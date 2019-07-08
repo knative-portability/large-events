@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World from the users service!'
+    return "Hello from the users service. Go to <a href='/v1/users/authorization?user_id=you_user_id_here'>/v1/users/authorization?user_id=you_user_id_here</a> to test."
 
 @app.route('/v1/users/authorization', methods=['GET'])
 def find_authorization():
