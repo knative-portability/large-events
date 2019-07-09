@@ -1,0 +1,13 @@
+steps:
+  # build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/knative-portability-2019/users', '.']
+  dir: 'users'
+  # push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/knative-portability-2019/users']
+  # Deploy container image to Cloud Run
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['beta', 'run', 'deploy', 'users', '--image', 'gcr.io/knative-portability-2019/users', '--region', 'us-central1','--platform', 'managed']
+images:
+        - gcr.io/knative-portability-2019/users
