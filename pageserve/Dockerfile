@@ -10,6 +10,9 @@ COPY . .
 # Install production dependencies.
 RUN pip install Flask gunicorn
 RUN pip install requests
+
+# Set environment variables
+ENV PROJECT_ID knative-portability-2019
 ENV USER_ENDPOINT https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
 
 # Run the web service on container startup. Here we use the gunicorn
