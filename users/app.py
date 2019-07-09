@@ -10,7 +10,7 @@ import os
 
 from flask import Flask, jsonify, request
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
 
 @app.route('/v1/authorization', methods=['GET'])
 def get_authorization():
@@ -33,14 +33,13 @@ def add_update_user():
     if user is None:
         # TODO(mukobi) validate the user object has everything it needs
         return jsonify(error="You must supply a valid user in the body")
-    else:
-        # TODO(mukobi) add or update the user in the database
-        added_new_user = True
-        # TODO(mukobi) get the new user object from the db to return
-        user_object = {
-            "user_id": "0", "username": "Dummy User", "edit_access": False
-        }
-        return jsonify(user_object), (201 if added_new_user else 200)
+    # TODO(mukobi) add or update the user in the database
+    added_new_user = True
+    # TODO(mukobi) get the new user object from the db to return
+    user_object = {
+        "user_id": "0", "username": "Dummy User", "edit_access": False
+    }
+    return jsonify(user_object), (201 if added_new_user else 200)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
