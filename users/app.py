@@ -12,10 +12,6 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return "Hello from the users service. Go to <a href='/v1/authorization?user_id=you_user_id_here'>/v1/authorization?user_id=you_user_id_here</a> to test."
-
 @app.route('/v1/authorization', methods=['GET'])
 def get_authorization():
     """Finds whether the given user is authorized for edit access"""
