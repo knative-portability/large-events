@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.6"
+# command to run tests
+env:
+  # Travis build matrix will test all permutations of the build
+  - TEST_DIR=pageserve
+  - TEST_DIR=users
+  # TODO(mcarolyn) add env var for USER_ENDPOINT
+script:
+  - cd $TEST_DIR && pip install -r requirements.txt && unittest *test.py
