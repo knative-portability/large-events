@@ -17,7 +17,7 @@ def index():
     
 def get_auth(user):
     url = os.environ.get("USER_ENDPOINT")
-    r = requests.get(url, params={'user_id':user})
+    r = requests.post(url, data={'user_id':user})
     response = r.json()
     is_auth = response['edit_access']
     return is_auth

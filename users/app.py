@@ -13,12 +13,12 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)  # pylint: disable=invalid-name
 
 
-@app.route('/v1/authorization', methods=['GET'])
+@app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
     """Finds whether the given user is authorized for edit access"""
-    user = request.args.get('user_id')
+    user = request.form.get('user_id')
     if user is None:
-        return jsonify(error="You must supply a 'user_id' GET parameter!")
+        return jsonify(error="You must supply a 'user_id' POST parameter!")
     authorized = is_authorized_to_edit(user, None)
     return jsonify(edit_access=authorized)
 
