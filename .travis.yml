@@ -8,4 +8,4 @@ env:
   - TEST_DIR=users
   - USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
 script:
-  - cd $TEST_DIR && pip install -r requirements.txt && unittest *test.py
+  - cd $TEST_DIR && pip install -r requirements.txt && python -m unittest *test.py
