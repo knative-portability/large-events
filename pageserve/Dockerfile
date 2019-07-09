@@ -8,12 +8,7 @@ WORKDIR $APP_HOME
 COPY . .
 
 # Install production dependencies.
-RUN pip install Flask gunicorn
-RUN pip install requests
-
-# Set environment variables
-ENV PROJECT_ID knative-portability-2019
-ENV USER_ENDPOINT https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+RUN pip install Flask gunicorn requests
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
