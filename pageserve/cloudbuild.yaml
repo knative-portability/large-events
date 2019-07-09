@@ -1,12 +1,12 @@
 steps:
   # build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/pageserve', '.']
+  args: ['build', '-t', 'gcr.io/knative-portability-2019/pageserve', '.']
   # push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/pageserve']
+  args: ['push', 'gcr.io/knative-portability-2019/pageserve']
   # Deploy container image to Cloud Run
 - name: 'gcr.io/cloud-builders/gcloud'
-  args: ['beta', 'run', 'deploy', 'pageserve', '--image', 'gcr.io/$PROJECT_ID/pageserve', '--region', 'us-central1','--platform', 'managed']
+  args: ['beta', 'run', 'deploy', 'pageserve', '--image', 'gcr.io/knative-portability-2019/pageserve', '--region', 'us-central1','--platform', 'managed']
 images:
-- gcr.io/$PROJECT_ID/pageserve
+- gcr.io/knative-portability-2019/pageserve
