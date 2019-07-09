@@ -6,9 +6,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return "Hello from the users service. Go to <a href='/v1/users/authorization?user_id=you_user_id_here'>/v1/users/authorization?user_id=you_user_id_here</a> to test."
+    return "Hello from the users service. Go to <a href='/v1/authorization?user_id=you_user_id_here'>/v1/authorization?user_id=you_user_id_here</a> to test."
 
-@app.route('/v1/users/authorization', methods=['GET'])
+@app.route('/v1/authorization', methods=['GET'])
 def find_authorization():
     user = request.args.get('user_id')
     if user == None:
@@ -17,7 +17,7 @@ def find_authorization():
         authorized = user != 'Voldemort'
         return jsonify(edit_access=authorized)
 
-@app.route('/v1/users', methods=['PUT'])
+@app.route('/v1/', methods=['PUT'])
 def add_update_user():
     user = request.getJSON()
     if user == None:
