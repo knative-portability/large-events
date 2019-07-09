@@ -18,9 +18,13 @@ def get_authorization():
     user = request.args.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' GET parameter!")
-    else:
-        authorized = user != 'Voldemort'
-        return jsonify(edit_access=authorized)
+    authorized = is_authorized_to_edit(user, None)
+    return jsonify(edit_access=authorized)
+
+def is_authorized_to_edit(user, database):
+    """Queries the db to find authorization of the given user"""
+    # TODO(mukobi) query db for actual user authorization
+    return user != 'Voldemort'
 
 @app.route('/v1/', methods=['PUT'])
 def add_update_user():

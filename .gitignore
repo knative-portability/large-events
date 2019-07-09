@@ -1,3 +1,9 @@
+# python
 venv
 __pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# development environments
 .vscode
