@@ -16,14 +16,14 @@ def index():
     )
     
 def get_auth(user):
-#    url = "users_endpoint"
-#    r = requests.post('https://httpbin.org/post', data={'user_id':user})
-#    response = r.json()
-#    is_auth = response['edit_access']
-    return True
+    url = os.environ.get("USER_ENDPOINT")
+    r = requests.get(url, params={'user_id':user})
+    response = r.json()
+    is_auth = response['edit_access']
+    return is_auth
 
 def get_user():
-    return "carolyn"
+    return "Voldemort"
     
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 8080)))
