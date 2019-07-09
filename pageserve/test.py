@@ -1,14 +1,10 @@
 import unittest
-from app import *
+import app
 
-# currently not working
 class TestServe(unittest.TestCase):
-    def test1(self):
-        self.assertTrue(get_auth("carolyn"))
-        self.assertFalse(get_auth("Voldemort"))
-        
-    def test2(self):
-        pass
+    def test_get_auth(self):
+        self.assertTrue(app.get_auth("carolyn"))
+        self.assertFalse(app.get_auth("Voldemort"))
         
         
 if __name__ == '__main__':
