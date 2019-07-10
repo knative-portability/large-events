@@ -8,11 +8,7 @@ WORKDIR $APP_HOME
 COPY . .
 
 # Install production dependencies.
-RUN pip install Flask gunicorn
-
-# Create enviornment variables
-ENV DB_USER mcarolyn
-ENV DB_PASS viG3wGMXIcAKX3jV
+RUN pip install Flask gunicorn pymongo[srv]
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
