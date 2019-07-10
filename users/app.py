@@ -49,9 +49,9 @@ def is_authorized_to_edit(username):
     if cursor.count() is 0:  # user not found
         return False
     for user in cursor:
-        if user["is_organizer"]:
-            return True
-    return False
+        if not user["is_organizer"]:
+            return False
+    return True
 
 
 @app.route('/v1/', methods=['PUT'])
