@@ -7,10 +7,45 @@ Main flask app for users service
 """
 
 import os
-
+from pprint import pprint  # for printing MongoDB data
 from flask import Flask, jsonify, request
+import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
+
+# connect to MongoDB Atlas database
+MONGODB_ATLAS_USERNAME = os.environ.get(
+    "MONGODB_ATLAS_DB_USERNAME", "large-events-users-service")
+MONGODB_ATLAS_PASSWORD = os.environ.get(
+    "MONGODB_ATLAS_PASSWORD", "F5eh9LH36fxHPwTo")
+MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
+    "MONGODB_ATLAS_CLUSTER_ADDRESS",
+    "knative-portability-cluster-fwdpx.gcp.mongodb.net/test?retryWrites=true&w=majority")
+DB = pymongo.MongoClient(
+    "mongodb+srv://{}:{}@{}".format(
+        MONGODB_ATLAS_USERNAME,
+        MONGODB_ATLAS_PASSWORD,
+        MONGODB_ATLAS_CLUSTER_ADDRESS)).test
+
+# update or insert (upsert) a new user
+DB.users.update(
+    {"username": "cmei4444"},
+    {"username": "cmei4444",
+     "name": "Carolyn Mei",
+     "is_organizer": True},
+    upsert=True)
+DB.users.update(
+    {"username": "mukobi"},
+    {"username": "mukobi",
+     "name": "Gabriel Mukobi",
+     "is_organizer": True},
+    upsert=True)
+DB.users.update(
+    {"username": "foobar"},
+    {"username": "foobar",
+     "name": "Unauthorized User",
+     "is_organizer": False},
+    upsert=True)
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -19,14 +54,27 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = is_authorized_to_edit(user, None)
+    authorized = is_authorized_to_edit(user)
     return jsonify(edit_access=authorized)
 
 
-def is_authorized_to_edit(user, database):
-    """Queries the db to find authorization of the given user"""
-    # TODO(mukobi) query db for actual user authorization
-    return user != 'Voldemort'
+def is_authorized_to_edit(username):
+    """
+    Queries the db to find authorization of the given user
+    Documents in the users collection should look like
+    {"username": "cmei4444",
+     "name": "Carolyn Mei",
+     "is_organizer": True}
+     """
+    cursor = DB.users.find({"username": username})
+    if cursor.count() is 0:  # user not found
+        return False
+    for user in cursor:
+        pprint(user)
+        print(user["is_organizer"])
+        if user["is_organizer"]:
+            return True
+    return False
 
 
 @app.route('/v1/', methods=['PUT'])
