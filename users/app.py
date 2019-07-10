@@ -24,7 +24,7 @@ PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
         MONGODB_ATLAS_USERNAME,
         MONGODB_ATLAS_PASSWORD,
         MONGODB_ATLAS_CLUSTER_ADDRESS)
-# print("Pymongo URI: {}".format(PYMONGO_URI))
+print("Pymongo URI: {}".format(PYMONGO_URI))
 DB = pymongo.MongoClient(PYMONGO_URI).test
 
 
