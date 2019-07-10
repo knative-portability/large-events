@@ -46,9 +46,9 @@ def is_authorized_to_edit(username):
      "name": "Carolyn Mei",
      "is_organizer": True}
      """
-    cursor = DB.users.find({"username": username})
-    if cursor.count() is 0:  # user not found
+    if DB.users.count_documents({"username": username}) is 0:  # user not found
         return False
+    cursor = DB.users.find({"username": username})
     for user in cursor:
         if not user["is_organizer"]:
             return False

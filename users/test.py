@@ -16,17 +16,17 @@ class TestAuthorization(unittest.TestCase):
         self.id_of_test_user_is_organizer = "test-is-organizer-12345"
         self.id_of_test_user_not_organizer = "test-not-organizer-12345"
         # update or insert (upsert) a new user
-        app.DB.users.update(
+        app.DB.users.update_one(
             {"username": self.id_of_test_user_is_organizer},
-            {"username": self.id_of_test_user_is_organizer,
-             "name": self.id_of_test_user_is_organizer,
-             "is_organizer": True},
+            {"$set": {"username": self.id_of_test_user_is_organizer,
+                      "name": self.id_of_test_user_is_organizer,
+                      "is_organizer": True}},
             upsert=True)
-        app.DB.users.update(
+        app.DB.users.update_one(
             {"username": self.id_of_test_user_not_organizer},
-            {"username": self.id_of_test_user_not_organizer,
-             "name": self.id_of_test_user_not_organizer,
-             "is_organizer": False},
+            {"$set": {"username": self.id_of_test_user_not_organizer,
+                      "name": self.id_of_test_user_not_organizer,
+                      "is_organizer": False}},
             upsert=True)
 
     def test_good_user_is_authorized(self):
