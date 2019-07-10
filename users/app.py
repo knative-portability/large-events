@@ -20,11 +20,12 @@ MONGODB_ATLAS_PASSWORD = os.environ.get(
     "MONGODB_ATLAS_PASSWORD")
 MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
     "MONGODB_ATLAS_CLUSTER_ADDRESS")
-DB = pymongo.MongoClient(
-    "mongodb+srv://{}:{}@{}".format(
+PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
         MONGODB_ATLAS_USERNAME,
         MONGODB_ATLAS_PASSWORD,
-        MONGODB_ATLAS_CLUSTER_ADDRESS)).test
+        MONGODB_ATLAS_CLUSTER_ADDRESS)
+# print("Pymongo URI: {}".format(PYMONGO_URI))
+DB = pymongo.MongoClient(PYMONGO_URI).test
 
 
 @app.route('/v1/authorization', methods=['POST'])
