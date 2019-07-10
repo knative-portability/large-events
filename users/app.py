@@ -15,12 +15,11 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 
 # connect to MongoDB Atlas database
 MONGODB_ATLAS_USERNAME = os.environ.get(
-    "MONGODB_ATLAS_DB_USERNAME", "large-events-users-service")
+    "MONGODB_ATLAS_USERNAME")
 MONGODB_ATLAS_PASSWORD = os.environ.get(
-    "MONGODB_ATLAS_PASSWORD", "F5eh9LH36fxHPwTo")
+    "MONGODB_ATLAS_PASSWORD")
 MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
-    "MONGODB_ATLAS_CLUSTER_ADDRESS",
-    "knative-portability-cluster-fwdpx.gcp.mongodb.net/test?retryWrites=true&w=majority")
+    "MONGODB_ATLAS_CLUSTER_ADDRESS")
 DB = pymongo.MongoClient(
     "mongodb+srv://{}:{}@{}".format(
         MONGODB_ATLAS_USERNAME,
