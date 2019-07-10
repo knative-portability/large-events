@@ -7,7 +7,7 @@ Main flask app for users service
 """
 
 import os
-from pprint import pprint  # for printing MongoDB data
+# from pprint import pprint  # for printing MongoDB data
 from flask import Flask, jsonify, request
 import pymongo
 
@@ -25,26 +25,6 @@ DB = pymongo.MongoClient(
         MONGODB_ATLAS_USERNAME,
         MONGODB_ATLAS_PASSWORD,
         MONGODB_ATLAS_CLUSTER_ADDRESS)).test
-
-# update or insert (upsert) a new user
-DB.users.update(
-    {"username": "cmei4444"},
-    {"username": "cmei4444",
-     "name": "Carolyn Mei",
-     "is_organizer": True},
-    upsert=True)
-DB.users.update(
-    {"username": "mukobi"},
-    {"username": "mukobi",
-     "name": "Gabriel Mukobi",
-     "is_organizer": True},
-    upsert=True)
-DB.users.update(
-    {"username": "foobar"},
-    {"username": "foobar",
-     "name": "Unauthorized User",
-     "is_organizer": False},
-    upsert=True)
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -69,8 +49,6 @@ def is_authorized_to_edit(username):
     if cursor.count() is 0:  # user not found
         return False
     for user in cursor:
-        pprint(user)
-        print(user["is_organizer"])
         if user["is_organizer"]:
             return True
     return False
