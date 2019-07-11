@@ -28,19 +28,7 @@ import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-# connect to MongoDB Atlas database
-MONGODB_ATLAS_USERNAME = os.environ.get(
-    "MONGODB_ATLAS_USERNAME")
-MONGODB_ATLAS_PASSWORD = os.environ.get(
-    "MONGODB_ATLAS_PASSWORD")
-MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
-    "MONGODB_ATLAS_CLUSTER_ADDRESS")
-PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
-        MONGODB_ATLAS_USERNAME,
-        MONGODB_ATLAS_PASSWORD,
-        MONGODB_ATLAS_CLUSTER_ADDRESS)
-print("Pymongo URI: {}".format(PYMONGO_URI))
-DB = pymongo.MongoClient(PYMONGO_URI).test
+DB = None  # db initialized in if __name__ == "__main__":
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -86,5 +74,21 @@ def add_update_user():
     return jsonify(user_object), (201 if added_new_user else 200)
 
 
+def initialize_mongodb():
+    """Connect to MongoDB Atlas database using env vars"""
+    mongodb_atlas_username = os.environ.get(
+        "MONGODB_ATLAS_USERNAME")
+    mongodb_atlas_password = os.environ.get(
+        "MONGODB_ATLAS_PASSWORD")
+    mongodb_atlas_cluster_address = os.environ.get(
+        "MONGODB_ATLAS_CLUSTER_ADDRESS")
+    pymongo_uri = "mongodb+srv://{}:{}@{}".format(
+        mongodb_atlas_username,
+        mongodb_atlas_password,
+        mongodb_atlas_cluster_address)
+    return pymongo.MongoClient(pymongo_uri).test
+
+
 if __name__ == "__main__":
+    DB = initialize_mongodb()  # keep DB from trying to init in tests
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
