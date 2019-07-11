@@ -41,8 +41,51 @@ class TestEventsDB(unittest.TestCase):
 
 
 class TestEventsClass(unittest.TestCase):
-    def test(self):
-        pass
+    def setUp(self):
+        # Sets up two events with identical data, one with event_id and one without
+        self.test_info = {'name': 'test_event',
+                           'description': 'testing!',
+                           'author': 'admin',
+                           'event_time': '7-12-2019',
+                           'created_at': '7-10-2019'}
+        self.test_info_with_id = {'name': 'test_event',
+                           'description': 'testing!',
+                           'author': 'admin',
+                           'event_time': '7-12-2019',
+                           'created_at': '7-10-2019',
+                           'event_id': 1}
+
+    def test_construct_event(self):
+        event = app.Event(self.test_info)
+        self.test_info['event_id'] = None
+        self.assertEqual(event.info, self.test_info)
+
+        event_with_id = app.Event(self.test_info_with_id)
+        self.assertEqual(event_with_id.info, self.test_info_with_id)
+
+
+    def test_events_equal(self):
+        test_info_diff = {'name': 'different event',
+                           'description': 'testing!',
+                           'author': 'admin',
+                           'event_time': '7-12-2019',
+                           'created_at': '7-10-2019'}
+        event = app.Event(self.test_info)
+        event_same = app.Event(self.test_info)
+        event_with_id = app.Event(self.test_info_with_id)
+        self.assertEqual(event,event_same)
+        self.assertEqual(event,event_with_id)
+
+        event_diff = app.Event(test_info_diff)
+        self.assertNotEqual(event, event_diff)
+
+    def test_is_valid(self):
+        valid_event = app.Event(self.test_info)
+        self.assertTrue(valid_event.is_valid())
+
+        del self.test_info['name']
+        invalid_event = app.Event(self.test_info)
+        self.assertFalse(invalid_event.is_valid())
 
 
 if __name__ == '__main__':

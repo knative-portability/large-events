@@ -88,7 +88,7 @@ class Event(object):
         'event_time']
 
     def __init__(self, info):
-        self.info = info.copy()
+        self.info = dict(info)
         # event_id is defined by the database, not the user
         if "event_id" not in self.info:
             self.info['event_id'] = None
