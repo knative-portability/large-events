@@ -22,13 +22,12 @@ limitations under the License.
 """
 
 import os
-# from pprint import pprint  # for printing MongoDB data
 from flask import Flask, jsonify, request
 import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-DB = None  # db initialized in if __name__ == "__main__":
+DB = None  # db initialized in main runtime
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -41,26 +40,9 @@ def get_authorization():
     return jsonify(edit_access=authorized)
 
 
-def is_authorized_to_edit(username, users_collection):
-    """
-    Queries the db to find authorization of the given user
-    Documents in the users collection should look like
-    {"username": "cmei4444",
-     "name": "Carolyn Mei",
-     "is_organizer": True}
-     """
-    if users_collection.count_documents({"username": username}) is 0:  # user not found
-        return False
-    cursor = users_collection.find({"username": username})
-    for user in cursor:
-        if not user["is_organizer"]:
-            return False
-    return True
-
-
 @app.route('/v1/', methods=['PUT'])
 def add_update_user():
-    """Adds or updates the user in the db and returns new user object"""
+    """Add or update the user in the db and returns new user object"""
     user = request.getJSON()
     if user is None:
         # TODO(mukobi) validate the user object has everything it needs
@@ -72,6 +54,23 @@ def add_update_user():
         "user_id": "0", "username": "Dummy User", "edit_access": False
     }
     return jsonify(user_object), (201 if added_new_user else 200)
+
+
+def is_authorized_to_edit(username, users_collection):
+    """
+    Queries the db to find authorization of the given user
+    Documents in the users collection should look like
+    {"username": "cmei4444",
+     "name": "Carolyn Mei",
+     "is_organizer": True}
+     """
+    if users_collection.count_documents({"username": username}) is 0:
+        return False  # user not found
+    cursor = users_collection.find({"username": username})
+    for user in cursor:
+        if not user["is_organizer"]:
+            return False
+    return True
 
 
 def initialize_mongodb():
@@ -90,5 +89,7 @@ def initialize_mongodb():
 
 
 if __name__ == "__main__":
-    DB = initialize_mongodb()  # keep DB from trying to init in tests
+    # keep DB from initializing in testing to remove dependency
+    DB = initialize_mongodb()
+
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

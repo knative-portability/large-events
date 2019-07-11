@@ -28,35 +28,35 @@ class TestAuthorization(unittest.TestCase):
     """Test /authorization endpoint of users service"""
 
     def setUp(self):
-        """Seed DB for testing"""
-        self.id_of_test_user_is_organizer = "test-is-organizer-12345"
-        self.id_of_test_user_not_organizer = "test-not-organizer-12345"
+        """Seed mock DB for testing"""
+        self.id_of_test_user_is_authorized = "authorized-user"
+        self.id_of_test_user_not_authorized = "non-authorized-user"
+        self.id_of_test_user_not_in_db = "not-a-user-in-the-database"
         self.mock_collection = mongomock.MongoClient().db.collection
-        # update or insert (upsert) a new user
         mock_data = [
-            {"username": self.id_of_test_user_is_organizer,
-             "name": self.id_of_test_user_is_organizer,
+            {"username": self.id_of_test_user_is_authorized,
+             "name": self.id_of_test_user_is_authorized,
              "is_organizer": True},
-            {"username": self.id_of_test_user_not_organizer,
-             "name": self.id_of_test_user_not_organizer,
+            {"username": self.id_of_test_user_not_authorized,
+             "name": self.id_of_test_user_not_authorized,
              "is_organizer": False}
         ]
         self.mock_collection.insert_many(mock_data)
 
-    def test_good_user_is_authorized(self):
-        """An authorized user should have authorized privileges"""
+    def test_authorized_user_is_authorized(self):
+        """An authorized user should receive authorized privileges"""
         self.assertTrue(is_authorized_to_edit(
-            self.id_of_test_user_is_organizer, self.mock_collection))
+            self.id_of_test_user_is_authorized, self.mock_collection))
 
-    def test_bad_user_not_authorized(self):
-        """An non-authorized user should not have authorized privileges"""
+    def test_non_authorized_user_not_authorized(self):
+        """An non-authorized user should not receive authorized privileges"""
         self.assertFalse(is_authorized_to_edit(
-            self.id_of_test_user_not_organizer, self.mock_collection))
+            self.id_of_test_user_not_authorized, self.mock_collection))
 
     def test_unkown_user_not_authorized(self):
-        """An user not found in the db should not have authorized privileges"""
+        """An user not found in the db should not receive authorized privileges"""
         self.assertFalse(is_authorized_to_edit(
-            "notAValidUsername31415926", self.mock_collection))
+            self.id_of_test_user_not_in_db, self.mock_collection))
 
 
 if __name__ == '__main__':
