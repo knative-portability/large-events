@@ -1,5 +1,6 @@
 import os
 import logging
+import datetime
 import pymongo
 # import pprint
 
@@ -27,11 +28,34 @@ events_coll = eventsDB.all_events
 
 @app.route('/v1/add', methods=['POST'])
 def add_event():
-    pass
+    # TODO(cmei4444): Get event information from request data
+    info = request.form['info']
+    # Add information into database
+    current_time = datetime.datetime.now()
+    build_event_info(info, current_time)
+    event = Event(info)
+    if not event.is_valid():
+        return Response(
+            status=400,
+            response="Event info was entered incorrectly.",
+        )
+
+    event.add_to_db()
+    return Response(
+        status=201,
+    )
 
 
-@app.route('/v1/edit', methods=['POST'])
-def edit_event():
+def build_event_info(info, time):
+    """Adds created_at time to event info dict"""
+    # MongoDB timestamp precision level, floor to milliseconds
+    time -= datetime.timedelta(0, 0, time.microsecond % 1000)
+    info['created_at'] = time
+    return info
+
+
+@app.route('/v1/edit/<event_id>', methods=['POST'])
+def edit_event(event_id):
     pass
 
 
@@ -49,22 +73,37 @@ def search_event():
 def get_one_event(event_id):
     pass
 
+
 class Event(object):
-    attributes = ['event_id', 'name', 'description', 'author', 'created_at', 'event_time']
+    attributes = [
+        'event_id',
+        'name',
+        'description',
+        'author',
+        'created_at',
+        'event_time']
 
     def __init__(self, info):
-        self.info = info
+        self.info = info.copy()
+        # event_id is defined by the database, not the user
+        if "event_id" not in self.info:
+            self.info['event_id'] = None
 
     def __eq__(self, other):
-        """Determines if two events have the same information"""
-        for att in attributes:
-            if self.info[att] != other.info[att]:
+        """Determines if two events have the same information outside of event_id"""
+        for att in self.attributes:
+            if att != 'event_id' and (self.info[att] != other.info[att]):
                 return False
         return True
 
     def is_valid(self):
         """Checks to make sure all of the required attributes are in the event info"""
-        for att in attributes:
+        for att in self.attributes:
             if att not in self.info:
                 return False
         return True
+
+    def add_to_db(self):
+        """Adds the event to the database, returns added dict"""
+        events_coll.insert_one(self.info)
+        return self.info
