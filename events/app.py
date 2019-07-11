@@ -48,3 +48,23 @@ def search_event():
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
     pass
+
+class Event(object):
+    attributes = ['event_id', 'name', 'description', 'author', 'created_at', 'event_time']
+
+    def __init__(self, info):
+        self.info = info
+
+    def __eq__(self, other):
+        """Determines if two events have the same information"""
+        for att in attributes:
+            if self.info[att] != other.info[att]:
+                return False
+        return True
+
+    def is_valid(self):
+        """Checks to make sure all of the required attributes are in the event info"""
+        for att in attributes:
+            if att not in self.info:
+                return False
+        return True
