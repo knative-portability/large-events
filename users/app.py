@@ -36,7 +36,7 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = is_authorized_to_edit(user, DB.users)
+    authorized = is_authorized_to_edit(user, DB.users_collection)
     return jsonify(edit_access=authorized)
 
 
@@ -85,7 +85,7 @@ def initialize_mongodb():
         mongodb_atlas_username,
         mongodb_atlas_password,
         mongodb_atlas_cluster_address)
-    return pymongo.MongoClient(pymongo_uri).test
+    return pymongo.MongoClient(pymongo_uri).users_db
 
 
 if __name__ == "__main__":
