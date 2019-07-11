@@ -3,7 +3,7 @@ import logging
 import pymongo
 # import pprint
 
-from flask import Flask, render_template, request, Response
+from flask import Flask, request, Response
 
 app = Flask(__name__)
 
@@ -15,11 +15,14 @@ MONGODB_ATLAS_PASSWORD = os.environ.get(
 MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
     "MONGODB_ATLAS_CLUSTER_ADDRESS")
 PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
-        MONGODB_ATLAS_USERNAME,
-        MONGODB_ATLAS_PASSWORD,
-        MONGODB_ATLAS_CLUSTER_ADDRESS)
-print("Pymongo URI: {}".format(PYMONGO_URI))
-DB = pymongo.MongoClient(PYMONGO_URI).test
+    MONGODB_ATLAS_USERNAME,
+    MONGODB_ATLAS_PASSWORD,
+    MONGODB_ATLAS_CLUSTER_ADDRESS)
+# print("Pymongo URI: {}".format(PYMONGO_URI))
+client = pymongo.MongoClient(PYMONGO_URI)
+testDB = client.test
+eventsDB = client.eventsDB
+events_coll = eventsDB.all_events
 
 
 @app.route('/v1/add', methods=['POST'])
