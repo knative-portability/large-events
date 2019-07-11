@@ -49,11 +49,11 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = is_authorized_to_edit(user)
+    authorized = is_authorized_to_edit(user, DB.users)
     return jsonify(edit_access=authorized)
 
 
-def is_authorized_to_edit(username):
+def is_authorized_to_edit(username, users_collection):
     """
     Queries the db to find authorization of the given user
     Documents in the users collection should look like
@@ -61,9 +61,9 @@ def is_authorized_to_edit(username):
      "name": "Carolyn Mei",
      "is_organizer": True}
      """
-    if DB.users.count_documents({"username": username}) is 0:  # user not found
+    if users_collection.count_documents({"username": username}) is 0:  # user not found
         return False
-    cursor = DB.users.find({"username": username})
+    cursor = users_collection.find({"username": username})
     for user in cursor:
         if not user["is_organizer"]:
             return False
