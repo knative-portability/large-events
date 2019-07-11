@@ -32,7 +32,7 @@ DB = None  # db initialized in main runtime
 
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
-    """Finds whether the given user is authorized for edit access"""
+    """Finds whether the given user is authorized for edit access."""
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
@@ -42,7 +42,7 @@ def get_authorization():
 
 @app.route('/v1/', methods=['PUT'])
 def add_update_user():
-    """Add or update the user in the db and returns new user object"""
+    """Add or update the user in the db and returns new user object."""
     user = request.getJSON()
     if user is None:
         # TODO(mukobi) validate the user object has everything it needs
@@ -57,14 +57,14 @@ def add_update_user():
 
 
 def is_authorized_to_edit(username, users_collection):
-    """
-    Queries the db to find authorization of the given user
+    """Queries the db to find authorization of the given user.
+
     Documents in the users collection should look like
-    {"username": "cmei4444",
-     "name": "Carolyn Mei",
-     "is_organizer": True}
-     """
-    if users_collection.count_documents({"username": username}) is 0:
+        {"username": "cmei4444",
+        "name": "Carolyn Mei",
+        "is_organizer": True}
+    """
+    if users_collection.count_documents({"username": username}) == 0:
         return False  # user not found
     cursor = users_collection.find({"username": username})
     for user in cursor:
@@ -74,7 +74,7 @@ def is_authorized_to_edit(username, users_collection):
 
 
 def initialize_mongodb():
-    """Connect to MongoDB Atlas database using env vars"""
+    """Connect to MongoDB Atlas database using env vars."""
     mongodb_atlas_username = os.environ.get(
         "MONGODB_ATLAS_USERNAME")
     mongodb_atlas_password = os.environ.get(

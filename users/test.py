@@ -25,7 +25,7 @@ from app import is_authorized_to_edit
 
 
 class TestAuthorization(unittest.TestCase):
-    """Test /authorization endpoint of users service"""
+    """Test /authorization endpoint of users service."""
 
     def setUp(self):
         """Seed mock DB for testing"""
@@ -44,17 +44,17 @@ class TestAuthorization(unittest.TestCase):
         self.mock_collection.insert_many(mock_data)
 
     def test_authorized_user_is_authorized(self):
-        """An authorized user should receive authorized privileges"""
+        """An authorized user should receive authorized privileges."""
         self.assertTrue(is_authorized_to_edit(
             self.id_of_test_user_is_authorized, self.mock_collection))
 
     def test_non_authorized_user_not_authorized(self):
-        """An non-authorized user should not receive authorized privileges"""
+        """An non-authorized user should not receive authorized privileges."""
         self.assertFalse(is_authorized_to_edit(
             self.id_of_test_user_not_authorized, self.mock_collection))
 
     def test_unkown_user_not_authorized(self):
-        """An user not found in the db should not receive authorized privileges"""
+        """An user not in the db should not receive authorized privileges."""
         self.assertFalse(is_authorized_to_edit(
             self.id_of_test_user_not_in_db, self.mock_collection))
 
