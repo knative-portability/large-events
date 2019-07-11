@@ -58,13 +58,6 @@ class TestAuthorization(unittest.TestCase):
         self.assertFalse(is_authorized_to_edit(
             "notAValidUsername31415926", self.mock_users_collection))
 
-    def tearDown(self):
-        """Clean up test users"""
-        self.mock_users_collection.delete_many(
-            {"$or": [
-                {"username": self.id_of_test_user_is_organizer},
-                {"username": self.id_of_test_user_not_organizer}]})
-
 
 if __name__ == '__main__':
     unittest.main()
