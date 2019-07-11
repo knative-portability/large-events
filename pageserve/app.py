@@ -22,7 +22,7 @@ def index():
 @app.route('/v1/events')
 def show_events():
     user = get_user()
-    is_auth = get_auth(user)
+    auth = has_edit_access(get_auth_json(user))
     events = get_events()
     return render_template(
         'events.html',
@@ -52,12 +52,15 @@ def get_events():
              }]
 
 
-def get_auth(user):
+def get_auth_json(user):
     url = os.environ.get("USER_ENDPOINT")
     r = requests.post(url, data={'user_id': user})
     response = r.json()
-    is_auth = response['edit_access']
-    return is_auth
+    return response
+
+
+def has_edit_access(user_data):
+    return user_data['edit_access']
 
 
 def get_user():
