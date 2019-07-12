@@ -8,22 +8,23 @@ from flask import Flask, request, Response
 
 app = Flask(__name__)
 
-# connect to MongoDB Atlas database
-MONGODB_ATLAS_USERNAME = os.environ.get(
-    "MONGODB_ATLAS_USERNAME")
-MONGODB_ATLAS_PASSWORD = os.environ.get(
-    "MONGODB_ATLAS_PASSWORD")
-MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
-    "MONGODB_ATLAS_CLUSTER_ADDRESS")
-PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
-    MONGODB_ATLAS_USERNAME,
-    MONGODB_ATLAS_PASSWORD,
-    MONGODB_ATLAS_CLUSTER_ADDRESS)
-# print("Pymongo URI: {}".format(PYMONGO_URI))
-client = pymongo.MongoClient(PYMONGO_URI)
-testDB = client.test
-eventsDB = client.eventsDB
-events_coll = eventsDB.all_events
+
+def db_setup():
+    """Connect to MongoDB Atlas database, returns events collection."""
+    MONGODB_ATLAS_USERNAME = os.environ.get(
+        "MONGODB_ATLAS_USERNAME")
+    MONGODB_ATLAS_PASSWORD = os.environ.get(
+        "MONGODB_ATLAS_PASSWORD")
+    MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
+        "MONGODB_ATLAS_CLUSTER_ADDRESS")
+    PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
+        MONGODB_ATLAS_USERNAME,
+        MONGODB_ATLAS_PASSWORD,
+        MONGODB_ATLAS_CLUSTER_ADDRESS)
+    # print("Pymongo URI: {}".format(PYMONGO_URI))
+    client = pymongo.MongoClient(PYMONGO_URI)
+    eventsDB = client.eventsDB
+    return eventsDB.all_events
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -111,3 +112,8 @@ class Event(object):
         """Adds the event to the database, returns added dict"""
         events_coll.insert_one(self.info)
         return self.info
+
+
+if __name__ == "__main__":
+    db_setup()
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
