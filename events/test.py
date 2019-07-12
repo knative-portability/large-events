@@ -63,11 +63,9 @@ class TestEventsClass(unittest.TestCase):
         self.assertEqual(event_with_id.info, self.test_info_with_id)
 
     def test_events_equal(self):
-        test_info_diff = {'name': 'different event',
-                          'description': 'testing!',
-                          'author': 'admin',
-                          'event_time': '7-12-2019',
-                          'created_at': '7-10-2019'}
+        test_info_diff = self.test_info.copy()
+        test_info_diff['name'] = 'different event'
+
         event = app.Event(self.test_info)
         event_same = app.Event(self.test_info)
         event_with_id = app.Event(self.test_info_with_id)
