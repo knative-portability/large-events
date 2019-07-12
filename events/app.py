@@ -7,10 +7,15 @@ import pymongo
 from flask import Flask, request, Response
 
 app = Flask(__name__)
+events_coll = None      # Set later inside db_setup
 
 
+@app.before_first_request
 def db_setup():
-    """Connect to MongoDB Atlas database, returns events collection."""
+    """Connect to MongoDB Atlas database, sets events collection.
+
+    Set up before first request so the database is not created during testing.
+    """
     MONGODB_ATLAS_USERNAME = os.environ.get(
         "MONGODB_ATLAS_USERNAME")
     MONGODB_ATLAS_PASSWORD = os.environ.get(
@@ -24,7 +29,7 @@ def db_setup():
     # print("Pymongo URI: {}".format(PYMONGO_URI))
     client = pymongo.MongoClient(PYMONGO_URI)
     eventsDB = client.eventsDB
-    return eventsDB.all_events
+    events_coll = eventsDB.all_events
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -39,8 +44,13 @@ def add_event():
             status=400,
             response="Event info was entered incorrectly.",
         )
-
-    event.add_to_db()
+    if events_coll is not None:
+        event.add_to_db(events_coll)
+    else:
+        return Response(
+            status=500,
+            response="Database was undefined.",
+        )
     return Response(
         status=201,
     )
@@ -107,9 +117,9 @@ class Event(object):
                 return False
         return True
 
-    def add_to_db(self):
-        """Adds the event to the database, returns added dict."""
-        events_coll.insert_one(self.info)
+    def add_to_db(self, events_collection):
+        """Adds the event to the specified collection."""
+        events_collection.insert_one(self.info)
         return self.info
 
 
