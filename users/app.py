@@ -22,10 +22,12 @@ limitations under the License.
 """
 
 import os
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request
 import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
+
+DB = None  # db initialized in main runtime
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -34,7 +36,7 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = find_authorization_in_db(user, g.db.users_collection)
+    authorized = find_authorization_in_db(user, DB.users_collection)
     return jsonify(edit_access=authorized)
 
 
@@ -84,12 +86,11 @@ def initialize_mongodb():
         "MONGODB_ATLAS_PASSWORD")
     mongodb_atlas_cluster_address = os.environ.get(
         "MONGODB_ATLAS_CLUSTER_ADDRESS")
-    mongodb_uri = "mongodb+srv://{}:{}@{}".format(
+    pymongo_uri = "mongodb+srv://{}:{}@{}".format(
         mongodb_atlas_username,
         mongodb_atlas_password,
         mongodb_atlas_cluster_address)
-    # store db information in flask g object app context
-    g.db = pymongo.MongoClient(mongodb_uri).users_db
+    DB = pymongo.MongoClient(pymongo_uri).users_db
 
 
 if __name__ == "__main__":
