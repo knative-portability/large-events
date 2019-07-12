@@ -87,10 +87,7 @@ gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[SERVICE] --platform managed
 
 ## Contributing
 
-<!--
-TODO(mukobi) add contributing to the main repo and link to it
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
--->
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Authors
 
