@@ -53,6 +53,12 @@ Install the required python modules.
 pip3 install -r requirements.txt
 ```
 
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable.
+
+```
+export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
+```
+
 ### Running the service
 
 Use flask to run the microservice locally.
