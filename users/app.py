@@ -22,31 +22,25 @@ limitations under the License.
 """
 
 import os
-
 from flask import Flask, jsonify, request
+import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
-    """Finds whether the given user is authorized for edit access"""
+    """Finds whether the given user is authorized for edit access."""
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = is_authorized_to_edit(user, None)
+    authorized = find_authorization_in_db(user, DB.users_collection)
     return jsonify(edit_access=authorized)
-
-
-def is_authorized_to_edit(user, database):
-    """Queries the db to find authorization of the given user"""
-    # TODO(mukobi) query db for actual user authorization
-    return user != 'Voldemort'
 
 
 @app.route('/v1/', methods=['PUT'])
 def add_update_user():
-    """Adds or updates the user in the db and returns new user object"""
+    """Add or update the user in the db and returns new user object."""
     user = request.getJSON()
     if user is None:
         # TODO(mukobi) validate the user object has everything it needs
@@ -58,6 +52,34 @@ def add_update_user():
         "user_id": "0", "username": "Dummy User", "edit_access": False
     }
     return jsonify(user_object), (201 if added_new_user else 200)
+
+
+def find_authorization_in_db(username, users_collection):
+    """Queries the db to find authorization of the given user.
+
+    Documents in the users collection should look like
+        {"username": "cmei4444",
+        "name": "Carolyn Mei",
+        "is_organizer": True}
+    """
+    first_user = users_collection.find_one({"username": username})
+    if first_user is None:  # user not found
+        return False
+    authorized = first_user.get("is_organizer")
+    return bool(authorized)  # handle 'None' case
+
+
+def connect_to_mongodb():
+    """Connect to MongoDB instance using env vars."""
+    mongodb_uri = os.environ.get("MONGODB_URI")
+    if mongodb_uri is None:
+        print("Alert: not able to find MONGODB_URI environmental variable, "
+              "no connection to MongoDB instance")
+        return None  # not able to find db config var
+    return pymongo.MongoClient(mongodb_uri).users_db
+
+
+DB = connect_to_mongodb()  # None if can't connect
 
 
 if __name__ == "__main__":
