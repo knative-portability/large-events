@@ -72,18 +72,18 @@ def find_authorization_in_db(username, users_collection):
 
 
 def connect_to_mongodb():
-    """Connect to MongoDB Atlas database using env vars."""
-    mongodb_atlas_username = os.environ.get(
+    """Connect to MongoDB instance using env vars."""
+    username = os.environ.get(
         "MONGODB_ATLAS_USERNAME")
-    mongodb_atlas_password = os.environ.get(
+    password = os.environ.get(
         "MONGODB_ATLAS_PASSWORD")
-    mongodb_atlas_cluster_address = os.environ.get(
+    cluster = os.environ.get(
         "MONGODB_ATLAS_CLUSTER_ADDRESS")
-    pymongo_uri = "mongodb+srv://{}:{}@{}".format(
-        mongodb_atlas_username,
-        mongodb_atlas_password,
-        mongodb_atlas_cluster_address)
-    return pymongo.MongoClient(pymongo_uri).users_db
+    mongodb_uri = "mongodb+srv://{}:{}@{}".format(
+        username,
+        password,
+        cluster)
+    return pymongo.MongoClient(mongodb_uri).users_db
 
 
 @app.before_first_request
