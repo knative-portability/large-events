@@ -33,23 +33,24 @@ def upload_new_post():
     event_id: id of the event to post to
     author_id: user id of the user making the post
     text: text to be sent
-    Post request files should contain all the files the user wants to upload to the server.
+    Post request files should contain all the files the user wants to upload
+    to the server.
     """
 
 
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
-    """Get all posts for the whole event"""
+    """Get all posts for the whole event."""
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
 def get_post_by_id(post_id):
-    """Get the post with the specified ID"""
+    """Get the post with the specified ID."""
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
 def get_all_posts_for_event(event_id):
-    """Get all posts matching the event with the specified ID"""
+    """Get all posts matching the event with the specified ID."""
 
 
 if __name__ == "__main__":

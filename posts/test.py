@@ -21,7 +21,7 @@ import app
 
 
 class TestPosts(unittest.TestCase):
-    """Test /authorization endpoint of users service"""
+    """Test /authorization endpoint of users service."""
     def test_basic(self):
         pass
 
