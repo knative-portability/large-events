@@ -14,9 +14,8 @@ class TestEventsDB(unittest.TestCase):
                            'created_at': self.example_time}
         self.test_event = app.Event(self.event_info)
         # Create mock DB for testing
-        self.test_coll = mongomock.MongoClient().eventsDB.all_events
-        # make sure DB has no other test entries
-        self.test_coll.delete_many(self.event_info)
+        self.client = mongomock.MongoClient()
+        self.test_coll = self.client.eventsDB.all_events
 
     def test_add(self):
         self.test_event.add_to_db(self.test_coll)
@@ -37,8 +36,7 @@ class TestEventsDB(unittest.TestCase):
         self.assertEqual(info['created_at'], time)
 
     def tearDown(self):
-        self.test_coll.delete_many(
-            self.event_info)    # empty DB of test entries
+        self.client.drop_database("eventsDB")
 
 
 class TestEventsClass(unittest.TestCase):
