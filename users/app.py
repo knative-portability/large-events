@@ -27,8 +27,6 @@ import pymongo
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-DB = None  # global DB lazily initialized
-
 
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
@@ -75,20 +73,13 @@ def connect_to_mongodb():
     """Connect to MongoDB instance using env vars."""
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
+        print("Alert: not able to find MONGODB_URI environmental variable, "
+              "no connection to MongoDB instance")
         return None  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).users_db
 
 
-@app.before_first_request
-def before_first_request():
-    """Initialize the app.
-
-    app.before_first_request decorator is used to keep
-    the DB from initializing in testing to remove the
-    dependency on the MongoDB connection in tests.
-    """
-    global DB
-    DB = connect_to_mongodb()
+DB = connect_to_mongodb()  # None if can't connect
 
 
 if __name__ == "__main__":
