@@ -7,29 +7,22 @@ from collections import namedtuple
 from flask import Flask, request, Response
 
 app = Flask(__name__)
-events_coll = None      # Set later inside db_setup
 
 
-@app.before_first_request
-def db_setup():
-    """Connect to MongoDB Atlas database, sets events collection.
+def connect_to_mongodb():
+    """Connects to MongoDB Atlas database.
 
-    Set up before first request so the database is not created during testing.
+    Returns events collection if connection is successful, and None otherwise.
     """
-    MONGODB_ATLAS_USERNAME = os.environ.get(
-        "MONGODB_ATLAS_USERNAME")
-    MONGODB_ATLAS_PASSWORD = os.environ.get(
-        "MONGODB_ATLAS_PASSWORD")
-    MONGODB_ATLAS_CLUSTER_ADDRESS = os.environ.get(
-        "MONGODB_ATLAS_CLUSTER_ADDRESS")
-    PYMONGO_URI = "mongodb+srv://{}:{}@{}".format(
-        MONGODB_ATLAS_USERNAME,
-        MONGODB_ATLAS_PASSWORD,
-        MONGODB_ATLAS_CLUSTER_ADDRESS)
-    # print("Pymongo URI: {}".format(PYMONGO_URI))
-    client = pymongo.MongoClient(PYMONGO_URI)
-    eventsDB = client.eventsDB
-    events_coll = eventsDB.all_events
+    mongodb_uri = os.environ.get("MONGODB_URI")
+    if mongodb_uri is None:
+        print("Alert: not able to find MONGODB_URI environmental variable, "
+              "no connection to MongoDB instance")
+        return None  # not able to find db config var
+    return pymongo.MongoClient(mongodb_uri).eventsDB.all_events
+
+
+EVENTS_COLL = connect_to_mongodb()  # None if can't connect
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -45,8 +38,8 @@ def add_event():
             status=400,
             response="Event info was entered incorrectly.",
         )
-    if events_coll is not None:
-        event.add_to_db(events_coll)
+    if EVENTS_COLL is not None:
+        event.add_to_db(EVENTS_COLL)
     else:
         return Response(
             status=500,
