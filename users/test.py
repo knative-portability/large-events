@@ -25,6 +25,7 @@ from app import is_authorized_to_edit
 
 AUTHORIZED_USER = "authorized-user"
 NON_AUTHORIZED_USER = "non-authorized-user"
+MALFORMATTED_IN_DB_USER = "this-user-has-no-'is_organizer'_db_field"
 MISSING_USER = "not-a-user-in-the-database"
 
 
@@ -40,7 +41,8 @@ class TestAuthorization(unittest.TestCase):
              "is_organizer": True},
             {"username": NON_AUTHORIZED_USER,
              "name": NON_AUTHORIZED_USER,
-             "is_organizer": False}
+             "is_organizer": False},
+            {"username": MALFORMATTED_IN_DB_USER}
         ]
         self.mock_collection.insert_many(mock_data)
 
@@ -50,14 +52,19 @@ class TestAuthorization(unittest.TestCase):
             AUTHORIZED_USER, self.mock_collection))
 
     def test_non_authorized_user_not_authorized(self):
-        """An non-authorized user should not receive authorized privileges."""
+        """A non-authorized user should not receive authorized privileges."""
         self.assertFalse(is_authorized_to_edit(
             NON_AUTHORIZED_USER, self.mock_collection))
 
-    def test_unkown_user_not_authorized(self):
-        """An user not in the db should not receive authorized privileges."""
+    def test_malformatted_user_none_authorization(self):
+        """An incorrect db schema should not receive authorized privileges."""
         self.assertFalse(is_authorized_to_edit(
             MISSING_USER, self.mock_collection))
+
+    def test_unkown_user_not_authorized(self):
+        """A user not in the db should not receive authorized privileges."""
+        self.assertFalse(is_authorized_to_edit(
+            MALFORMATTED_IN_DB_USER, self.mock_collection))
 
 
 if __name__ == '__main__':
