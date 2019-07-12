@@ -58,10 +58,10 @@ class TestEventsClass(unittest.TestCase):
     def test_construct_event(self):
         event = app.Event(self.test_info)
         self.test_info['event_id'] = None
-        self.assertEqual(event.info, self.test_info)
+        self.assertEqual(event.get_info(), self.test_info)
 
         event_with_id = app.Event(self.test_info_with_id)
-        self.assertEqual(event_with_id.info, self.test_info_with_id)
+        self.assertEqual(event_with_id.get_info(), self.test_info_with_id)
 
     def test_events_equal(self):
         test_info_diff = self.test_info.copy()
@@ -75,14 +75,6 @@ class TestEventsClass(unittest.TestCase):
 
         event_diff = app.Event(test_info_diff)
         self.assertNotEqual(event, event_diff)
-
-    def test_is_valid(self):
-        valid_event = app.Event(self.test_info)
-        self.assertTrue(valid_event.is_valid())
-
-        del self.test_info['name']
-        invalid_event = app.Event(self.test_info)
-        self.assertFalse(invalid_event.is_valid())
 
 
 if __name__ == '__main__':

@@ -2,8 +2,8 @@ import os
 import logging
 import datetime
 import pymongo
-# import pprint
 
+from collections import namedtuple
 from flask import Flask, request, Response
 
 app = Flask(__name__)
@@ -38,8 +38,9 @@ def add_event():
     info = request.form['info']
     current_time = datetime.datetime.now()
     build_event_info(info, current_time)
-    event = Event(info)
-    if not event.is_valid():
+    try:
+        event = Event(info)
+    except ValueError:      # missing or extra event attributes
         return Response(
             status=400,
             response="Event info was entered incorrectly.",
@@ -88,39 +89,55 @@ def get_one_event(event_id):
     pass
 
 
-class Event(object):
-    attributes = [
-        'event_id',
-        'name',
-        'description',
-        'author',
-        'created_at',
-        'event_time']
+attributes = [
+    'event_id',
+    'name',
+    'description',
+    'author',
+    'created_at',
+    'event_time']
 
+EventTuple = namedtuple('EventTuple', attributes)
+
+
+class Event(object):
     def __init__(self, info):
-        self.info = dict(info)
+        """Constructs an event object represented by a EventTuple namedtuple.
+
+        Creating the EventTuple raises a ValueError if any attributes are
+        missing or if extra attributes are included.
+        """
         # event_id is defined by the database, not the user
-        if "event_id" not in self.info:
-            self.info['event_id'] = None
+        if "event_id" not in info:
+            info['event_id'] = None
+        if '_id' in info:       # found DB-generated ID, override given one
+            info['event_id'] = info['_id']
+            del info['_id']
+        self.info = EventTuple(**info)
 
     def __eq__(self, other):
         """Determines if two events have the same info, excluding event_id."""
-        for att in self.attributes:
-            if att != 'event_id' and (self.info[att] != other.info[att]):
+        if not isinstance(other, Event):
+            return False
+        for att in attributes:
+            if att != 'event_id' and (
+                    self.get_info()[att] != other.get_info()[att]):
                 return False
-        return True
-
-    def is_valid(self):
-        """Checks that all of the required attributes are in the event info."""
-        for att in self.attributes:
-            if att not in self.info:
-                return False
+            if att == 'event_time' or att == 'created_at':
+                pass
         return True
 
     def add_to_db(self, events_collection):
         """Adds the event to the specified collection."""
-        events_collection.insert_one(self.info)
+        events_collection.insert_one(self.get_info())
         return self.info
+
+    def get_info(self):
+        """Returns event info converted back into dictionary form.
+
+        Used for inserting into the DB or serving through requests.
+        """
+        return self.info._asdict()
 
 
 if __name__ == "__main__":
