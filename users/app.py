@@ -67,10 +67,8 @@ def is_authorized_to_edit(username, users_collection):
     if users_collection.count_documents({"username": username}) == 0:
         return False  # user not found
     cursor = users_collection.find({"username": username})
-    for user in cursor:
-        if not user["is_organizer"]:
-            return False
-    return True
+    first_user = cursor[0]
+    return first_user.get("is_organizer")  # None if key not found
 
 
 def initialize_mongodb():
