@@ -49,22 +49,38 @@ def show_events():
 
 def get_posts():
     # TODO: integrate with posts service to pull post info from database
-    return [{'post_id': '1', 'event_id': '0', 'type': 'text', 'author': 'admin',
-             'created_at': '7-9-2019', 'text': 'this will be a fun event!',
+    return [{'post_id': '1',
+             'event_id': '0',
+             'type': 'text',
+             'author': 'admin',
+             'created_at': '7-9-2019',
+             'text': 'this will be a fun event!',
              },
-            {'post_id': '2', 'event_id': '0', 'type': 'image', 'author': 'admin',
-             'created_at': '7-9-2019', 'text': 'abcdefghi',
+            {'post_id': '2',
+             'event_id': '0',
+             'type': 'image',
+             'author': 'admin',
+             'created_at': '7-9-2019',
+             'text': 'abcdefghi',
              }]
 
 
 def get_events():
     # TODO(mcarolyn): integrate with events service to pull event info from
     # database
-    return [{'event_id': '1', 'name': 'concert 1', 'description': 'listen to fun music here!',
-             'author': 'admin', 'created_at': '7-9-2019', 'event_time': '7-10-2019',
+    return [{'event_id': '1',
+             'name': 'concert 1',
+             'description': 'listen to fun music here!',
+             'author': 'admin',
+             'created_at': '7-9-2019',
+             'event_time': '7-10-2019',
              },
-            {'event_id': '2', 'name': 'concert 2', 'description': 'listen to fun music here!',
-             'author': 'admin', 'created_at': '7-9-2019', 'event_time': '7-12-2019',
+            {'event_id': '2',
+             'name': 'concert 2',
+             'description': 'listen to fun music here!',
+             'author': 'admin',
+             'created_at': '7-9-2019',
+             'event_time': '7-12-2019',
              }]
 
 

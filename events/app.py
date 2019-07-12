@@ -31,7 +31,6 @@ def db_setup():
 def add_event():
     # TODO(cmei4444): Get event information from request data
     info = request.form['info']
-    # Add information into database
     current_time = datetime.datetime.now()
     build_event_info(info, current_time)
     event = Event(info)
@@ -48,7 +47,7 @@ def add_event():
 
 
 def build_event_info(info, time):
-    """Adds created_at time to event info dict"""
+    """Adds created_at time to event info dict."""
     # MongoDB timestamp precision level, floor to milliseconds
     time -= datetime.timedelta(0, 0, time.microsecond % 1000)
     info['created_at'] = time
@@ -57,25 +56,25 @@ def build_event_info(info, time):
 
 @app.route('/v1/edit/<event_id>', methods=['PUT'])
 def edit_event(event_id):
-    """Edit the event with the given id"""
+    """Edit the event with the given id."""
     pass
 
 
 @app.route('/v1/', methods=['GET'])
 def get_all_events():
-    """Return a list of all events currently in the DB"""
+    """Return a list of all events currently in the DB."""
     pass
 
 
 @app.route('/v1/search', methods=['GET'])
 def search_event():
-    """Search for the event with the given name in the DB"""
+    """Search for the event with the given name in the DB."""
     pass
 
 
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
-    """Retrieve one event by event_id"""
+    """Retrieve one event by event_id."""
     pass
 
 
@@ -95,21 +94,21 @@ class Event(object):
             self.info['event_id'] = None
 
     def __eq__(self, other):
-        """Determines if two events have the same information outside of event_id"""
+        """Determines if two events have the same info, excluding event_id."""
         for att in self.attributes:
             if att != 'event_id' and (self.info[att] != other.info[att]):
                 return False
         return True
 
     def is_valid(self):
-        """Checks to make sure all of the required attributes are in the event info"""
+        """Checks that all of the required attributes are in the event info."""
         for att in self.attributes:
             if att not in self.info:
                 return False
         return True
 
     def add_to_db(self):
-        """Adds the event to the database, returns added dict"""
+        """Adds the event to the database, returns added dict."""
         events_coll.insert_one(self.info)
         return self.info
 

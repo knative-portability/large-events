@@ -42,8 +42,6 @@ class TestEventsDB(unittest.TestCase):
 
 class TestEventsClass(unittest.TestCase):
     def setUp(self):
-        # Sets up two events with identical data, one with event_id and one
-        # without
         self.test_info = {'name': 'test_event',
                           'description': 'testing!',
                           'author': 'admin',
