@@ -1,2 +1,4 @@
 flask
+gunicorn
 pymongo[srv]
+mongomock
