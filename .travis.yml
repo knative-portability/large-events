@@ -22,5 +22,6 @@ env:
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=users
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+  - TEST_DIR=posts
 script:
   - cd $TEST_DIR && pip install -r requirements.txt && python -m unittest *test.py
