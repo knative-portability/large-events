@@ -1,6 +1,8 @@
 # large-events/posts
 
 Posts service as part of large-events project for Knative proof of portability.
+* Serve stored media/posts
+* Upload new posts to the database
 
 ## Getting Started
 
