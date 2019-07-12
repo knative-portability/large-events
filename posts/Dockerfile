@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-language: python
-python:
-  - "3.6"
-# command to run tests
-env:
-  # Travis build matrix will test all permutations of the build
-  - TEST_DIR=pageserve
-    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
-  - TEST_DIR=users
-    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
-  - TEST_DIR=posts
-script:
-  - cd $TEST_DIR && pip install -r requirements.txt && python -m unittest *test.py
+# Use the official Python image.
+# https://hub.docker.com/_/python
+FROM python:3.7
+
+# Copy local code to the container image.
+ENV APP_HOME /app
+WORKDIR $APP_HOME
+COPY . .
+
+# Install production dependencies.
+RUN pip install -r requirements.txt
+
+# Run the web service on container startup. Here we use the gunicorn
+# webserver, with one worker process and 8 threads.
+# For environments with multiple CPU cores, increase the number of workers
+# to be equal to the cores available.
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 app:app
