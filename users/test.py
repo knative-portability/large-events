@@ -21,7 +21,7 @@ limitations under the License.
 
 import unittest
 import mongomock
-from app import is_authorized_to_edit
+from app import find_authorization_in_db
 
 AUTHORIZED_USER = "authorized-user"
 NON_AUTHORIZED_USER = "non-authorized-user"
@@ -48,22 +48,22 @@ class TestAuthorization(unittest.TestCase):
 
     def test_authorized_user_is_authorized(self):
         """An authorized user should receive authorized privileges."""
-        self.assertTrue(is_authorized_to_edit(
+        self.assertTrue(find_authorization_in_db(
             AUTHORIZED_USER, self.mock_collection))
 
     def test_non_authorized_user_not_authorized(self):
         """A non-authorized user should not receive authorized privileges."""
-        self.assertFalse(is_authorized_to_edit(
+        self.assertFalse(find_authorization_in_db(
             NON_AUTHORIZED_USER, self.mock_collection))
 
     def test_malformatted_user_none_authorization(self):
         """An incorrect db schema should not receive authorized privileges."""
-        self.assertFalse(is_authorized_to_edit(
+        self.assertFalse(find_authorization_in_db(
             MISSING_USER, self.mock_collection))
 
     def test_unkown_user_not_authorized(self):
         """A user not in the db should not receive authorized privileges."""
-        self.assertFalse(is_authorized_to_edit(
+        self.assertFalse(find_authorization_in_db(
             MALFORMATTED_IN_DB_USER, self.mock_collection))
 
 

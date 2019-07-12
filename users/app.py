@@ -36,7 +36,7 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = is_authorized_to_edit(user, DB.users_collection)
+    authorized = find_authorization_in_db(user, DB.users_collection)
     return jsonify(edit_access=authorized)
 
 
@@ -56,7 +56,7 @@ def add_update_user():
     return jsonify(user_object), (201 if added_new_user else 200)
 
 
-def is_authorized_to_edit(username, users_collection):
+def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user.
 
     Documents in the users collection should look like
