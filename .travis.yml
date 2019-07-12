@@ -26,8 +26,9 @@ env:
 # command to run tests
 script:
   - cd $TEST_DIR && 
-    pip install -r requirements.txt && 
-    coverage run --omit=venv/* *test.py
+    pip install -r requirements.txt &&
+    # run coverage on *test*.py files testing the app module
+    coverage run --source app *test*.py
 
 after_success:
     coveralls
