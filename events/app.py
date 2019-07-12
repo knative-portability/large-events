@@ -124,6 +124,8 @@ class Event(object):
                     self.get_info()[att] != other.get_info()[att]):
                 return False
             if att == 'event_time' or att == 'created_at':
+                # TODO(cmei4444): ignore time error here instead of rounding
+                # to the millisecond in build_event_info
                 pass
         return True
 
