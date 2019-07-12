@@ -62,11 +62,11 @@ def find_authorization_in_db(username, users_collection):
         "name": "Carolyn Mei",
         "is_organizer": True}
     """
-    if users_collection.count_documents({"username": username}) == 0:
-        return False  # user not found
     first_user = users_collection.find_one({"username": username})
+    if first_user is None:  # user not found
+        return False
     authorized = first_user.get("is_organizer")
-    return authorized is True  # handle 'None' case
+    return bool(authorized)  # handle 'None' case
 
 
 def connect_to_mongodb():
