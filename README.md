@@ -50,7 +50,7 @@ python3 -m venv venv && . venv/bin/activate
 Install the required python modules.
 
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ### Running the service
