@@ -73,13 +73,9 @@ def find_authorization_in_db(username, users_collection):
 
 def connect_to_mongodb():
     """Connect to MongoDB instance using env vars."""
-    username = os.environ.get(
-        "MONGODB_ATLAS_USERNAME")
-    password = os.environ.get(
-        "MONGODB_ATLAS_PASSWORD")
-    cluster = os.environ.get(
-        "MONGODB_ATLAS_CLUSTER_ADDRESS")
-    mongodb_uri = f"mongodb+srv://{username}:{password}@{cluster}"
+    mongodb_uri = os.environ.get("MONGODB_URI")
+    if mongodb_uri is None:
+        return None  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).users_db
 
 
