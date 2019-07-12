@@ -25,9 +25,7 @@ env:
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
 # command to run tests
 script:
-  - cd $TEST_DIR && 
-    pip install -r requirements.txt &&
-    # run coverage on *test*.py files testing the app module
-    coverage run --source app *test*.py
+  # run coverage on *test*.py files testing the app module 
+  - cd $TEST_DIR && pip install -r requirements.txt && coverage run --source app *test*.py
 after_success:
     coveralls
