@@ -20,17 +20,51 @@ limitations under the License.
 """
 
 import unittest
-from app import is_authorized_to_edit
+import mongomock
+from app import find_authorization_in_db
+
+AUTHORIZED_USER = "authorized-user"
+NON_AUTHORIZED_USER = "non-authorized-user"
+MALFORMATTED_IN_DB_USER = "this-user-has-no-'is_organizer'_db_field"
+MISSING_USER = "not-a-user-in-the-database"
+
 
 class TestAuthorization(unittest.TestCase):
-    """Test /authorization endpoint of users service"""
-    def test_good_user_is_authorized(self):
-        """An authorized user should have authorized privileges"""
-        self.assertTrue(is_authorized_to_edit("carolyn", None))
+    """Test /authorization endpoint of users service."""
 
-    def test_bad_user_not_authorized(self):
-        """An non-authorized user should not have authorized privileges"""
-        self.assertFalse(is_authorized_to_edit("Voldemort", None))
+    def setUp(self):
+        """Seed mock DB for testing"""
+        self.mock_collection = mongomock.MongoClient().db.collection
+        mock_data = [
+            {"username": AUTHORIZED_USER,
+             "name": AUTHORIZED_USER,
+             "is_organizer": True},
+            {"username": NON_AUTHORIZED_USER,
+             "name": NON_AUTHORIZED_USER,
+             "is_organizer": False},
+            {"username": MALFORMATTED_IN_DB_USER}
+        ]
+        self.mock_collection.insert_many(mock_data)
+
+    def test_authorized_user_is_authorized(self):
+        """An authorized user should receive authorized privileges."""
+        self.assertTrue(find_authorization_in_db(
+            AUTHORIZED_USER, self.mock_collection))
+
+    def test_non_authorized_user_not_authorized(self):
+        """A non-authorized user should not receive authorized privileges."""
+        self.assertFalse(find_authorization_in_db(
+            NON_AUTHORIZED_USER, self.mock_collection))
+
+    def test_malformatted_user_none_authorization(self):
+        """An incorrect db schema should not receive authorized privileges."""
+        self.assertFalse(find_authorization_in_db(
+            MISSING_USER, self.mock_collection))
+
+    def test_unkown_user_not_authorized(self):
+        """A user not in the db should not receive authorized privileges."""
+        self.assertFalse(find_authorization_in_db(
+            MALFORMATTED_IN_DB_USER, self.mock_collection))
 
 
 if __name__ == '__main__':
