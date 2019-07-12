@@ -1,5 +1,4 @@
-"""
-users/test.py
+"""users/test.py
 Authors: mukobi
 Unit tests for users service
 

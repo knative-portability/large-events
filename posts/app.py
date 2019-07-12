@@ -1,5 +1,4 @@
-"""
-posts/app.py
+"""posts/app.py
 Authors: mukobi
 Main flask app for posts
     - Serve stored media
