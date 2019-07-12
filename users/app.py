@@ -72,8 +72,14 @@ def find_authorization_in_db(username, users_collection):
     return False if authorized is None else authorized
 
 
+@app.before_first_request
 def initialize_mongodb():
-    """Connect to MongoDB Atlas database using env vars."""
+    """Connect to MongoDB Atlas database using env vars.
+
+    app.before_first_request decorator is used to keep
+    the DB from initializing in testing to remove the
+    dependency on the MongoDB connection in tests.
+    """
     mongodb_atlas_username = os.environ.get(
         "MONGODB_ATLAS_USERNAME")
     mongodb_atlas_password = os.environ.get(
@@ -84,11 +90,8 @@ def initialize_mongodb():
         mongodb_atlas_username,
         mongodb_atlas_password,
         mongodb_atlas_cluster_address)
-    return pymongo.MongoClient(pymongo_uri).users_db
+    DB = pymongo.MongoClient(pymongo_uri).users_db
 
 
 if __name__ == "__main__":
-    # keep DB from initializing in testing to remove dependency
-    DB = initialize_mongodb()
-
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
