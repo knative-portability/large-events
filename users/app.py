@@ -66,8 +66,7 @@ def find_authorization_in_db(username, users_collection):
     """
     if users_collection.count_documents({"username": username}) == 0:
         return False  # user not found
-    cursor = users_collection.find({"username": username})
-    first_user = cursor[0]
+    first_user = users_collection.find_one({"username": username})
     authorized = first_user.get("is_organizer")
     return False if authorized is None else authorized
 
