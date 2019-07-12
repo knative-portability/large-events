@@ -22,10 +22,8 @@ limitations under the License.
 import unittest
 from app import is_authorized_to_edit
 
-
 class TestAuthorization(unittest.TestCase):
     """Test /authorization endpoint of users service"""
-
     def test_good_user_is_authorized(self):
         """An authorized user should have authorized privileges"""
         self.assertTrue(is_authorized_to_edit("carolyn", None))
