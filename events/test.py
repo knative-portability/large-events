@@ -46,12 +46,7 @@ class TestEventsClass(unittest.TestCase):
                           'author': 'admin',
                           'event_time': '7-12-2019',
                           'created_at': '7-10-2019'}
-        self.test_info_with_id = {'name': 'test_event',
-                                  'description': 'testing!',
-                                  'author': 'admin',
-                                  'event_time': '7-12-2019',
-                                  'created_at': '7-10-2019',
-                                  'event_id': 1}
+        self.test_info_with_id = dict(event_id=1, **self.test_info)
 
     def test_construct_event(self):
         event = app.Event(self.test_info)
