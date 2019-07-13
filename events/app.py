@@ -29,6 +29,7 @@ EVENTS_COLL = connect_to_mongodb()  # None if can't connect
 def add_event():
     # TODO(cmei4444): Get event information from request data
     info = request.form['info']
+    # TODO(cmei4444): Verify that user has event editing access
     current_time = datetime.datetime.now()
     build_event_info(info, current_time)
     try:
@@ -94,6 +95,9 @@ EventTuple = namedtuple('EventTuple', attributes)
 
 
 class Event(object):
+    # TODO(cmei4444): move Event class to a separate file for better
+    # code organization
+    # TODO(cmei4444): implement as namedtuple with __new__ method
     def __init__(self, info):
         """Constructs an event object represented by a EventTuple namedtuple.
 
@@ -124,8 +128,8 @@ class Event(object):
 
     def add_to_db(self, events_collection):
         """Adds the event to the specified collection."""
+        # TODO(cmei4444): move out of class
         events_collection.insert_one(self.get_info())
-        return self.info
 
     def get_info(self):
         """Returns event info converted back into dictionary form.
