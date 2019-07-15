@@ -59,14 +59,10 @@ def upsert_user_in_db(user_object, users_collection):
 
     Sets/overwrites default values as needed.
 
-    user_object should look like
-        {"user_id": foobar,
-         "name": Foo Bar}
-
-    Documents in users_collection should look like
-        {"user_id": foobar,
-         "name": Foo Bar,
-         "is_organizer": False}
+    Args:
+        user_object (dict): must contain a user_id and name, and may contain
+            other attributes. Default values will be set as needed.
+        users_collection (pymongo.collection): the MongoDB collection to use.
 
     Returns:
         dict: The upserted object as it is in the db.
