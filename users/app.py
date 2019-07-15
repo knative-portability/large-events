@@ -65,7 +65,8 @@ def upsert_user_in_db(user_object, users_collection):
         users_collection (pymongo.collection): the MongoDB collection to use.
 
     Returns:
-        dict: The upserted object as it is in the db.
+        ObjectID: The ID of the upserted object from the db. This can be used
+            to find the object with collection.find_one(object_id).
 
     Raises:
         AttributeError: if user_object is malformatted.
@@ -75,11 +76,10 @@ def upsert_user_in_db(user_object, users_collection):
     # insert is_organizer field (default False)
     user_object["is_organizer"] = False
     # upsert user in db
-    users_collection.update_one(
+    return users_collection.update_one(
         {"user_id": user_object["user_id"]},
         {"$set": user_object},
-        upsert=True)
-    return users_collection.find_one({"user_id": user_object["user_id"]})
+        upsert=True).upserted_id
 
 
 def find_authorization_in_db(username, users_collection):
