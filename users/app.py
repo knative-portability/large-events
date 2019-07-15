@@ -72,7 +72,7 @@ def upsert_user_in_db(user_object, users_collection):
         bool: whether user_object was formatted correctly and the upsert
             was successful.
     """
-    if "user_id" not in user_object or "name" not in user_object:
+    if user_object.keys() < {"user_id", "name"}:
         # malformatted user_object
         return False
     # insert is_organizer field (default False)
