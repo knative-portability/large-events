@@ -69,11 +69,10 @@ def upsert_user_in_db(user_object, users_collection):
          "is_organizer": False}
 
     Returns:
-        bool: whether user_object was formatted correctly and the upsert
-            was successful.
+        dict: The upserted object as it is in the db.
 
     Raises:
-        AttributeError: if user_object is malformatted
+        AttributeError: if user_object is malformatted.
     """
     if user_object.keys() < {"user_id", "name"}:
         raise AttributeError("missing user_id or name")
@@ -83,9 +82,8 @@ def upsert_user_in_db(user_object, users_collection):
     users_collection.update_one(
         {"user_id": user_object["user_id"]},
         {"$set": user_object},
-        upsert=True
-    )
-    return True
+        upsert=True)
+    return users_collection.find_one({"user_id": user_object["user_id"]})
 
 
 def find_authorization_in_db(username, users_collection):

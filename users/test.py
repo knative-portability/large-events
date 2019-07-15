@@ -158,6 +158,17 @@ class TestUserUpsertion(unittest.TestCase):
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
 
+    def test_returns_upserted_user(self):
+        """upsert_user_in_db should return the upserted user from the db."""
+        self.mock_collection = mongomock.MongoClient().db.collection
+        user_to_insert = {
+            "user_id": USER_ID,
+            "name": USER_NAME
+        }
+        returned_user = upsert_user_in_db(user_to_insert, self.mock_collection)
+        found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        self.assertEqual(returned_user, found_user)
+
 
 if __name__ == '__main__':
     unittest.main()
