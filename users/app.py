@@ -57,7 +57,7 @@ def add_update_user():
 def upsert_user_in_db(user_object, users_collection):
     """Updates or inserts the user object into user_collection.
 
-    Adds the is_oganizer field to user_object with default False
+    Adds the is_oganizer field to user_object with default value False.
 
     user_object should look like
         {"user_id": foobar,
@@ -69,9 +69,8 @@ def upsert_user_in_db(user_object, users_collection):
          "is_organizer": False}
 
     Returns:
-        True if user_object was formatted correctly and the upsert
+        bool: whether user_object was formatted correctly and the upsert
             was successful.
-        False otherwise.
     """
     if "user_id" not in user_object or "name" not in user_object:
         # malformatted user_object
