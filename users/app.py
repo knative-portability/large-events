@@ -101,7 +101,7 @@ def find_authorization_in_db(username, users_collection):
     return bool(authorized)  # handle 'None' case
 
 
-def connect_to_mongodb():
+def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
@@ -114,5 +114,5 @@ def connect_to_mongodb():
 DB = connect_to_mongodb()  # None if can't connect
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
