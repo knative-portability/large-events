@@ -53,8 +53,6 @@ def add_event():
 
 def build_event_info(info, time):
     """Adds created_at time to event info dict."""
-    # MongoDB timestamp precision level, floor to milliseconds
-    time -= datetime.timedelta(0, 0, time.microsecond % 1000)
     info['created_at'] = time
     return info
 
@@ -81,6 +79,26 @@ def search_event():
 def get_one_event(event_id):
     """Retrieve one event by event_id."""
     pass
+
+
+def equal_times(time_1, time_2):
+    """Determines if two times are equal.
+
+    Times can be represented as strings (mainly for testing) or as
+    datetime.datetime objects. Datetime objects are rounded to the nearest
+    millisecond before comparison.
+
+    Used for comparing Event objects, since MongoDB truncates times to the
+    nearest millisecond.
+    """
+    if isinstance(time_1, type(time_2)):
+        if isinstance(time_1, datetime.datetime):
+            time_1 = time_1.replace(
+                microsecond=(time_1.microsecond // 1000) * 1000)
+            time_2 = time_2.replace(
+                microsecond=(time_2.microsecond // 1000) * 1000)
+        return time_1 == time_2
+    return False
 
 
 EVENT_ATTRIBUTES = [
@@ -114,13 +132,13 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         if not isinstance(other, Event):
             return False
         for att in EVENT_ATTRIBUTES:
-            if att != 'event_id' and (
+            if att == 'event_time' or att == 'created_at':
+                if not equal_times(getattr(self, att), getattr(other, att)):
+                    print('times not eq')
+                    return False
+            elif att != 'event_id' and (
                     getattr(self, att) != getattr(other, att)):
                 return False
-            if att == 'event_time' or att == 'created_at':
-                # TODO(cmei4444): ignore time error here instead of rounding
-                # to the millisecond in build_event_info
-                pass
         return True
 
     def add_to_db(self, events_collection):
