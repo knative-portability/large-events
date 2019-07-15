@@ -21,7 +21,7 @@ limitations under the License.
 
 import unittest
 import mongomock
-from app import find_authorization_in_db, upsert_user_in_db
+import app
 
 AUTHORIZED_USER = "authorized-user"
 NON_AUTHORIZED_USER = "non-authorized-user"
@@ -48,22 +48,22 @@ class TestAuthorization(unittest.TestCase):
 
     def test_authorized_user_is_authorized(self):
         """An authorized user should receive authorized privileges."""
-        self.assertTrue(find_authorization_in_db(
+        self.assertTrue(app.find_authorization_in_db(
             AUTHORIZED_USER, self.mock_collection))
 
     def test_non_authorized_user_not_authorized(self):
         """A non-authorized user should not receive authorized privileges."""
-        self.assertFalse(find_authorization_in_db(
+        self.assertFalse(app.find_authorization_in_db(
             NON_AUTHORIZED_USER, self.mock_collection))
 
     def test_malformatted_user_none_authorization(self):
         """An incorrect db schema should not receive authorized privileges."""
-        self.assertFalse(find_authorization_in_db(
+        self.assertFalse(app.find_authorization_in_db(
             MISSING_USER, self.mock_collection))
 
     def test_unkown_user_not_authorized(self):
         """A user not in the db should not receive authorized privileges."""
-        self.assertFalse(find_authorization_in_db(
+        self.assertFalse(app.find_authorization_in_db(
             MALFORMATTED_IN_DB_USER, self.mock_collection))
 
 
@@ -82,13 +82,13 @@ class TestUserUpsertion(unittest.TestCase):
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        upsert_user_in_db(user_to_insert, self.mock_collection)
+        app.upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
 
     def test_user_auth_defaults_are_set(self):
-        """upsert_user_in_db should set any default value before upsertion.
+        """app.upsert_user_in_db should set any default value before upsertion.
 
         Right now, only the 'is_organizer' field of an inserted user should
         default to False.
@@ -98,28 +98,28 @@ class TestUserUpsertion(unittest.TestCase):
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        upsert_user_in_db(user_to_insert, self.mock_collection)
+        app.upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertFalse(found_user["is_organizer"])
 
     def test_malformatted_user_not_inserted(self):
         """A malformatted user_object should not be inserted.
 
-        Note: upsert_user_in_db should not insert the user if it is missing
+        Note: app.upsert_user_in_db should not insert the user if it is missing
         the 'user_id' or 'name' attributes, but should insert the user if
         the user has more attributes than those. If the user is malformatted,
-        upsert_user_in_db raises an AttributeError, else it upserts the user
-        and returns the new user object.
+        app.upsert_user_in_db raises an AttributeError, else it upserts the
+        user and returns the new user object.
         """
         self.mock_collection = mongomock.MongoClient().db.collection
         # missing name
-        self.assertRaises(AttributeError, upsert_user_in_db,
+        self.assertRaises(AttributeError, app.upsert_user_in_db,
                           {"user_id": USER_ID}, self.mock_collection)
         # missing user_id
-        self.assertRaises(AttributeError, upsert_user_in_db,
+        self.assertRaises(AttributeError, app.upsert_user_in_db,
                           {"name": USER_NAME}, self.mock_collection)
         # missing both
-        self.assertRaises(AttributeError, upsert_user_in_db,
+        self.assertRaises(AttributeError, app.upsert_user_in_db,
                           {}, self.mock_collection)
         # no users should have been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 0)
@@ -127,11 +127,11 @@ class TestUserUpsertion(unittest.TestCase):
     def test_additional_info_still_inserted(self):
         """A user_object with additional information should still be inserted.
 
-        Note: upsert_user_in_db should not insert the user if it is missing
+        Note: app.upsert_user_in_db should not insert the user if it is missing
         the 'user_id' or 'name' attributes, but should insert the user if
         the user has more attributes than those. If the user is malformatted,
-        upsert_user_in_db raises an AttributeError, else it upserts the user
-        and returns the new user object.
+        app.upsert_user_in_db raises an AttributeError, else it upserts the
+        user and returns the new user object.
         """
         self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
@@ -139,7 +139,7 @@ class TestUserUpsertion(unittest.TestCase):
             "name": USER_NAME,
             "additional_info": ADDITIONAL_INFORMATION
         }
-        upsert_user_in_db(user_to_insert, self.mock_collection)
+        app.upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
@@ -155,7 +155,7 @@ class TestUserUpsertion(unittest.TestCase):
         }
         # upsert many times
         for i in range(0, 42):
-            upsert_user_in_db(user_to_insert, self.mock_collection)
+            app.upsert_user_in_db(user_to_insert, self.mock_collection)
         # only 1 user has been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 1)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
@@ -163,13 +163,14 @@ class TestUserUpsertion(unittest.TestCase):
         self.assertEqual(user_to_insert["name"], found_user["name"])
 
     def test_returns_upserted_user(self):
-        """upsert_user_in_db should return the upserted user from the db."""
+        """app.upsert_user_in_db should return the upserted user object."""
         self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        returned_user = upsert_user_in_db(user_to_insert, self.mock_collection)
+        returned_user = app.upsert_user_in_db(
+            user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(returned_user, found_user)
 
