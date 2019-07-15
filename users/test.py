@@ -123,14 +123,14 @@ class TestUserUpsertion(unittest.TestCase):
         user and returns the new user object.
         """
         # missing name
-        self.assertRaises(AttributeError, app.upsert_user_in_db,
-                          {"user_id": USER_ID}, self.mock_collection)
+        with self.assertRaises(AttributeError):
+            app.upsert_user_in_db({"user_id": USER_ID}, self.mock_collection)
         # missing user_id
-        self.assertRaises(AttributeError, app.upsert_user_in_db,
-                          {"name": USER_NAME}, self.mock_collection)
+        with self.assertRaises(AttributeError):
+            app.upsert_user_in_db({"name": USER_NAME}, self.mock_collection)
         # missing both
-        self.assertRaises(AttributeError, app.upsert_user_in_db,
-                          {}, self.mock_collection)
+        with self.assertRaises(AttributeError):
+            app.upsert_user_in_db({}, self.mock_collection)
         # no users should have been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 0)
 
