@@ -83,7 +83,7 @@ def get_one_event(event_id):
     pass
 
 
-attributes = [
+EVENT_ATTRIBUTES = [
     'event_id',
     'name',
     'description',
@@ -91,34 +91,31 @@ attributes = [
     'created_at',
     'event_time']
 
-EventTuple = namedtuple('EventTuple', attributes)
 
-
-class Event(object):
+class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
     # TODO(cmei4444): move Event class to a separate file for better
     # code organization
-    # TODO(cmei4444): implement as namedtuple with __new__ method
-    def __init__(self, info):
+    def __new__(cls, info):
         """Constructs an event object represented by a EventTuple namedtuple.
 
-        Creating the EventTuple raises a ValueError if any attributes are
-        missing or if extra attributes are included.
+        Raises a ValueError if any attributes are missing or if extra
+        attributes are included.
         """
-        # event_id is defined by the database, not the user
         if "event_id" not in info:
             info['event_id'] = None
         if '_id' in info:       # found DB-generated ID, override given one
             info['event_id'] = info['_id']
             del info['_id']
-        self.info = EventTuple(**info)
+        self = super(Event, cls).__new__(cls, **info)
+        return self
 
     def __eq__(self, other):
         """Determines if two events have the same info, excluding event_id."""
         if not isinstance(other, Event):
             return False
-        for att in attributes:
+        for att in EVENT_ATTRIBUTES:
             if att != 'event_id' and (
-                    self.get_info()[att] != other.get_info()[att]):
+                    getattr(self, att) != getattr(other, att)):
                 return False
             if att == 'event_time' or att == 'created_at':
                 # TODO(cmei4444): ignore time error here instead of rounding
@@ -129,14 +126,7 @@ class Event(object):
     def add_to_db(self, events_collection):
         """Adds the event to the specified collection."""
         # TODO(cmei4444): move out of class
-        events_collection.insert_one(self.get_info())
-
-    def get_info(self):
-        """Returns event info converted back into dictionary form.
-
-        Used for inserting into the DB or serving through requests.
-        """
-        return self.info._asdict()
+        events_collection.insert_one(self._asdict())
 
 
 if __name__ == "__main__":

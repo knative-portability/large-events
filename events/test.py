@@ -51,10 +51,10 @@ class TestEventsClass(unittest.TestCase):
     def test_construct_event(self):
         event = app.Event(self.test_info)
         self.test_info['event_id'] = None
-        self.assertEqual(event.get_info(), self.test_info)
+        self.assertEqual(event._asdict(), self.test_info)
 
         event_with_id = app.Event(self.test_info_with_id)
-        self.assertEqual(event_with_id.get_info(), self.test_info_with_id)
+        self.assertEqual(event_with_id._asdict(), self.test_info_with_id)
 
     def test_events_equal(self):
         test_info_diff = self.test_info.copy()
