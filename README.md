@@ -12,7 +12,7 @@ An app built as proof of portability for [Knative](https://knative.dev) that pro
 * Provide a clean front-end web UI for interaction with the service
 * Authenticate with OAuth 2.0
 
-This app is built as part of a proof of portability project for [Knative](https://knative.dev). It is meant to show the key features of Knative, to test the conformance various cloud product implementations of Knative, and to document with functioning sample code how one might develop, build, and deploy with Knative. Key features of Knative this app demonstrates include:
+This app is built as part of a proof of portability project for [Knative](https://knative.dev). It is meant to show the key features of Knative, to test the conformance across various cloud product implementations of Knative, and to document with functioning sample code how one might develop, build, and deploy with Knative. Key features of Knative this app demonstrates include:
 * Develop microservices independently that can be individually deployed, updated, and auto-scaled
 * Deploy containerized code with minimal configuration, allowing the developer to focus on features rather than infrastructure
 * Run serverless, stateful containers that enable pay-for-use billing
