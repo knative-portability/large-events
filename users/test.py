@@ -75,16 +75,26 @@ class TestUserUpsertion(unittest.TestCase):
     """Test updating/inserting users into the db."""
 
     def test_insert_valid_user(self):
-        """A valid user object should be upserted and retrieved correctly."""
+        """A valid user object should be upserted and retrieved correctly.
+
+        Checks the user found after upsertion both against the original
+        object added to the database and against the object found with
+        the ObjectID returned from app.upsert_user_in_db.
+        """
         self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        app.upsert_user_in_db(user_to_insert, self.mock_collection)
+        upserted_id = app.upsert_user_in_db(
+            user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
+        # user returned from app.upsert_user_in_db matches found user exactly
+        returned_user = self.mock_collection.find_one(upserted_id)
+        self.assertEqual(returned_user, found_user)
 
     def test_user_auth_defaults_are_set(self):
         """app.upsert_user_in_db should set any default value before upsertion.
@@ -160,19 +170,6 @@ class TestUserUpsertion(unittest.TestCase):
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
-
-    def test_returns_upserted_user(self):
-        """Should return the ObjectID of the upserted user object."""
-        self.mock_collection = mongomock.MongoClient().db.collection
-        user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME
-        }
-        upserted_id = app.upsert_user_in_db(
-            user_to_insert, self.mock_collection)
-        returned_user = self.mock_collection.find_one(upserted_id)
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
-        self.assertEqual(returned_user, found_user)
 
 
 if __name__ == '__main__':
