@@ -67,11 +67,13 @@ class TestAuthorization(unittest.TestCase):
             MALFORMATTED_IN_DB_USER, self.mock_collection))
 
 
+USER_ID = "valid-user-id"
+USER_NAME = "Valid User Name"
+ADDITIONAL_INFORMATION = "I'm not found in other documents"
+
+
 class TestUserUpsertion(unittest.TestCase):
     """Test updating/inserting users into the db."""
-    USER_ID = "valid-user-id"
-    USER_NAME = "Valid User Name"
-    ADDITIONAL_INFORMATION = "I'm not found in other documents"
 
     def test_insert_valid_user(self):
         """A valid user object should be upserted and retrieved correctly."""
