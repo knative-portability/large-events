@@ -124,8 +124,11 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         if '_id' in info:       # found DB-generated ID, override given one
             info['event_id'] = info['_id']
             del info['_id']
-        self = super(Event, cls).__new__(cls, **info)
-        return self
+        try:
+            self = super(Event, cls).__new__(cls, **info)
+            return self
+        except TypeError:
+            raise ValueError("Event info was formatted incorrectly.")
 
     def __eq__(self, other):
         """Determines if two events have the same info, excluding event_id."""

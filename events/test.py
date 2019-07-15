@@ -56,6 +56,15 @@ class TestEventsClass(unittest.TestCase):
         event_with_db_id = app.Event(self.test_info_with_db_id)
         self.assertEqual(event_with_db_id._asdict(), self.test_info_with_db_id)
 
+    def test_constuct_event_error(self):
+        info_missing_name = self.test_info.copy()
+        del info_missing_name['name']
+        info_extra_field = self.test_info.copy()
+        info_extra_field['extra'] = 'hello'
+
+        self.assertRaises(ValueError, app.Event, info_missing_name)
+        self.assertRaises(ValueError, app.Event, info_extra_field)
+
     def test_events_equal(self):
         event = app.Event(self.test_info)
         event_same = app.Event(self.test_info)
