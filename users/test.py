@@ -74,6 +74,10 @@ class TestAuthorization(unittest.TestCase):
 class TestUserUpsertion(unittest.TestCase):
     """Test updating/inserting users into the db."""
 
+    def setUp(self):
+        """Seed mock DB for testing"""
+        self.mock_collection = mongomock.MongoClient().db.collection
+
     def test_insert_valid_user(self):
         """A valid user object should be upserted and retrieved correctly.
 
@@ -81,7 +85,6 @@ class TestUserUpsertion(unittest.TestCase):
         object added to the database and against the object found with
         the ObjectID returned from app.upsert_user_in_db.
         """
-        self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME
@@ -102,7 +105,6 @@ class TestUserUpsertion(unittest.TestCase):
         Right now, only the 'is_organizer' field of an inserted user should
         default to False.
         """
-        self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME
@@ -120,7 +122,6 @@ class TestUserUpsertion(unittest.TestCase):
         app.upsert_user_in_db raises an AttributeError, else it upserts the
         user and returns the new user object.
         """
-        self.mock_collection = mongomock.MongoClient().db.collection
         # missing name
         self.assertRaises(AttributeError, app.upsert_user_in_db,
                           {"user_id": USER_ID}, self.mock_collection)
@@ -142,7 +143,6 @@ class TestUserUpsertion(unittest.TestCase):
         app.upsert_user_in_db raises an AttributeError, else it upserts the
         user and returns the new user object.
         """
-        self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME,
@@ -157,7 +157,6 @@ class TestUserUpsertion(unittest.TestCase):
 
     def test_multiple_upserts_is_one_insert(self):
         """Upserting the same user multiple times should insert once."""
-        self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
             "name": USER_NAME
