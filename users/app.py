@@ -67,7 +67,15 @@ def upsert_user_in_db(user_object, users_collection):
         {"user_id": foobar,
          "name": Foo Bar,
          "is_organizer": False}
+
+    Returns:
+        True if user_object was formatted correctly and the upsert
+            was successful.
+        False otherwise.
     """
+    if "user_id" not in user_object or "name" not in user_object:
+        # malformatted user_object
+        return False
     # insert is_organizer field (default False)
     user_object["is_organizer"] = False
     # upsert user in db
@@ -78,6 +86,7 @@ def upsert_user_in_db(user_object, users_collection):
         }},
         upsert=True
     )
+    return True
 
 
 def find_authorization_in_db(username, users_collection):
