@@ -54,6 +54,32 @@ def add_update_user():
     return jsonify(user_object), (201 if added_new_user else 200)
 
 
+def upsert_user_in_db(user_object, users_collection):
+    """Updates or inserts the user object into user_collection.
+
+    Adds the is_oganizer field to user_object with default False
+
+    user_object should look like
+        {"user_id": foobar,
+         "name": Foo Bar}
+
+    Documents in users_collection should look like
+        {"user_id": foobar,
+         "name": Foo Bar,
+         "is_organizer": False}
+    """
+    # insert is_organizer field (default False)
+    user_object["is_organizer"] = False
+    # upsert user in db
+    users_collection.update_one(
+        {"user_id": user_object["user_id"]},
+        {"set": {
+            user_object
+        }},
+        upsert=True
+    )
+
+
 def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user.
 
