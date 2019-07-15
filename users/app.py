@@ -57,7 +57,7 @@ def add_update_user():
 def upsert_user_in_db(user_object, users_collection):
     """Updates or inserts the user object into users_collection.
 
-    Adds the is_oganizer field to user_object with default value False.
+    Sets/overwrites default values as needed.
 
     user_object should look like
         {"user_id": foobar,
