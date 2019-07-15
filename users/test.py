@@ -28,6 +28,10 @@ NON_AUTHORIZED_USER = "non-authorized-user"
 MALFORMATTED_IN_DB_USER = "this-user-has-no-'is_organizer'_db_field"
 MISSING_USER = "not-a-user-in-the-database"
 
+USER_ID = "valid-user-id"
+USER_NAME = "Valid User Name"
+ADDITIONAL_INFORMATION = "I'm not found in other documents"
+
 
 class TestAuthorization(unittest.TestCase):
     """Test /authorization endpoint of users service."""
@@ -65,11 +69,6 @@ class TestAuthorization(unittest.TestCase):
         """A user not in the db should not receive authorized privileges."""
         self.assertFalse(app.find_authorization_in_db(
             MALFORMATTED_IN_DB_USER, self.mock_collection))
-
-
-USER_ID = "valid-user-id"
-USER_NAME = "Valid User Name"
-ADDITIONAL_INFORMATION = "I'm not found in other documents"
 
 
 class TestUserUpsertion(unittest.TestCase):
