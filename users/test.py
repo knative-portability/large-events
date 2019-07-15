@@ -82,8 +82,7 @@ class TestUserUpsertion(unittest.TestCase):
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        self.assertTrue(upsert_user_in_db(
-            user_to_insert, self.mock_collection))
+        upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
@@ -95,8 +94,7 @@ class TestUserUpsertion(unittest.TestCase):
             "user_id": USER_ID,
             "name": USER_NAME
         }
-        self.assertTrue(upsert_user_in_db(
-            user_to_insert, self.mock_collection))
+        upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertFalse(found_user["is_organizer"])
 
@@ -111,14 +109,14 @@ class TestUserUpsertion(unittest.TestCase):
         """
         self.mock_collection = mongomock.MongoClient().db.collection
         # missing name
-        self.assertFalse(upsert_user_in_db(
-            {"user_id": USER_ID}, self.mock_collection))
+        self.assertRaises(AttributeError, upsert_user_in_db,
+                          {"user_id": USER_ID}, self.mock_collection)
         # missing user_id
-        self.assertFalse(upsert_user_in_db(
-            {"name": USER_NAME}, self.mock_collection))
+        self.assertRaises(AttributeError, upsert_user_in_db,
+                          {"name": USER_NAME}, self.mock_collection)
         # missing both
-        self.assertFalse(upsert_user_in_db(
-            {}, self.mock_collection))
+        self.assertRaises(AttributeError, upsert_user_in_db,
+                          {}, self.mock_collection)
         # no users should have been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 0)
 
@@ -137,8 +135,7 @@ class TestUserUpsertion(unittest.TestCase):
             "name": USER_NAME,
             "additional_info": ADDITIONAL_INFORMATION
         }
-        self.assertTrue(upsert_user_in_db(
-            user_to_insert, self.mock_collection))
+        upsert_user_in_db(user_to_insert, self.mock_collection)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
@@ -154,8 +151,7 @@ class TestUserUpsertion(unittest.TestCase):
         }
         # upsert many times
         for i in range(0, 42):
-            self.assertTrue(upsert_user_in_db(
-                user_to_insert, self.mock_collection))
+            upsert_user_in_db(user_to_insert, self.mock_collection)
         # only 1 user has been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 1)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
