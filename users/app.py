@@ -81,9 +81,7 @@ def upsert_user_in_db(user_object, users_collection):
     # upsert user in db
     users_collection.update_one(
         {"user_id": user_object["user_id"]},
-        {"set": {
-            user_object
-        }},
+        {"$set": user_object},
         upsert=True
     )
     return True
