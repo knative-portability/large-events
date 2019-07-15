@@ -84,11 +84,11 @@ def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user.
 
     Documents in the users collection should look like
-        {"username": "cmei4444",
-        "name": "Carolyn Mei",
+        {"user_id": foobar,
+         "name": Foo Bar,
         "is_organizer": True}
     """
-    first_user = users_collection.find_one({"username": username})
+    first_user = users_collection.find_one({"user_id": username})
     if first_user is None:  # user not found
         return False
     authorized = first_user.get("is_organizer")
