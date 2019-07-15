@@ -87,8 +87,12 @@ class TestUserUpsertion(unittest.TestCase):
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
 
-    def test_user_auth_default_false(self):
-        """The 'is_organizer' field of an inserted user should be False."""
+    def test_user_auth_defaults_are_set(self):
+        """upsert_user_in_db should set any default value before upsertion.
+
+        Right now, only the 'is_organizer' field of an inserted user should
+        default to False.
+        """
         self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
             "user_id": USER_ID,
@@ -104,8 +108,8 @@ class TestUserUpsertion(unittest.TestCase):
         Note: upsert_user_in_db should not insert the user if it is missing
         the 'user_id' or 'name' attributes, but should insert the user if
         the user has more attributes than those. If the user is malformatted,
-        upsert_user_in_db returns False, else it upserts the user and returns
-        True.
+        upsert_user_in_db raises an AttributeError, else it upserts the user
+        and returns the new user object.
         """
         self.mock_collection = mongomock.MongoClient().db.collection
         # missing name
@@ -126,8 +130,8 @@ class TestUserUpsertion(unittest.TestCase):
         Note: upsert_user_in_db should not insert the user if it is missing
         the 'user_id' or 'name' attributes, but should insert the user if
         the user has more attributes than those. If the user is malformatted,
-        upsert_user_in_db returns False, else it upserts the user and returns
-        True.
+        upsert_user_in_db raises an AttributeError, else it upserts the user
+        and returns the new user object.
         """
         self.mock_collection = mongomock.MongoClient().db.collection
         user_to_insert = {
