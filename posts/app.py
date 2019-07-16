@@ -64,7 +64,7 @@ def connect_to_mongodb():  # pragma: no cover
 
         def __getattribute__(self, _):
             raise DBNotConnectedError(
-                "Not able to find MONGODB_URI environmental variable")
+                "Not able to find MONGODB_URI environment variable")
 
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
