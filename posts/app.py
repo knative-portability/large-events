@@ -65,5 +65,5 @@ def connect_to_mongodb():  # pragma: no cover
 
 DB = connect_to_mongodb()  # None if can't connect
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
