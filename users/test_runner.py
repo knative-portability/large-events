@@ -24,10 +24,14 @@ import test_authorization
 import test_user_upsertion
 
 
-if __name__ == "__main__":
+def generate_suite():
+    """Generates and loads a test suite."""
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     suite.addTest(loader.loadTestsFromModule(test_authorization))
     suite.addTest(loader.loadTestsFromModule(test_user_upsertion))
+    return suite
 
-    unittest.TextTestRunner().run(suite)
+
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(generate_suite())
