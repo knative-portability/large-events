@@ -19,10 +19,10 @@
 # limitations under the License.
 
 import os
-
+import pymongo
 from flask import Flask, jsonify, request
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -53,5 +53,26 @@ def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
 
 
-if __name__ == "__main__":
+def connect_to_mongodb():  # pragma: no cover
+    """Connect to MongoDB instance using env vars."""
+
+    class DBNotConnectedError(EnvironmentError):
+        """Raised when not able to connect to the db."""
+
+    class Thrower(object):
+        """Used to raise an exception on failed db connect."""
+
+        def __getattribute__(self, _):
+            raise DBNotConnectedError(
+                "Not able to find MONGODB_URI environment variable")
+
+    mongodb_uri = os.environ.get("MONGODB_URI")
+    if mongodb_uri is None:
+        return Thrower()  # not able to find db config var
+    return pymongo.MongoClient(mongodb_uri).users_db
+
+
+DB = connect_to_mongodb()  # None if can't connect
+
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
