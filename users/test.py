@@ -83,31 +83,21 @@ class TestUserUpsertion(unittest.TestCase):
         """
         user_to_insert = {
             "user_id": USER_ID,
-            "name": USER_NAME
+            "name": USER_NAME,
+            "is_organizer": False
         }
         upserted_id = app.upsert_user_in_db(
             user_to_insert, self.mock_collection)
+        self.assertIsNotNone(upserted_id)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
         # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
+        self.assertEqual(
+            user_to_insert["is_organizer"], found_user["is_organizer"])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
-
-    def test_user_auth_defaults_are_set(self):
-        """app.upsert_user_in_db should set any default value before upsertion.
-
-        Right now, only the 'is_organizer' field of an inserted user should
-        default to False.
-        """
-        user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME
-        }
-        app.upsert_user_in_db(user_to_insert, self.mock_collection)
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
-        self.assertFalse(found_user["is_organizer"])
 
     def test_malformatted_user_not_inserted(self):
         """A malformatted user_object should not be inserted.
@@ -120,51 +110,54 @@ class TestUserUpsertion(unittest.TestCase):
         """
         # missing name
         with self.assertRaises(AttributeError):
-            app.upsert_user_in_db({"user_id": USER_ID}, self.mock_collection)
+            app.upsert_user_in_db(
+                {"user_id": USER_ID, "is_organizer": False},
+                self.mock_collection)
         # missing user_id
         with self.assertRaises(AttributeError):
-            app.upsert_user_in_db({"name": USER_NAME}, self.mock_collection)
-        # missing both
+            app.upsert_user_in_db(
+                {"name": USER_NAME, "is_organizer": False},
+                self.mock_collection)
+        # missing is_organizer
+        with self.assertRaises(AttributeError):
+            app.upsert_user_in_db(
+                {"user_id": USER_ID, "name": USER_NAME},
+                self.mock_collection)
+        # missing all
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db({}, self.mock_collection)
+        # too much info
+        with self.assertRaises(AttributeError):
+            app.upsert_user_in_db(
+                {"user_id": USER_ID, "name": USER_NAME, "is_organizer": False,
+                 "additional_info": ADDITIONAL_INFORMATION},
+                self.mock_collection)
         # no users should have been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 0)
-
-    def test_additional_info_still_inserted(self):
-        """A user_object with additional information should still be inserted.
-
-        Note: app.upsert_user_in_db should not insert the user if it is missing
-        the 'user_id' or 'name' attributes, but should insert the user if
-        the user has more attributes than those. If the user is malformatted,
-        app.upsert_user_in_db raises an AttributeError, else it upserts the
-        user and returns the new user object.
-        """
-        user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME,
-            "additional_info": ADDITIONAL_INFORMATION
-        }
-        app.upsert_user_in_db(user_to_insert, self.mock_collection)
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
-        self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
-        self.assertEqual(user_to_insert["name"], found_user["name"])
-        self.assertEqual(user_to_insert["additional_info"],
-                         found_user["additional_info"])
 
     def test_multiple_upserts_is_one_insert(self):
         """Upserting the same user multiple times should insert once."""
         user_to_insert = {
             "user_id": USER_ID,
-            "name": USER_NAME
+            "name": USER_NAME,
+            "is_organizer": False
         }
+        upserted_id = None
         # upsert many times
-        for i in range(0, 42):
-            app.upsert_user_in_db(user_to_insert, self.mock_collection)
+        for i in range(42):
+            upserted_id = app.upsert_user_in_db(
+                user_to_insert, self.mock_collection)
         # only 1 user has been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 1)
         found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
+        self.assertEqual(
+            user_to_insert["is_organizer"], found_user["is_organizer"])
+        # user returned from app.upsert_user_in_db matches found user exactly
+        returned_user = self.mock_collection.find_one(upserted_id)
+        self.assertEqual(returned_user, found_user)
 
 
 if __name__ == '__main__':

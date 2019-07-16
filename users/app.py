@@ -1,4 +1,6 @@
 """Main flask app for users service
+
+Features include
     - adding/updating users in the users db
     - getting the authorization level of a user
 """
@@ -54,11 +56,9 @@ def add_update_user():
 def upsert_user_in_db(user_object, users_collection):
     """Updates or inserts the user object into users_collection.
 
-    Sets/overwrites default values as needed.
-
     Args:
-        user_object (dict): must contain a user_id and name, and may contain
-            other attributes. Default values will be set as needed.
+        user_object (dict): must contain a user_id, name, and is_organizer,
+            and must not contain other attributes.
         users_collection (pymongo.collection): the MongoDB collection to use.
 
     Returns:
@@ -68,10 +68,9 @@ def upsert_user_in_db(user_object, users_collection):
     Raises:
         AttributeError: if user_object is malformatted.
     """
-    if user_object.keys() < {"user_id", "name"}:
-        raise AttributeError("missing user_id or name")
-    # insert is_organizer field (default False)
-    user_object["is_organizer"] = False
+    required_attributes = {"user_id", "name", "is_organizer"}
+    if user_object.keys() != required_attributes:
+        raise AttributeError("malformatted user object")
     # upsert user in db
     return users_collection.update_one(
         {"user_id": user_object["user_id"]},
@@ -80,13 +79,7 @@ def upsert_user_in_db(user_object, users_collection):
 
 
 def find_authorization_in_db(username, users_collection):
-    """Queries the db to find authorization of the given user.
-
-    Documents in the users collection should look like
-        {"user_id": foobar,
-         "name": Foo Bar,
-        "is_organizer": True}
-    """
+    """Queries the db to find authorization of the given user."""
     first_user = users_collection.find_one({"user_id": username})
     if first_user is None:  # user not found
         return False
