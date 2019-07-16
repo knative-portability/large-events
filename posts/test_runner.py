@@ -1,5 +1,7 @@
-"""Unit tests for posts service.
-"""
+"""Unit test runner for users service.
+
+Test runner that runs several different test modules.
+To see the tests, look at the sibling test_*.py files."""
 
 # Authors: mukobi
 # Copyright 2019 The Knative Authors
@@ -17,14 +19,17 @@
 # limitations under the License.
 
 import unittest
-import app
+
+import test_posts
 
 
-class TestPosts(unittest.TestCase):
-    """Test /authorization endpoint of users service."""
-    def test_basic(self):
-        pass
+def generate_suite():
+    """Generates and loads a test suite."""
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTest(loader.loadTestsFromModule(test_posts))
+    return suite
 
 
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(generate_suite())
