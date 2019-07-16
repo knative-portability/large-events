@@ -101,7 +101,7 @@ class TestUserUpsertion(unittest.TestCase):
         }
         upserted_id = None
         # upsert many times
-        for i in range(42):
+        for _ in range(42):
             upserted_id = app.upsert_user_in_db(
                 user_to_insert, self.mock_collection)
         # only 1 user has been inserted
