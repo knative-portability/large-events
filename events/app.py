@@ -31,7 +31,7 @@ def add_event():
     info = request.form['info']
     # TODO(cmei4444): Verify that user has event editing access
     current_time = datetime.datetime.now()
-    build_event_info(info, current_time)
+    info = build_event_info(info, current_time)
     try:
         event = Event(info)
     except ValueError:      # missing or extra event attributes
@@ -53,8 +53,7 @@ def add_event():
 
 def build_event_info(info, time):
     """Adds created_at time to event info dict."""
-    info['created_at'] = time
-    return info
+    return dict(created_at=time, **info)
 
 
 @app.route('/v1/edit/<event_id>', methods=['PUT'])
@@ -84,21 +83,13 @@ def get_one_event(event_id):
 def equal_times(time_1, time_2):
     """Determines if two times are equal.
 
-    Times can be represented as strings (mainly for testing) or as
-    datetime.datetime objects. Datetime objects are rounded to the nearest
-    millisecond before comparison.
-
+    Datetime objects are rounded to the nearest millisecond before comparison.
     Used for comparing Event objects, since MongoDB truncates times to the
     nearest millisecond.
     """
-    if isinstance(time_1, type(time_2)):
-        if isinstance(time_1, datetime.datetime):
-            time_1 = time_1.replace(
-                microsecond=(time_1.microsecond // 1000) * 1000)
-            time_2 = time_2.replace(
-                microsecond=(time_2.microsecond // 1000) * 1000)
-        return time_1 == time_2
-    return False
+    time_1 = time_1.replace(microsecond=(time_1.microsecond // 1000) * 1000)
+    time_2 = time_2.replace(microsecond=(time_2.microsecond // 1000) * 1000)
+    return time_1 == time_2
 
 
 EVENT_ATTRIBUTES = [
@@ -135,19 +126,24 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         if not isinstance(other, Event):
             return False
         for att in EVENT_ATTRIBUTES:
-            if att == 'event_time' or att == 'created_at':
+            if att == 'event_id':
+                continue
+            if att in ('event_time', 'created_at'):
                 if not equal_times(getattr(self, att), getattr(other, att)):
-                    print('times not eq')
                     return False
-            elif att != 'event_id' and (
-                    getattr(self, att) != getattr(other, att)):
+            elif getattr(self, att) != getattr(other, att):
                 return False
         return True
 
     def add_to_db(self, events_collection):
         """Adds the event to the specified collection."""
         # TODO(cmei4444): move out of class
-        events_collection.insert_one(self._asdict())
+        events_collection.insert_one(self.dict)
+
+    def get_dict(self):
+        return self._asdict()
+
+    dict = property(get_dict)
 
 
 if __name__ == "__main__":

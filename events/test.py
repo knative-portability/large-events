@@ -4,14 +4,16 @@ import app
 import mongomock
 
 
+example_time = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+
+
 class TestEventsDB(unittest.TestCase):
     def setUp(self):
-        self.example_time = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
         self.event_info = {'name': 'test_event',
                            'description': 'testing!',
                            'author': 'admin',
-                           'event_time': '7-12-2019',
-                           'created_at': self.example_time}
+                           'event_time': example_time,
+                           'created_at': example_time}
         self.test_event = app.Event(self.event_info)
         # Create mock DB for testing
         self.client = mongomock.MongoClient()
@@ -26,10 +28,9 @@ class TestEventsDB(unittest.TestCase):
         test_info = {'name': 'test_event',
                      'description': 'testing!',
                      'author': 'admin',
-                     'event_time': '7-12-2019', }
-        time = datetime.datetime(2017, 8, 28, 10, 33, 1, 100000)
-        info = app.build_event_info(test_info, time)
-        self.assertEqual(info['created_at'], time)
+                     'event_time': example_time, }
+        info = app.build_event_info(test_info, example_time)
+        self.assertEqual(info['created_at'], example_time)
 
     def tearDown(self):
         self.client.drop_database("eventsDB")
@@ -40,21 +41,21 @@ class TestEventsClass(unittest.TestCase):
         self.test_info = {'name': 'test_event',
                           'description': 'testing!',
                           'author': 'admin',
-                          'event_time': '7-12-2019',
-                          'created_at': '7-10-2019'}
+                          'event_time': example_time,
+                          'created_at': example_time}
         self.test_info_with_id = dict(event_id=1, **self.test_info)
         self.test_info_with_db_id = dict(event_id=1, _id=2, **self.test_info)
 
     def test_construct_event(self):
         event = app.Event(self.test_info)
         self.test_info['event_id'] = None
-        self.assertEqual(event._asdict(), self.test_info)
+        self.assertEqual(event.dict, self.test_info)
 
         event_with_id = app.Event(self.test_info_with_id)
-        self.assertEqual(event_with_id._asdict(), self.test_info_with_id)
+        self.assertEqual(event_with_id.dict, self.test_info_with_id)
 
         event_with_db_id = app.Event(self.test_info_with_db_id)
-        self.assertEqual(event_with_db_id._asdict(), self.test_info_with_db_id)
+        self.assertEqual(event_with_db_id.dict, self.test_info_with_db_id)
 
     def test_constuct_event_error(self):
         info_missing_name = self.test_info.copy()
@@ -111,15 +112,6 @@ class TestEventsClass(unittest.TestCase):
         event_timestr = app.Event(self.test_info)
         event_timestr_diff = app.Event(test_info_diff_timestr)
         self.assertNotEqual(event_timestr, event_timestr_diff)
-
-    def test_events_unequal_timetypes(self):
-        test_info_time = self.test_info.copy()
-        test_info_time['created_at'] = datetime.datetime(
-            2017, 8, 28, 10, 33, 1, 100000)
-
-        event_datetime = app.Event(test_info_time)
-        event_timestr = app.Event(self.test_info)
-        self.assertNotEqual(event_datetime, event_timestr)
 
 
 if __name__ == '__main__':
