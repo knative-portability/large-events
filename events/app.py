@@ -1,9 +1,8 @@
 import os
-import logging
 import datetime
+from collections import namedtuple
 import pymongo
 
-from collections import namedtuple
 from flask import Flask, request, Response
 
 app = Flask(__name__)
