@@ -23,6 +23,8 @@ env:
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=users
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+  - TEST_DIR=events
+    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=posts
 script:
   # run coverage on *test*.py files testing the app module 
