@@ -1,10 +1,10 @@
 import unittest
 import datetime
-import app
 import mongomock
+import app
 
 
-example_time = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
 
 class TestEventsDB(unittest.TestCase):
@@ -12,9 +12,9 @@ class TestEventsDB(unittest.TestCase):
         self.event_info = {'name': 'test_event',
                            'description': 'testing!',
                            'author': 'admin',
-                           'event_time': example_time,
-                           'created_at': example_time}
         self.test_event = app.Event(self.event_info)
+                           'event_time': EXAMPLE_TIME,
+                           'created_at': EXAMPLE_TIME}
         # Create mock DB for testing
         self.client = mongomock.MongoClient()
         self.test_coll = self.client.eventsDB.all_events
@@ -28,9 +28,9 @@ class TestEventsDB(unittest.TestCase):
         test_info = {'name': 'test_event',
                      'description': 'testing!',
                      'author': 'admin',
-                     'event_time': example_time, }
-        info = app.build_event_info(test_info, example_time)
-        self.assertEqual(info['created_at'], example_time)
+                     'event_time': EXAMPLE_TIME, }
+        info = app.build_event_info(test_info, EXAMPLE_TIME)
+        self.assertEqual(info['created_at'], EXAMPLE_TIME)
 
     def tearDown(self):
         self.client.drop_database("eventsDB")
@@ -41,8 +41,8 @@ class TestEventsClass(unittest.TestCase):
         self.test_info = {'name': 'test_event',
                           'description': 'testing!',
                           'author': 'admin',
-                          'event_time': example_time,
-                          'created_at': example_time}
+                          'event_time': EXAMPLE_TIME,
+                          'created_at': EXAMPLE_TIME}
         self.test_info_with_id = dict(event_id=1, **self.test_info)
         self.test_info_with_db_id = dict(event_id=1, _id=2, **self.test_info)
 
