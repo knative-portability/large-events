@@ -21,20 +21,11 @@ To see the tests, look at the sibling test_*.py files."""
 import unittest
 import sys
 
-import test_serve
-
-
-def generate_suite():
-    """Generates and loads a test suite."""
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-    suite.addTest(loader.loadTestsFromModule(test_serve))
-    return suite
-
 
 def run_test_suite():
-    """Runs the test suite and exits with correct status code."""
-    result = unittest.TextTestRunner().run(generate_suite())
+    """Generate and run test suite and exit with correct status code."""
+    suite = unittest.TestLoader().discover(".")
+    result = unittest.TextTestRunner().run(suite)
     sys.exit(not result.wasSuccessful())
 
 
