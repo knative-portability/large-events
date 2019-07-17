@@ -32,9 +32,6 @@ class TestEventsDB(unittest.TestCase):
         info = app.build_event_info(test_info, EXAMPLE_TIME)
         self.assertEqual(info['created_at'], EXAMPLE_TIME)
 
-    def tearDown(self):
-        self.client.drop_database("eventsDB")
-
 
 class TestEventsClass(unittest.TestCase):
     def setUp(self):
