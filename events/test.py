@@ -106,13 +106,6 @@ class TestEventsClass(unittest.TestCase):
         event_time_as_str = app
         self.assertNotEqual(event, event_diff)
 
-        test_info_diff_timestr = self.test_info.copy()
-        test_info_diff_timestr['created_at'] = "different time"
-
-        event_timestr = app.Event(self.test_info)
-        event_timestr_diff = app.Event(test_info_diff_timestr)
-        self.assertNotEqual(event_timestr, event_timestr_diff)
-
 
 if __name__ == '__main__':
     unittest.main()
