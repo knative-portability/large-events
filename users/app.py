@@ -79,6 +79,24 @@ def upsert_user_in_db(user_object, users_collection):
 
 
 def update_user_authorization_in_db(user_id, is_organizer, users_collection):
+    """Updates the authorization of the given user in the database.
+
+    Assumes caller has authorization to make this change in the database.
+    I.e. caller route should first make sure request maker was authorized
+    to update the given user.
+
+    Args:
+        user_id (str): The id of the user to change.
+        is_organizer (bool): The authorization value to set.
+
+    Returns:
+        ObjectID: The ID of the updated object from the db. This can be used
+            to find the object with `collection.find_one(object_id)`.
+
+    Raises:
+        IndexError: Bad `user_id`/user not found in db.
+        TypeError: `is_organizer` is not a bool.
+    """
     pass
 
 
