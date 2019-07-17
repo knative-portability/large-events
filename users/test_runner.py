@@ -19,6 +19,7 @@ To see the tests, look at the sibling test_*.py files."""
 # limitations under the License.
 
 import unittest
+import sys
 
 import test_authorization
 import test_user_upsertion
@@ -33,5 +34,11 @@ def generate_suite():
     return suite
 
 
+def run_test_suite():
+    """Runs the test suite and exits with correct status code."""
+    result = unittest.TextTestRunner().run(generate_suite())
+    sys.exit(not result.wasSuccessful())
+
+
 if __name__ == "__main__":
-    unittest.TextTestRunner().run(generate_suite())
+    run_test_suite()
