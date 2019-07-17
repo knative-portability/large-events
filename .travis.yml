@@ -28,6 +28,6 @@ env:
   - TEST_DIR=posts
 script:
   # run coverage on *test*.py files testing the app module 
-  - cd $TEST_DIR && pip install -r requirements.txt && coverage run --source app *test*.py
+  - cd $TEST_DIR && pip install -r requirements.txt && coverage run --source app test_runner.py
 after_success:
     coveralls
