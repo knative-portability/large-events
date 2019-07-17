@@ -40,7 +40,7 @@ def add_event():
     current_time = datetime.datetime.now()
     info = build_event_info(info, current_time)
     try:
-        event = Event(info)
+        event = Event(**info)
     except ValueError:      # missing or extra event attributes
         return Response(
             status=400,
@@ -60,7 +60,7 @@ def add_event():
 
 def build_event_info(info, time):
     """Adds created_at time to event info dict."""
-    return dict(created_at=time, **info)
+    return {**info, 'created_at': time}
 
 
 @app.route('/v1/edit/<event_id>', methods=['PUT'])
@@ -111,7 +111,7 @@ EVENT_ATTRIBUTES = [
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
     # TODO(cmei4444): move Event class to a separate file for better
     # code organization
-    def __new__(cls, info):
+    def __new__(cls, **info):
         """Constructs an event object represented by a EventTuple namedtuple.
 
         Raises a ValueError if any attributes are missing or if extra
@@ -123,8 +123,7 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
             info['event_id'] = info['_id']
             del info['_id']
         try:
-            self = super(Event, cls).__new__(cls, **info)
-            return self
+            return super(Event, cls).__new__(cls, **info)
         except TypeError:
             raise ValueError("Event info was formatted incorrectly.")
 
