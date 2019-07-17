@@ -1,4 +1,4 @@
-"""Unit test runner for users service.
+"""Unit test runner for posts service.
 
 Test runner that runs several different test modules.
 To see the tests, look at the sibling test_*.py files."""
