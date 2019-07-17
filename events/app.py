@@ -13,11 +13,19 @@ def connect_to_mongodb():
 
     Returns events collection if connection is successful, and None otherwise.
     """
+    class DBNotConnectedError(EnvironmentError):
+        """Raised when not able to connect to the db."""
+
+    class Thrower(object):
+        """Used to raise an exception on failed db connect."""
+
+        def __getattribute__(self, _):
+            raise DBNotConnectedError(
+                "Not able to find MONGODB_URI environmental variable")
+
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
-        print("Alert: not able to find MONGODB_URI environmental variable, "
-              "no connection to MongoDB instance")
-        return None  # not able to find db config var
+        return Thrower()  # DBNotConnectedErrorot able to find db config var
     return pymongo.MongoClient(mongodb_uri).eventsDB.all_events
 
 
@@ -38,16 +46,16 @@ def add_event():
             status=400,
             response="Event info was entered incorrectly.",
         )
-    if EVENTS_COLL is not None:
+    try:
         event.add_to_db(EVENTS_COLL)
-    else:
+        return Response(
+            status=201,
+        )
+    except DBNotConnectedError as e:
         return Response(
             status=500,
             response="Database was undefined.",
         )
-    return Response(
-        status=201,
-    )
 
 
 def build_event_info(info, time):
