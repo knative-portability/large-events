@@ -94,10 +94,18 @@ def update_user_authorization_in_db(user_id, is_organizer, users_collection):
             to find the object with `collection.find_one(object_id)`.
 
     Raises:
-        IndexError: Bad `user_id`/user not found in db.
+        KeyError: Bad `user_id`/user not found in db.
         TypeError: `is_organizer` is not a bool.
     """
-    pass
+    if not isinstance(is_organizer, bool):
+        raise TypeError("Trying to set authorization to a non-bool type.")
+    result = users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {"is_organizer": is_organizer}},
+        upsert=False)
+    if result.matched_count == 0:
+        raise KeyError(f"User with ID '{user_id}' not found.'")
+    return result.upserted_id
 
 
 def find_authorization_in_db(username, users_collection):
