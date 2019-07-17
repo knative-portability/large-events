@@ -15,7 +15,8 @@
 language: python
 python:
   - "3.6"
-# command to run tests
+install:
+  - pip install coverage coveralls
 env:
   # Travis build matrix will test all permutations of the build
   - TEST_DIR=pageserve
@@ -24,5 +25,9 @@ env:
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=events
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+  - TEST_DIR=posts
 script:
-  - cd $TEST_DIR && pip install -r requirements.txt && python -m unittest *test.py
+  # run coverage on *test*.py files testing the app module 
+  - cd $TEST_DIR && pip install -r requirements.txt && coverage run --source app *test*.py
+after_success:
+    coveralls

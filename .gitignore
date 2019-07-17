@@ -7,3 +7,6 @@ __pycache__
 
 # development environments
 .vscode
+
+# testing
+.coverage
