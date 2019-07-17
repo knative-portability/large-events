@@ -78,6 +78,10 @@ def upsert_user_in_db(user_object, users_collection):
         upsert=True).upserted_id
 
 
+def update_user_authorization_in_db(user_id, is_organizer, users_collection):
+    pass
+
+
 def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user."""
     first_user = users_collection.find_one({"user_id": username})
