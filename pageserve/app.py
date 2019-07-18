@@ -23,13 +23,14 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/v1/')
 def index():
     user = get_user()
     is_auth = has_edit_access(get_auth_json(user))
     posts = get_posts()
     return render_template(
         'index.html',
+        posts=posts,
         auth=is_auth,
     )
 
@@ -97,11 +98,15 @@ def get_auth_json(user):
     url = os.environ.get("USER_ENDPOINT")
     r = requests.post(url, data={'user_id': user})
     response = r.json()
-    is_auth = response['edit_access']
-    return is_auth
+    return response
+
+
+def has_edit_access(user_data):
+    return user_data['edit_access']
 
 
 def get_user():
+    # TODO: get user info using OAuth
     return "Voldemort"
 
 
