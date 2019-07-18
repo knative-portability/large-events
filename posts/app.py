@@ -53,6 +53,10 @@ def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
 
 
+def upload_new_post_to_db(post, collection):
+    """Uploads a new post to the db collection."""
+
+
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
