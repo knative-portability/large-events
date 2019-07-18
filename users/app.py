@@ -103,10 +103,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri)
+    return pymongo.MongoClient(mongodb_uri).users_db
 
 
-DB = connect_to_mongodb().users_db  # None if can't connect
+DB = connect_to_mongodb()  # None if can't connect
 
 
 if __name__ == "__main__":  # pragma: no cover

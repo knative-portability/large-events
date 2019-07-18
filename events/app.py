@@ -24,10 +24,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri)
+    return pymongo.MongoClient(mongodb_uri).eventsDB.all_events
 
 
-EVENTS_COLL = connect_to_mongodb().eventsDB.all_events  # None if can't connect
+EVENTS_COLL = connect_to_mongodb()  # None if can't connect
 
 
 @app.route('/v1/add', methods=['POST'])
