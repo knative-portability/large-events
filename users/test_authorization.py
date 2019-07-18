@@ -55,12 +55,12 @@ class TestAuthorization(unittest.TestCase):
     def test_malformatted_user_none_authorization(self):
         """An incorrect db schema should not receive authorized privileges."""
         self.assertFalse(app.find_authorization_in_db(
-            MISSING_USER, self.mock_collection))
+            MALFORMATTED_IN_DB_USER, self.mock_collection))
 
     def test_unkown_user_not_authorized(self):
         """A user not in the db should not receive authorized privileges."""
         self.assertFalse(app.find_authorization_in_db(
-            MALFORMATTED_IN_DB_USER, self.mock_collection))
+            MISSING_USER, self.mock_collection))
 
 
 if __name__ == '__main__':
