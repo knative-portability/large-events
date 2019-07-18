@@ -19,11 +19,6 @@ class TestEventsDB(unittest.TestCase):
         self.client = mongomock.MongoClient()
         self.test_coll = self.client.eventsDB.all_events
 
-    def test_add(self):
-        self.test_event.add_to_db(self.test_coll)
-        queried_event = self.test_coll.find_one(self.event_info)
-        self.assertEqual(app.Event(**queried_event), self.test_event)
-
     def test_build_info(self):
         test_info = {'name': 'test_event',
                      'description': 'testing!',
