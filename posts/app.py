@@ -59,7 +59,7 @@ def connect_to_mongodb():  # pragma: no cover
     class DBNotConnectedError(EnvironmentError):
         """Raised when not able to connect to the db."""
 
-    class Thrower(object):
+    class Thrower():  # pylint: disable=too-few-public-methods
         """Used to raise an exception on failed db connect."""
 
         def __getattribute__(self, _):
@@ -69,10 +69,11 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).users_db
+    return pymongo.MongoClient(mongodb_uri)
 
 
-DB = connect_to_mongodb()  # None if can't connect
+DB = connect_to_mongodb().users_db  # None if can't connect
+
 
 if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
