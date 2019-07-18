@@ -89,11 +89,20 @@ def find_authorization_in_db(username, users_collection):
 
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
+
+    class DBNotConnectedError(EnvironmentError):
+        """Raised when not able to connect to the db."""
+
+    class Thrower():  # pylint: disable=too-few-public-methods
+        """Used to raise an exception on failed db connect."""
+
+        def __getattribute__(self, _):
+            raise DBNotConnectedError(
+                "Not able to find MONGODB_URI environment variable")
+
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
-        print("Alert: not able to find MONGODB_URI environmental variable, "
-              "no connection to MongoDB instance")
-        return None  # not able to find db config var
+        return Thrower()  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).users_db
 
 
