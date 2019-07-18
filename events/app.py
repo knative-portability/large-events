@@ -47,7 +47,7 @@ def add_event():
             response="Event info was entered incorrectly.",
         )
     try:
-        add_to_db(event.dict, EVENTS_COLL)
+        EVENTS_COLL.insert_one(event.dict)
         return Response(
             status=201,
         )
@@ -56,11 +56,6 @@ def add_event():
             status=500,
             response="Database was undefined.",
         )
-
-
-def add_to_db(info, events_collection):
-    """Adds the given info to the specified collection."""
-    events_collection.insert_one(info)
 
 
 def build_event_info(info, time):
