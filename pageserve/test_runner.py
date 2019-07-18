@@ -1,5 +1,7 @@
-"""Unit tests for posts service.
-"""
+"""Unit test runner for pageserve service.
+
+Test runner that runs several different test modules.
+To see the tests, look at the sibling test_*.py files."""
 
 # Authors: mukobi
 # Copyright 2019 The Knative Authors
@@ -17,14 +19,15 @@
 # limitations under the License.
 
 import unittest
-import app
+import sys
 
 
-class TestPosts(unittest.TestCase):
-    """Test /authorization endpoint of users service."""
-    def test_basic(self):
-        pass
+def run_test_suite():
+    """Generate and run test suite and exit with correct status code."""
+    suite = unittest.TestLoader().discover(".")
+    result = unittest.TextTestRunner().run(suite)
+    sys.exit(not result.wasSuccessful())
 
 
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    run_test_suite()
