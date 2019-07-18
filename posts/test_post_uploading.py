@@ -1,4 +1,4 @@
-"""Unit tests for posts service.
+"""Unit tests for posts uploading.
 """
 
 # Authors: mukobi
@@ -20,8 +20,8 @@ import unittest
 import app
 
 
-class TestPosts(unittest.TestCase):
-    """Test /authorization endpoint of users service."""
+class TestPostUploading(unittest.TestCase):
+    """Test post uploading of users service."""
 
     def test_basic(self):
         pass
