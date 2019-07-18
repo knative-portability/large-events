@@ -2,7 +2,7 @@ import os
 import datetime
 import pymongo
 
-from flask import Flask, request, Response
+from flask import Flask, request, Response, json
 from eventclass import Event
 
 app = Flask(__name__)
@@ -77,7 +77,28 @@ def edit_event(event_id):
 @app.route('/v1/', methods=['GET'])
 def get_all_events():
     """Return a list of all events currently in the DB."""
-    pass
+    try:
+        events = events_collection.find()
+        events_dict = build_events_dict(events)
+        return Response(
+            events_dict,
+            status=200,
+            mimetype='application/json'
+        )
+    except DBNotConnectedError as e:
+        return Response(
+            status=500,
+            response="Database was undefined.",
+        )
+
+
+def build_events_dict(events):
+    """Builds a dict in the correct format for returning through a GET request.
+
+    Takes in a mongoDB cursor from querying the DB.
+    """
+    num_events = len(events)
+    return {'events': list(events), 'num_events': num_events}
 
 
 @app.route('/v1/search', methods=['GET'])
