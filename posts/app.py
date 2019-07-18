@@ -56,6 +56,9 @@ def get_all_posts_for_event(event_id):
 def upload_new_post_to_db(post, collection):
     """Uploads a new post to the db collection.
 
+    Assumes the event matching the post's `event_id` and the user matching
+        the post's `author_id` both exist. I.e. Caller should check this.
+
     Args:
         post (dict): Post to add. Requires exactly the following attributes:
             event_id (str): id of the event to post to
