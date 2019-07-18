@@ -1,5 +1,4 @@
-"""Unit tests for posts uploading.
-"""
+"""Unit tests for posts uploading."""
 
 # Authors: mukobi
 # Copyright 2019 The Knative Authors
@@ -17,14 +16,110 @@
 # limitations under the License.
 
 import unittest
+import mongomock
 import app
+
+VALID_POST_FULL = {
+    "event_id": "abc123",
+    "author_id": "kurt_vonnegut",
+    "text": "This is a very valid post.",
+    "files": [
+        "Pretend I am a long base-64 encoded file",
+        "Another pretend encoded file"
+    ]}
+VALID_POST_TEXT_NO_FILES = {
+    "event_id": "abc123",
+    "author_id": "ray_bradbury",
+    "text": "This post has no files but is still valid.",
+    "files": []}
+VALID_POST_FILES_NO_TEXT = {
+    "event_id": "abc123",
+    "author_id": "douglas_adams",
+    "text": "",
+    "files": [
+        "This post has no text but is valid because it has at least one file."
+    ]}
+INVALID_POST_NO_TEXT_NOR_FILES = {
+    "event_id": "abc123",
+    "author_id": "jrr_tolkien",
+    "text": "",
+    "files": []}
+INVALID_POST_NOT_ENOUGH_ATTRS = {
+    "where_did_all_the_attributes_go?": "I don't know"}
+INVALD_POST_TOO_MANY_ATTRS = {
+    "event_id": "abc123",
+    "author_id": "grr_martin",
+    "text": "I have a valid description but too many fields.",
+    "files": [],
+    "woah_where_did_I_come_from?": "malicious data"}
 
 
 class TestPostUploading(unittest.TestCase):
     """Test post uploading of users service."""
+    @staticmethod
+    def posts_are_equal(first, second):
+        """Returns whether the 2 posts have the same data.
 
-    def test_basic(self):
-        pass
+        Only looks at valid post attributes
+        (event_id, author_id, text, files).
+        """
+        return (first["event_id"] == second["event_id"] and
+                first["author_id"] == second["author_id"] and
+                first["text"] == second["text"] and
+                first["files"] == second["files"])
+
+    def setUp(self):
+        """Set up mock DB for testing"""
+        self.mock_collection = mongomock.MongoClient().db.collection
+
+    def test_full_upload(self):
+        """Can upload a full post object with both text and files."""
+        app.upload_new_post_to_db(VALID_POST_FULL, self.mock_collection)
+        post_in_db = self.mock_collection.find_one({})
+        self.assertIsNotNone(post_in_db)
+        self.assertTrue(self.posts_are_equal(VALID_POST_FULL, post_in_db))
+
+    def test_partial_upload(self):
+        """Can upload a post with one of text or files."""
+        # text but no files
+        app.upload_new_post_to_db(
+            VALID_POST_TEXT_NO_FILES, self.mock_collection)
+        post_in_db = self.mock_collection.find_one({})
+        self.assertIsNotNone(post_in_db)
+        self.assertTrue(self.posts_are_equal(
+            VALID_POST_TEXT_NO_FILES, post_in_db))
+        # files but no text
+        self.mock_collection.delete_many({})  # clear db
+        app.upload_new_post_to_db(
+            VALID_POST_FILES_NO_TEXT, self.mock_collection)
+        post_in_db = self.mock_collection.find_one({})
+        self.assertIsNotNone(post_in_db)
+        self.assertTrue(self.posts_are_equal(
+            VALID_POST_FILES_NO_TEXT, post_in_db))
+
+    def test_empty_upload(self):
+        """Cannot upload a post without text and files."""
+        with self.assertRaises(ValueError):
+            app.upload_new_post_to_db(
+                INVALID_POST_NO_TEXT_NOR_FILES, self.mock_collection)
+        # no posts were uploaded
+        self.assertIsNone(self.mock_collection.find_one({}))
+
+    def test_not_enough_attrs_upload(self):
+        """Cannot upload a post missing required post attributes."""
+        with self.assertRaises(ValueError):
+            app.upload_new_post_to_db(
+                INVALID_POST_NOT_ENOUGH_ATTRS, self.mock_collection)
+        # no posts were uploaded
+        self.assertIsNone(self.mock_collection.find_one({}))
+
+    def test_too_many_attrs_upload(self):
+        """Cannot upload a post with too many attributes."""
+        with self.assertRaises(ValueError):
+            app.upload_new_post_to_db(
+                INVALD_POST_TOO_MANY_ATTRS, self.mock_collection)
+        # no posts were uploaded
+        self.assertIsNone(self.mock_collection.find_one({}))
 
 
 if __name__ == '__main__':
