@@ -22,6 +22,12 @@ def equal_times(time_1, time_2):
 
 
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
+    """Class for representing events.
+
+    Used to ensure event info is in the correct format when constructing or
+    manipulating event info from user input.
+    """
+
     def __new__(cls, **info):
         """Constructs an event object represented by a EventTuple namedtuple.
 
@@ -53,6 +59,7 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         return True
 
     def get_dict(self):
+        """Returns event info in dict form."""
         return self._asdict()
 
     dict = property(get_dict)
