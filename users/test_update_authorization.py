@@ -96,17 +96,6 @@ class TestUpdateAuthorization(unittest.TestCase):
         self.assertIsNone(self.mock_collection.find_one(
             {"user_id": MISSING_USER}))
 
-    def test_fail_on_bad_arg_type(self):
-        """Should raise error and do nothing on bad arg type."""
-        self.assertTrue(self.mock_collection.find_one(
-            {"user_id": AUTHORIZED_USER})["is_organizer"])
-        with self.assertRaises(TypeError):
-            app.update_user_authorization_in_db(
-                AUTHORIZED_USER, "I am not a bool", self.mock_collection)
-        # type/value not changed
-        self.assertTrue(self.mock_collection.find_one(
-            {"user_id": AUTHORIZED_USER})["is_organizer"])
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -78,7 +78,8 @@ def upsert_user_in_db(user_object, users_collection):
         upsert=True).upserted_id
 
 
-def update_user_authorization_in_db(user_id, is_organizer, users_collection):
+def update_user_authorization_in_db(
+        user_id: str, is_organizer: bool, users_collection):
     """Updates the authorization of the given user in the database.
 
     Assumes caller has authorization to make this change in the database.
@@ -95,13 +96,10 @@ def update_user_authorization_in_db(user_id, is_organizer, users_collection):
 
     Raises:
         KeyError: Bad `user_id`/user not found in db.
-        TypeError: `is_organizer` is not a bool.
     """
-    if not isinstance(is_organizer, bool):
-        raise TypeError("Trying to set authorization to a non-bool type.")
     result = users_collection.update_one(
         {"user_id": user_id},
-        {"$set": {"is_organizer": is_organizer}},
+        {"$set": {"is_organizer": bool(is_organizer)}},
         upsert=False)
     if result.matched_count == 0:
         raise KeyError(f"User with ID '{user_id}' not found.'")
