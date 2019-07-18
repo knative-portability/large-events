@@ -107,7 +107,7 @@ class TestPostUploading(unittest.TestCase):
 
     def test_not_enough_attrs_upload(self):
         """Cannot upload a post missing required post attributes."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             app.upload_new_post_to_db(
                 INVALID_POST_NOT_ENOUGH_ATTRS, self.mock_collection)
         # no posts were uploaded
@@ -115,7 +115,7 @@ class TestPostUploading(unittest.TestCase):
 
     def test_too_many_attrs_upload(self):
         """Cannot upload a post with too many attributes."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             app.upload_new_post_to_db(
                 INVALD_POST_TOO_MANY_ATTRS, self.mock_collection)
         # no posts were uploaded

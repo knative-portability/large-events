@@ -54,7 +54,31 @@ def get_all_posts_for_event(event_id):
 
 
 def upload_new_post_to_db(post, collection):
-    """Uploads a new post to the db collection."""
+    """Uploads a new post to the db collection.
+
+    Args:
+        post (dict): Post to add. Requires exactly the following attributes:
+            event_id (str): id of the event to post to
+            author_id (str): user id of the user making the post
+            text (str): text description
+            files (list): list of string encoded files
+        collection: pymongo collection to insert into.
+
+    Returns:
+        ObjectID: DB ID of the post that was uploaded.
+
+    Raises:
+        ValueError: Has no text body (i.e. empty string) nor any files
+            to upload.
+        AttributeError: `post` has not enough or too many attributes.
+    """
+    required_attributes = {"event_id", "author_id", "text", "files"}
+    if post.keys() != required_attributes:
+        raise AttributeError(f"Arg post must have exactly the "
+                             "attributes {required_attributes}")
+    if str(post["text"]) == "" and list(post["files"]) == []:
+        raise ValueError("One of text or files must not be empty.")
+    return collection.insert_one(post).inserted_id
 
 
 def connect_to_mongodb():  # pragma: no cover
