@@ -1,0 +1,26 @@
+<html lang="en">
+    <head>
+
+    </head>
+    <body>
+        <h1>Sub-Events</h1>
+
+        {% if auth %}
+        <p>user has edit authorization</p>
+        {% else %}
+        <p>user does not have edit authorization</p>
+        {% endif %}
+
+        <hr>
+        {% for event in events %}
+        <p>Event name: {{event.name}}</p>
+        <p>Event time: {{event.event_time}}</p>
+        <p>Event description: {{event.description}}</p>
+        <p>Created by {{event.author}} at {{event.created_at}}</p>
+        <hr/>
+        {% endfor %}
+
+        <a href='/v1/'>See all posts</a>
+
+    </body>
+</html>

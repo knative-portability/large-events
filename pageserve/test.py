@@ -18,9 +18,21 @@ import app
 
 
 class TestServe(unittest.TestCase):
-    def test_get_auth(self):
-        # TODO: test authorization retrieval
-        pass
+    def test_auth_json(self):
+        """Checks if users service returns a correctly formatted object.
+
+        A dictionary with a boolean 'edit_access' field should be received.
+        """
+        response = app.get_auth_json('example_user')
+        valid_response = response['edit_access'] or not response['edit_access']
+        self.assertTrue(valid_response)
+
+    def test_edit_access(self):
+        """Tests if edit access is correctly retrieved from a user dict."""
+        has_access = {'edit_access': True}
+        no_access = {'edit_access': False}
+        self.assertTrue(app.has_edit_access(has_access))
+        self.assertFalse(app.has_edit_access(no_access))
 
 
 if __name__ == '__main__':
