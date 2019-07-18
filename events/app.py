@@ -47,7 +47,7 @@ def add_event():
             response="Event info was entered incorrectly.",
         )
     try:
-        event.add_to_db(EVENTS_COLL)
+        add_to_db(event.dict, EVENTS_COLL)
         return Response(
             status=201,
         )
@@ -56,6 +56,11 @@ def add_event():
             status=500,
             response="Database was undefined.",
         )
+
+
+def add_to_db(info, events_collection):
+    """Adds the given info to the specified collection."""
+    events_collection.insert_one(info)
 
 
 def build_event_info(info, time):
@@ -140,11 +145,6 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
             elif getattr(self, att) != getattr(other, att):
                 return False
         return True
-
-    def add_to_db(self, events_collection):
-        """Adds the event to the specified collection."""
-        # TODO(cmei4444): move out of class
-        events_collection.insert_one(self.dict)
 
     def get_dict(self):
         return self._asdict()
