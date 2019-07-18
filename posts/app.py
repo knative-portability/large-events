@@ -20,7 +20,7 @@
 
 import os
 import pymongo
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -41,6 +41,17 @@ def upload_new_post():
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
     """Get all posts for the whole event."""
+    # TODO(mukobi) change from fake data to real query from db
+    return jsonify({
+        "event_id": "all",
+        "author_id": "mukobi",
+        "created_at": "2017-10-06T00:00:00+00:00",
+        "text": "This is the description of a post. The post is tagged with "
+                "the event id of 'all' and should be viewable by default.",
+        "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg",
+            "http://4.bp.blogspot.com/-w8U75TCuhgU/Tzw8TmaclvI/AAAAAAAABJ0/6fMMcRLAceM/s1600/Rabbit3.jpg"
+        ]})
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
