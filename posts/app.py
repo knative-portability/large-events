@@ -78,7 +78,19 @@ def upload_new_post_to_db(post, collection):
                              "attributes {required_attributes}")
     if str(post["text"]) == "" and list(post["files"]) == []:
         raise ValueError("One of text or files must not be empty.")
+    # post is valid, add on timestamp and insert into db
+    post["created_at"] = generate_timestamp()
     return collection.insert_one(post).inserted_id
+
+
+def generate_timestamp() -> str:
+    """Generate timestamp of the current time for placement in db.
+
+    Returns:
+        str: string representation of the current time.
+    """
+    # TODO use general timestamp generation function from events
+    return "2017-10-06T00:00:00+00:00"
 
 
 def connect_to_mongodb():  # pragma: no cover
