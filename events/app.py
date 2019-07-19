@@ -75,7 +75,7 @@ def edit_event(event_id):
 def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
-        events = events_collection.find()
+        events = EVENTS_COLL.find()
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
         # correct in the response
