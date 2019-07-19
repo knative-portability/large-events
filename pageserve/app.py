@@ -67,11 +67,13 @@ def get_posts():
 
 
 def parsed_posts(posts):
+    # TODO(cmei4444): implement parsing on posts pulled from posts service in
+    # a format for web display
     return posts
 
 
 def get_events():
-    # TODO(mcarolyn): integrate with events service to pull event info from
+    # TODO(cmei4444): integrate with events service to pull event info from
     # database
     events = [{'event_id': '1',
                'name': 'concert 1',
@@ -91,6 +93,8 @@ def get_events():
 
 
 def parsed_events(events):
+    # TODO(cmei4444): implement parsing on events pulled from events service in
+    # a format for web display
     return events
 
 
