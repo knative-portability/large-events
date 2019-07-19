@@ -77,16 +77,9 @@ def get_all_events():
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
         # correct in the response
-        return Response(
-            events_dict,
-            status=200,
-            mimetype='application/json'
-        )
+        return jsonify(events_dict)
     except DBNotConnectedError as e:
-        return Response(
-            status=500,
-            response="Database was undefined.",
-        )
+        return "Database was undefined.", 500
 
 
 def build_events_dict(events):
