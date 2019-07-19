@@ -82,10 +82,6 @@ def update_user_authorization_in_db(
         user_id: str, is_organizer: bool, users_collection):
     """Updates the authorization of the given user in the database.
 
-    Assumes caller has authorization to make this change in the database.
-    I.e. caller route should first make sure request maker was authorized
-    to update the given user.
-
     Args:
         user_id (str): The id of the user to change.
         is_organizer (bool): The authorization value to set.
