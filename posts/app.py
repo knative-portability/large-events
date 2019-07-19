@@ -19,11 +19,15 @@
 # limitations under the License.
 
 import os
+import uuid
 import pymongo
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import BadRequestKeyError
+from google.cloud import storage
 
 app = Flask(__name__)  # pylint: disable=invalid-name
+
+GCLOUD_STORAGE_BUCKET_NAME = "large_events_posts_service_bucket"
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -94,8 +98,10 @@ def upload_new_post_to_db(post, collection):
                              "attributes {required_attributes}")
     if not post["text"] and not post["files"]:
         raise ValueError("One of text or files must not be empty.")
-    # post is valid, add on timestamp and insert into db
+    # post is valid, add on timestamp, upload files, insert into db
     post["created_at"] = generate_timestamp()
+    post["files"] = [
+        upload_file_to_cloud_and_get_url(file) for file in post["files"]]
     return collection.insert_one(post).inserted_id
 
 
@@ -107,6 +113,20 @@ def generate_timestamp() -> str:
     """
     # TODO use general timestamp generation function from events
     return "2017-10-06T00:00:00+00:00"
+
+
+def upload_file_to_cloud_and_get_url(file):
+    """Uploads a file to the GCloud Storage bucket.
+
+    Returns:
+        str: Public URL of the file in the cloud.
+    """
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(GCLOUD_STORAGE_BUCKET_NAME)
+    filename = str(uuid.uuid4()) + file.filename
+    blob = bucket.blob(filename)
+    blob.upload_from_file(file)
+    return blob.public_url
 
 
 def connect_to_mongodb():  # pragma: no cover
