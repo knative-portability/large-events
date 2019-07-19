@@ -43,6 +43,7 @@ def get_all_posts():
     """Get all posts for the whole event."""
     # TODO(mukobi) change from fake data to real query from db
     return jsonify({
+        "post_id": "abc123",
         "event_id": "all",
         "author_id": "mukobi",
         "created_at": "2017-10-06T00:00:00+00:00",
