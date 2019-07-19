@@ -9,6 +9,8 @@ app = Flask(__name__)
 
 
 def connect_to_mongodb():
+    # TODO(cmei4444): restructure to be consistent with other services
+    # TODO(cmei4444): test with deployed service
     """Connects to MongoDB Atlas database.
 
     Returns events collection if connection is successful, and None otherwise.
