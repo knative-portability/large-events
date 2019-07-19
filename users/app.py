@@ -96,7 +96,10 @@ def update_user_authorization_in_db(
 
     Raises:
         KeyError: Bad `user_id`/user not found in db.
+        TypeError: `is_organizer` is not a bool.
     """
+    if not isinstance(is_organizer, bool):
+        raise TypeError("Trying to set authorization to a non-bool type.")
     result = users_collection.update_one(
         {"user_id": user_id},
         {"$set": {"is_organizer": bool(is_organizer)}},
