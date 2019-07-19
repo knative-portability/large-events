@@ -56,7 +56,7 @@ def add_event():
     except DBNotConnectedError as e:
         return Response(
             status=500,
-            response="Database was undefined.",
+            response="Events database was undefined.",
         )
 
 
@@ -81,7 +81,7 @@ def get_all_events():
         # correct in the response
         return jsonify(events_dict)
     except DBNotConnectedError as e:
-        return "Database was undefined.", 500
+        return "Events database was undefined.", 500
 
 
 def build_events_dict(events):
