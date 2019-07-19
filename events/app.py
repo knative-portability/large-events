@@ -75,6 +75,8 @@ def get_all_events():
     try:
         events = events_collection.find()
         events_dict = build_events_dict(events)
+        # TODO(cmei4444): test with pageserve to make sure the json format is
+        # correct in the response
         return Response(
             events_dict,
             status=200,
