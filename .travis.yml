@@ -22,12 +22,14 @@ env:
   - TEST_DIR=pageserve
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=users
-    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=events
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=posts
+before_script:
+  - cd $TEST_DIR
+  - pip install -r requirements.txt
 script:
-  # run coverage on *test*.py files testing the app module
-  - cd $TEST_DIR && pip install -r requirements.txt && coverage run --source app test_runner.py
+  # run coverage on *test*.py files testing the app module 
+  - coverage run --source app test_runner.py
 after_success:
-    coveralls
+  - coveralls

@@ -78,6 +78,37 @@ def upsert_user_in_db(user_object, users_collection):
         upsert=True).upserted_id
 
 
+def update_user_authorization_in_db(
+        user_id: str, is_organizer: bool, users_collection):
+    """Updates the authorization of the given user in the database.
+
+    Assumes caller has authorization to make this change in the database.
+    I.e. caller route should first make sure request maker was authorized
+    to update the given user.
+
+    Args:
+        user_id (str): The id of the user to change.
+        is_organizer (bool): The authorization value to set.
+
+    Returns:
+        ObjectID: The ID of the updated object from the db. This can be used
+            to find the object with `collection.find_one(object_id)`.
+
+    Raises:
+        KeyError: Bad `user_id`/user not found in db.
+        TypeError: `is_organizer` is not a bool.
+    """
+    if not isinstance(is_organizer, bool):
+        raise TypeError("Trying to set authorization to a non-bool type.")
+    result = users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {"is_organizer": bool(is_organizer)}},
+        upsert=False)
+    if result.matched_count == 0:
+        raise KeyError(f"User with ID '{user_id}' not found.'")
+    return result.upserted_id
+
+
 def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user."""
     first_user = users_collection.find_one({"user_id": username})
