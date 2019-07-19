@@ -79,7 +79,7 @@ def upload_new_post_to_db(post, collection):
     if post.keys() != required_attributes:
         raise AttributeError(f"Arg post must have exactly the "
                              "attributes {required_attributes}")
-    if str(post["text"]) == "" and list(post["files"]) == []:
+    if not post["text"] and not post["files"]:
         raise ValueError("One of text or files must not be empty.")
     # post is valid, add on timestamp and insert into db
     post["created_at"] = generate_timestamp()
