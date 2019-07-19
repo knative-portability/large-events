@@ -123,7 +123,7 @@ def upload_file_to_cloud_and_get_url(file):
     """
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(GCLOUD_STORAGE_BUCKET_NAME)
-    filename = str(uuid.uuid4()) + file.filename
+    filename = str(uuid.uuid4()) + "-" + file.filename
     blob = bucket.blob(filename)
     blob.upload_from_file(file)
     return blob.public_url
