@@ -92,8 +92,9 @@ def build_events_dict(events):
 
     Takes in a mongoDB cursor from querying the DB.
     """
-    num_events = len(events)
-    return {'events': list(events), 'num_events': num_events}
+    events_list = list(events)
+    num_events = len(events_list)
+    return {'events': events_list, 'num_events': num_events}
 
 
 @app.route('/v1/search', methods=['GET'])
