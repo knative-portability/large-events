@@ -21,6 +21,7 @@
 import os
 import pymongo
 from flask import Flask, jsonify, request
+from werkzeug.exceptions import BadRequestKeyError
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -36,6 +37,18 @@ def upload_new_post():
     Post request files should contain all the files the user wants to upload
     to the server.
     """
+    try:
+        post = {
+            "event_id": request.form["event_id"],
+            "author_id": request.form["author_id"],
+            "text":  request.form["text"],
+            "files": [file for file in request.files.values()]
+        }
+        return str(upload_new_post_to_db(post, DB.posts_collection)), 201
+    except BadRequestKeyError:
+        return "Invalid request.", 400
+    except ValueError:
+        return "Post must contain text and/or files.", 400
 
 
 @app.route('/v1/', methods=['GET'])
@@ -112,7 +125,7 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).users_db
+    return pymongo.MongoClient(mongodb_uri).posts_db
 
 
 DB = connect_to_mongodb()  # None if can't connect
