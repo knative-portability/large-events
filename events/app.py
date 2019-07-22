@@ -2,7 +2,7 @@ import os
 import datetime
 import pymongo
 
-from flask import Flask, request, Response, json
+from flask import Flask, request, Response, jsonify
 from eventclass import Event
 
 app = Flask(__name__)

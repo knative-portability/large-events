@@ -112,7 +112,7 @@ def get_user_info(user):
     url = os.environ.get("USER_ENDPOINT")
     r = requests.post(url, data={'user_id': user})
     response = r.json()
-    return response['edit_access']
+    return response
 
 
 def has_edit_access(user_data):
