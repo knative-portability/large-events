@@ -78,7 +78,7 @@ class TestPostUploading(unittest.TestCase):
         # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
         # mock Google storage module for uploading to storage bucket
-        app.storage = mock.MagicMock()
+        app.storage = mock.MagicMock(spec=app.storage)
         app.storage.Client().get_bucket().blob().public_url = MOCK_FILE_URL
 
     def test_full_upload(self):
