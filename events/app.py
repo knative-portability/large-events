@@ -8,6 +8,10 @@ from eventclass import Event
 app = Flask(__name__)
 
 
+class DBNotConnectedError(EnvironmentError):
+    """Raised when not able to connect to the db."""
+
+
 def connect_to_mongodb():
     # TODO(cmei4444): restructure to be consistent with other services
     # TODO(cmei4444): test with deployed service
@@ -15,9 +19,6 @@ def connect_to_mongodb():
 
     Returns events collection if connection is successful, and None otherwise.
     """
-    class DBNotConnectedError(EnvironmentError):
-        """Raised when not able to connect to the db."""
-
     class Thrower():  # pylint: disable=too-few-public-methods
         """Used to raise an exception on failed db connect."""
 
