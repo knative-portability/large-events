@@ -1,6 +1,8 @@
 import os
 import datetime
+import json
 import pymongo
+from bson import json_util
 
 from flask import Flask, request, Response, jsonify
 from eventclass import Event
@@ -80,7 +82,9 @@ def get_all_events():
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
         # correct in the response
-        return jsonify(events_dict)
+        # handle objects from MongoDB (e.g. ObjectID) that aren't JSON
+        # serializable
+        return json.loads(json_util.dumps(events_dict))
     except DBNotConnectedError as e:
         return "Events database was undefined.", 500
 
