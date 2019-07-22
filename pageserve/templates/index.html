@@ -15,17 +15,34 @@ limitations under the License.
 -->
 <html lang="en">
     <head>
-    
+
     </head>
     <body>
-        <h1>Event Organizer Page</h1>
+        <h1>Event Main Page</h1>
         <h2>test user auth</h2>
-        
+
         {% if auth %}
         <p>user has edit authorization</p>
         {% else %}
         <p>user does not have edit authorization</p>
         {% endif %}
-        
+
+        <a href='/v1/events'>See sub-events</a>
+
+        <h2>Past posts</h2>
+        {% for post in posts %}
+            <p>Posted by {{post.author}} at {{post.created_at}}</p>
+
+            {% if post.type == 'text' %}
+                <p>{{post.text}}</p>
+            {% elif post.type == 'image' %}
+                <p>This is an image but we can't display it right now</p>
+            {% else %}
+                <p>This post type is unrecognized.</p>
+            {% endif %}
+
+            <hr/>
+        {% endfor %}
+
     </body>
 </html>
