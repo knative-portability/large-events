@@ -84,6 +84,8 @@ class TestPostUploading(unittest.TestCase):
     def test_full_upload(self):
         """Can upload a full post object with both text and files."""
         app.upload_new_post_to_db(VALID_POST_FULL, self.mock_collection)
+        (app.storage.Client().get_bucket().blob().upload_from_file
+         .assert_called())
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_FULL, post_in_db)
@@ -92,6 +94,8 @@ class TestPostUploading(unittest.TestCase):
         """Can upload a post with text but no files."""
         app.upload_new_post_to_db(
             VALID_POST_TEXT_NO_FILES, self.mock_collection)
+        (app.storage.Client().get_bucket().blob().upload_from_file
+         .assert_not_called())  # no files to upload to bucket
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_TEXT_NO_FILES, post_in_db)
@@ -100,6 +104,8 @@ class TestPostUploading(unittest.TestCase):
         """Can upload a post with files but no text."""
         app.upload_new_post_to_db(
             VALID_POST_FILES_NO_TEXT, self.mock_collection)
+        (app.storage.Client().get_bucket().blob().upload_from_file
+         .assert_called())
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_FILES_NO_TEXT, post_in_db)
