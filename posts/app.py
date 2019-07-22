@@ -53,13 +53,56 @@ def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
 
 
+def upload_new_post_to_db(post, collection):
+    """Uploads a new post to the db collection.
+
+    Assumes the event matching the post's `event_id` and the user matching
+        the post's `author_id` both exist. I.e. Caller should check this.
+
+    Args:
+        post (dict): Post to add. Requires exactly the following attributes:
+            event_id (str): id of the event to post to
+            author_id (str): user id of the user making the post
+            text (str): text description
+            files (list): list of string encoded files
+        collection: pymongo collection to insert into.
+
+    Returns:
+        ObjectID: DB ID of the post that was uploaded.
+
+    Raises:
+        ValueError: Has no text body (i.e. empty string) nor any files
+            to upload.
+        AttributeError: `post` has not enough or too many attributes.
+    """
+    required_attributes = {"event_id", "author_id", "text", "files"}
+    if post.keys() != required_attributes:
+        raise AttributeError(f"Arg post must have exactly the "
+                             "attributes {required_attributes}")
+    if not post["text"] and not post["files"]:
+        raise ValueError("One of text or files must not be empty.")
+    # post is valid, add on timestamp and insert into db
+    post["created_at"] = generate_timestamp()
+    return collection.insert_one(post).inserted_id
+
+
+def generate_timestamp() -> str:
+    """Generate timestamp of the current time for placement in db.
+
+    Returns:
+        str: string representation of the current time.
+    """
+    # TODO use general timestamp generation function from events
+    return "2017-10-06T00:00:00+00:00"
+
+
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
     class DBNotConnectedError(EnvironmentError):
         """Raised when not able to connect to the db."""
 
-    class Thrower(object):
+    class Thrower():  # pylint: disable=too-few-public-methods
         """Used to raise an exception on failed db connect."""
 
         def __getattribute__(self, _):
@@ -73,6 +116,7 @@ def connect_to_mongodb():  # pragma: no cover
 
 
 DB = connect_to_mongodb()  # None if can't connect
+
 
 if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

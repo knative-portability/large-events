@@ -78,6 +78,33 @@ def upsert_user_in_db(user_object, users_collection):
         upsert=True).upserted_id
 
 
+def update_user_authorization_in_db(
+        user_id: str, is_organizer: bool, users_collection):
+    """Updates the authorization of the given user in the database.
+
+    Args:
+        user_id (str): The id of the user to change.
+        is_organizer (bool): The authorization value to set.
+
+    Returns:
+        ObjectID: The ID of the updated object from the db. This can be used
+            to find the object with `collection.find_one(object_id)`.
+
+    Raises:
+        KeyError: Bad `user_id`/user not found in db.
+        TypeError: `is_organizer` is not a bool.
+    """
+    if not isinstance(is_organizer, bool):
+        raise TypeError("Trying to set authorization to a non-bool type.")
+    result = users_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {"is_organizer": bool(is_organizer)}},
+        upsert=False)
+    if result.matched_count == 0:
+        raise KeyError(f"User with ID '{user_id}' not found.'")
+    return result.upserted_id
+
+
 def find_authorization_in_db(username, users_collection):
     """Queries the db to find authorization of the given user."""
     first_user = users_collection.find_one({"user_id": username})
@@ -89,11 +116,20 @@ def find_authorization_in_db(username, users_collection):
 
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
+
+    class DBNotConnectedError(EnvironmentError):
+        """Raised when not able to connect to the db."""
+
+    class Thrower():  # pylint: disable=too-few-public-methods
+        """Used to raise an exception on failed db connect."""
+
+        def __getattribute__(self, _):
+            raise DBNotConnectedError(
+                "Not able to find MONGODB_URI environment variable")
+
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
-        print("Alert: not able to find MONGODB_URI environmental variable, "
-              "no connection to MongoDB instance")
-        return None  # not able to find db config var
+        return Thrower()  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).users_db
 
 
