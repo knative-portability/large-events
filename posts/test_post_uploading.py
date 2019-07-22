@@ -26,8 +26,8 @@ MOCK_FILE.filename = "the name of a file"
 
 VALID_POST_FULL = {
     "event_id": "abc123",
-    "author_id": "kurt_vonnegut",
-    "text": "This is a very valid post.",
+    "author_id": "jrr_tolkien",
+    "text": "This is a very valid post with text and files.",
     "files": [
         MOCK_FILE,
         MOCK_FILE
@@ -39,14 +39,14 @@ VALID_POST_TEXT_NO_FILES = {
     "files": []}
 VALID_POST_FILES_NO_TEXT = {
     "event_id": "abc123",
-    "author_id": "douglas_adams",
+    "author_id": "No text is alright if I have files.",
     "text": "",
     "files": [
         MOCK_FILE
     ]}
 INVALID_POST_NO_TEXT_NOR_FILES = {
     "event_id": "abc123",
-    "author_id": "jrr_tolkien",
+    "author_id": "I'm missing text and files and am invalid.",
     "text": "",
     "files": []}
 INVALID_POST_NOT_ENOUGH_ATTRS = {
@@ -77,7 +77,7 @@ class TestPostUploading(unittest.TestCase):
         """Set up mocks for testing."""
         # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
-        # mock function for uploading images to storage bucket
+        # mock Google storage module for uploading to storage bucket
         app.storage = mock.MagicMock()
         app.storage.Client().get_bucket().blob().public_url = MOCK_FILE_URL
 
