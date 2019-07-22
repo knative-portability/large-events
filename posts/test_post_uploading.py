@@ -20,15 +20,17 @@ from unittest import mock
 import mongomock
 import app
 
-MOCK_FILE_URL = "Pretend I am the url of an uploaded file."
+MOCK_FILE_URL = "the url of an uploaded file"
+MOCK_FILE = mock.MagicMock()
+MOCK_FILE.filename = "the name of a file"
 
 VALID_POST_FULL = {
     "event_id": "abc123",
     "author_id": "kurt_vonnegut",
     "text": "This is a very valid post.",
     "files": [
-        "Pretend I am a long base-64 encoded file",
-        "Another pretend encoded file"
+        MOCK_FILE,
+        MOCK_FILE
     ]}
 VALID_POST_TEXT_NO_FILES = {
     "event_id": "abc123",
@@ -40,7 +42,7 @@ VALID_POST_FILES_NO_TEXT = {
     "author_id": "douglas_adams",
     "text": "",
     "files": [
-        "This post has no text but is valid because it has at least one file."
+        MOCK_FILE
     ]}
 INVALID_POST_NO_TEXT_NOR_FILES = {
     "event_id": "abc123",
@@ -76,8 +78,8 @@ class TestPostUploading(unittest.TestCase):
         # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
         # mock function for uploading images to storage bucket
-        app.upload_file_to_cloud_and_get_url = mock.MagicMock()
-        app.upload_file_to_cloud_and_get_url.return_value = MOCK_FILE_URL
+        app.storage = mock.MagicMock()
+        app.storage.Client().get_bucket().blob().public_url = MOCK_FILE_URL
 
     def test_full_upload(self):
         """Can upload a full post object with both text and files."""
