@@ -30,6 +30,6 @@ before_script:
   - pip install -r requirements.txt
 script:
   # run coverage on *test*.py files testing the app module 
-  - coverage run --source app test_runner.py
+  - coverage run --source app -m unittest discover && coverage report -m
 after_success:
   - coveralls
