@@ -16,8 +16,11 @@
 # limitations under the License.
 
 import unittest
+from unittest import mock
 import mongomock
 import app
+
+MOCK_FILE_URL = "Pretend I am the url of an uploaded file."
 
 VALID_POST_FULL = {
     "event_id": "abc123",
@@ -69,8 +72,12 @@ class TestPostUploading(unittest.TestCase):
         self.assertEqual(first["files"], second["files"])
 
     def setUp(self):
-        """Set up mock DB for testing"""
+        """Set up mocks for testing."""
+        # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
+        # mock function for uploading images to storage bucket
+        app.upload_file_to_cloud_and_get_url = mock.MagicMock()
+        app.upload_file_to_cloud_and_get_url.return_value = MOCK_FILE_URL
 
     def test_full_upload(self):
         """Can upload a full post object with both text and files."""
