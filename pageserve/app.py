@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 import os
-import logging
 import requests
 
 from flask import Flask, render_template, request, Response
@@ -25,8 +24,9 @@ app = Flask(__name__)
 
 @app.route('/v1/')
 def index():
+    """Displays home page with all past posts."""
     user = get_user()
-    is_auth = has_edit_access(get_auth_json(user))
+    is_auth = has_edit_access(get_user_info(user))
     posts = get_posts()
     return render_template(
         'index.html',
@@ -37,8 +37,9 @@ def index():
 
 @app.route('/v1/events')
 def show_events():
+    """Displays page with all sub-events."""
     user = get_user()
-    is_auth = has_edit_access(get_auth_json(user))
+    is_auth = has_edit_access(get_user_info(user))
     events = get_events()
     return render_template(
         'events.html',
@@ -48,6 +49,7 @@ def show_events():
 
 
 def get_posts():
+    """Gets all posts from posts service."""
     # TODO: integrate with posts service to pull post info from database
     posts = [{'post_id': '1',
               'event_id': '0',
@@ -73,6 +75,7 @@ def parsed_posts(posts):
 
 
 def get_events():
+    """Gets all sub-events from events service."""
     # TODO(cmei4444): integrate with events service to pull event info from
     # database
     events = [{'event_id': '1',
@@ -98,18 +101,21 @@ def parsed_events(events):
     return events
 
 
-def get_auth_json(user):
+def get_user_info(user):
+    """Gets info about the current user from the users service."""
     url = os.environ.get("USER_ENDPOINT")
     r = requests.post(url, data={'user_id': user})
     response = r.json()
-    return response
+    return response['edit_access']
 
 
 def has_edit_access(user_data):
+    """Determines if the user with the given info has edit access."""
     return user_data['edit_access']
 
 
 def get_user():
+    """Retrieves the current user of the app."""
     # TODO: get user info using OAuth
     return "Voldemort"
 
