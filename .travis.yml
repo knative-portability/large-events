@@ -16,7 +16,7 @@ language: python
 python:
   - "3.6"
 install:
-  - pip install coverage coveralls
+  - pip install coverage python-coveralls
 env:
   # Travis build matrix will test all permutations of the build
   - TEST_DIR=pageserve
