@@ -4,7 +4,7 @@ import json
 import pymongo
 from bson import json_util
 
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response
 from eventclass import Event
 
 app = Flask(__name__)
