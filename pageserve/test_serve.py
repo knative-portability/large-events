@@ -15,12 +15,29 @@ limitations under the License.
 
 import unittest
 import app
+from unittest.mock import patch
 
 
 class TestServe(unittest.TestCase):
-    def test_get_auth(self):
-        # TODO: test authorization retrieval
-        pass
+    @patch('app.requests')
+    def test_auth_json(self, mock_post):
+        """Checks if users service returns a correctly formatted object.
+
+        A dictionary with a boolean 'edit_access' field should be received.
+        """
+
+        response = app.get_user_info('example_user')
+        # valid_response = (response['edit_access'] is True or
+        #                   response['edit_access'] is False)
+        # self.assertTrue(valid_response)
+        expected_content = mock_post.get.return_value
+
+    def test_edit_access(self):
+        """Tests if edit access is correctly retrieved from a user dict."""
+        has_access = {'edit_access': True}
+        no_access = {'edit_access': False}
+        self.assertTrue(app.has_edit_access(has_access))
+        self.assertFalse(app.has_edit_access(no_access))
 
 
 if __name__ == '__main__':
