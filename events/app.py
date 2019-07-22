@@ -8,24 +8,22 @@ from eventclass import Event
 app = Flask(__name__)
 
 
-def connect_to_mongodb():
-    """Connects to MongoDB Atlas database.
+def connect_to_mongodb():  # pragma: no cover
+    """Connect to MongoDB instance using env vars."""
 
-    Returns events collection if connection is successful, and None otherwise.
-    """
     class DBNotConnectedError(EnvironmentError):
         """Raised when not able to connect to the db."""
 
-    class Thrower(object):
+    class Thrower():  # pylint: disable=too-few-public-methods
         """Used to raise an exception on failed db connect."""
 
         def __getattribute__(self, _):
             raise DBNotConnectedError(
-                "Not able to find MONGODB_URI environmental variable")
+                "Not able to find MONGODB_URI environment variable")
 
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
-        return Thrower()  # DBNotConnectedErrorot able to find db config var
+        return Thrower()  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).eventsDB.all_events
 
 

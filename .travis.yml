@@ -21,6 +21,7 @@ env:
   # Travis build matrix will test all permutations of the build
   - TEST_DIR=pageserve
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+    EVENTS_ENDPOINT=https://events-l3zyoxchqa-uc.a.run.app
   - TEST_DIR=users
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=events

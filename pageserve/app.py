@@ -30,8 +30,75 @@ def index():
         'index.html',
         auth=is_auth,
     )
-    
-def get_auth(user):
+
+
+@app.route('/v1/events')
+def show_events():
+    user = get_user()
+    is_auth = has_edit_access(get_auth_json(user))
+    events = get_events()
+    # return render_template(
+    #     'events.html',
+    #     events=events,
+    #     auth=is_auth,
+    # )
+    return events
+
+
+def get_posts():
+    # TODO: integrate with posts service to pull post info from database
+    posts = [{'post_id': '1',
+              'event_id': '0',
+              'type': 'text',
+              'author': 'admin',
+              'created_at': '7-9-2019',
+              'text': 'this will be a fun event!',
+              },
+             {'post_id': '2',
+              'event_id': '0',
+              'type': 'image',
+              'author': 'admin',
+              'created_at': '7-9-2019',
+              'text': 'abcdefghi',
+              }]
+    return parsed_posts(posts)
+
+
+def parsed_posts(posts):
+    return posts
+
+
+def get_events():
+    # TODO(mcarolyn): integrate with events service to pull event info from
+    # database
+    url = os.environ.get("EVENTS_ENDPOINT")
+    r = requests.get(url, params={})
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return "Error in getting events"
+    # events = [{'event_id': '1',
+    #            'name': 'concert 1',
+    #            'description': 'listen to fun music here!',
+    #            'author': 'admin',
+    #            'created_at': '7-9-2019',
+    #            'event_time': '7-10-2019',
+    #            },
+    #           {'event_id': '2',
+    #            'name': 'concert 2',
+    #            'description': 'listen to fun music here!',
+    #            'author': 'admin',
+    #            'created_at': '7-9-2019',
+    #            'event_time': '7-12-2019',
+    #            }]
+    # return parsed_events(events)
+
+
+def parsed_events(events):
+    return events
+
+
+def get_auth_json(user):
     url = os.environ.get("USER_ENDPOINT")
     r = requests.post(url, data={'user_id':user})
     response = r.json()
@@ -40,6 +107,6 @@ def get_auth(user):
 
 def get_user():
     return "Voldemort"
-    
+
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 8080)))
