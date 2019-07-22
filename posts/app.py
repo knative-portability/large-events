@@ -27,6 +27,8 @@ from google.cloud import storage
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
+REQUIRED_ATTRIBUTES = {"event_id", "author_id", "text", "files"}
+
 
 @app.route('/v1/add', methods=['POST'])
 def upload_new_post():
@@ -47,8 +49,10 @@ def upload_new_post():
             "files": [file for file in request.files.values()]
         }
         return str(upload_new_post_to_db(post, DB.posts_collection)), 201
-    except BadRequestKeyError:
-        return "Invalid request.", 400
+    except BadRequestKeyError as error:
+        return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
+    except AttributeError as error:
+        return f"Invalid request. {str(error)}", 400
     except ValueError:
         return "Post must contain text and/or files.", 400
 
@@ -90,9 +94,8 @@ def upload_new_post_to_db(post, collection):
             to upload.
         AttributeError: `post` has not enough or too many attributes.
     """
-    required_attributes = {"event_id", "author_id", "text", "files"}
-    if post.keys() != required_attributes:
-        raise AttributeError(f"Arg post must have exactly the "
+    if post.keys() != REQUIRED_ATTRIBUTES:
+        raise AttributeError(f"Post must have exactly the "
                              "attributes {required_attributes}")
     if not post["text"] and not post["files"]:
         raise ValueError("One of text or files must not be empty.")
