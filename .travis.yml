@@ -32,7 +32,6 @@ before_script:
 script:
   # run coverage on *test*.py files testing the app module 
   - coverage run --parallel-mode --source app -m unittest discover
-  - coverage report -m
   - cp .coverage* ../coverage/
 
 after_success:
