@@ -81,7 +81,7 @@ def upload_new_post_to_db(post, collection):
             event_id (str): id of the event to post to
             author_id (str): user id of the user making the post
             text (str): text description
-            files (list): list of string encoded files
+            files (list): list of strings of file URLs
         collection: pymongo collection to insert into.
 
     Returns:
@@ -101,7 +101,7 @@ def upload_new_post_to_db(post, collection):
     # post is valid, add on timestamp, upload files, insert into db
     post["created_at"] = generate_timestamp()
     post["files"] = [
-        upload_file_to_cloud_and_get_url(file) for file in post["files"]]
+        upload_file_to_cloud(file) for file in post["files"]]
     return collection.insert_one(post).inserted_id
 
 
@@ -115,7 +115,7 @@ def generate_timestamp() -> str:
     return "2017-10-06T00:00:00+00:00"
 
 
-def upload_file_to_cloud_and_get_url(file):
+def upload_file_to_cloud(file):
     """Uploads a file to the GCloud Storage bucket.
 
     Returns:
