@@ -2,18 +2,23 @@ import os
 import datetime
 import pymongo
 
-from flask import Flask, request, Response, json
+from flask import Flask, request, Response, jsonify
 from eventclass import Event
 
 app = Flask(__name__)
 
 
-def connect_to_mongodb():  # pragma: no cover
-    """Connect to MongoDB instance using env vars."""
+class DBNotConnectedError(EnvironmentError):
+    """Raised when not able to connect to the db."""
 
-    class DBNotConnectedError(EnvironmentError):
-        """Raised when not able to connect to the db."""
 
+def connect_to_mongodb():
+    # TODO(cmei4444): restructure to be consistent with other services
+    # TODO(cmei4444): test with deployed service
+    """Connects to MongoDB Atlas database.
+
+    Returns events collection if connection is successful, and None otherwise.
+    """
     class Thrower():  # pylint: disable=too-few-public-methods
         """Used to raise an exception on failed db connect."""
 
@@ -52,7 +57,7 @@ def add_event():
     except DBNotConnectedError as e:
         return Response(
             status=500,
-            response="Database was undefined.",
+            response="Events database was undefined.",
         )
 
 
@@ -71,13 +76,13 @@ def edit_event(event_id):
 def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
-        events = events_collection.find()
+        events = EVENTS_COLL.find()
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
         # correct in the response
         return jsonify(events_dict)
     except DBNotConnectedError as e:
-        return "Database was undefined.", 500
+        return "Events database was undefined.", 500
 
 
 def build_events_dict(events):
