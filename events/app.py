@@ -8,9 +8,13 @@ from eventclass import Event
 app = Flask(__name__)
 
 
-def connect_to_mongodb():  # pragma: no cover
-    """Connect to MongoDB instance using env vars."""
+def connect_to_mongodb():
+    # TODO(cmei4444): restructure to be consistent with other services
+    # TODO(cmei4444): test with deployed service
+    """Connects to MongoDB Atlas database.
 
+    Returns events collection if connection is successful, and None otherwise.
+    """
     class DBNotConnectedError(EnvironmentError):
         """Raised when not able to connect to the db."""
 
@@ -52,7 +56,7 @@ def add_event():
     except DBNotConnectedError as e:
         return Response(
             status=500,
-            response="Database was undefined.",
+            response="Events database was undefined.",
         )
 
 
@@ -71,20 +75,13 @@ def edit_event(event_id):
 def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
-        events = events_collection.find()
+        events = EVENTS_COLL.find()
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
         # correct in the response
-        return Response(
-            events_dict,
-            status=200,
-            mimetype='application/json'
-        )
+        return jsonify(events_dict)
     except DBNotConnectedError as e:
-        return Response(
-            status=500,
-            response="Database was undefined.",
-        )
+        return "Events database was undefined.", 500
 
 
 def build_events_dict(events):

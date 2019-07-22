@@ -8,7 +8,6 @@ EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
 class TestEventsDB(unittest.TestCase):
     def setUp(self):
-        self.maxDiff = None
         self.event_info = {'name': 'test_event',
                            'description': 'testing!',
                            'author': 'admin',
