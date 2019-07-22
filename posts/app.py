@@ -27,8 +27,6 @@ from google.cloud import storage
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-GCLOUD_STORAGE_BUCKET_NAME = "large_events_posts_service_bucket"
-
 
 @app.route('/v1/add', methods=['POST'])
 def upload_new_post():
@@ -121,12 +119,33 @@ def upload_file_to_cloud(file):
     Returns:
         str: Public URL of the file in the cloud.
     """
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(GCLOUD_STORAGE_BUCKET_NAME)
     filename = str(uuid.uuid4()) + "-" + file.filename
-    blob = bucket.blob(filename)
+    blob = CLOUD_STORAGE_BUCKET.blob(filename)
     blob.upload_from_file(file)
     return blob.public_url
+
+
+def connect_to_cloud_storage():  # pragma: no cover
+    """Connect to Google Cloud Storage using env vars."""
+
+    class StorageNotConnectedError(EnvironmentError):
+        """Raised when not able to connect to the storage."""
+
+    class Thrower():  # pylint: disable=too-few-public-methods
+        """Used to raise an exception on failed storage connect."""
+
+        def __getattribute__(self, _):
+            raise StorageNotConnectedError(
+                "Not able to find GCLOUD_STORAGE_BUCKET_NAME environment variable")
+
+    bucket_name = os.environ.get("GCLOUD_STORAGE_BUCKET_NAME")
+    if bucket_name is None:
+        return Thrower()  # not able to find storage config var
+    storage_client = storage.Client()
+    return storage_client.get_bucket(bucket_name)
+
+
+CLOUD_STORAGE_BUCKET = connect_to_cloud_storage()
 
 
 def connect_to_mongodb():  # pragma: no cover
