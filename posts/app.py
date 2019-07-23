@@ -21,8 +21,8 @@
 import os
 import uuid
 import pymongo
-from bson import json_util
-from flask import Flask, jsonify, request
+from bson import json_util, ObjectId
+from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
 from google.cloud import storage
 
@@ -69,7 +69,8 @@ def get_all_posts():
 def get_post_by_id(post_id):
     """Get the post with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    return json_util.dumps(find_posts_in_db(POSTS_COLLECTION, post_id=post_id))
+    return json_util.dumps(
+        find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id)))
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
@@ -98,7 +99,7 @@ def find_posts_in_db(collection, post_id=None, event_id=None):
     """
     query = {}
     if post_id is not None:
-        query = {"post_id": post_id}
+        query = {"_id": post_id}
     elif event_id is not None:
         query = {"event_id": event_id}
     cursor = collection.find(query)

@@ -21,7 +21,6 @@ import app
 
 FAKE_POSTS = [
     {
-        "post_id": "abc123",
         "event_id": "picnic",
         "author_id": "mukobi",
         "created_at": "2017-10-06T00:00:00+00:00",
@@ -35,7 +34,6 @@ FAKE_POSTS = [
         ]
     },
     {
-        "post_id": "def456",
         "event_id": "aquarium",
         "author_id": "mukobi",
         "created_at": "2011-11-11T00:00:00+00:00",
@@ -46,7 +44,6 @@ FAKE_POSTS = [
         ]
     },
     {
-        "post_id": "ghi789",
         "event_id": "aquarium",
         "author_id": "john_wick",
         "created_at": "2014-10-24T00:00:00+00:00",
@@ -71,9 +68,9 @@ class TestPostDBGetting(unittest.TestCase):
 
     def test_find_by_post_id(self):
         """Search for 1 post by post ID."""
-        post_id = FAKE_POSTS[0]["post_id"]
+        post_id = FAKE_POSTS[0]["_id"]
         found = app.find_posts_in_db(self.collection, post_id=post_id)
-        expected = [post for post in FAKE_POSTS if post["post_id"] is post_id]
+        expected = [post for post in FAKE_POSTS if post["_id"] is post_id]
         self.assertEqual(found, expected)
 
     def test_find_by_event_id(self):
