@@ -23,7 +23,7 @@ import uuid
 import json
 import pymongo
 from bson import json_util, ObjectId
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
 from google.cloud import storage
 
