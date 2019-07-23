@@ -22,7 +22,7 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
