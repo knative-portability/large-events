@@ -40,12 +40,11 @@ def show_events():
     user = get_user()
     is_auth = has_edit_access(get_user_info(user))
     events = get_events()
-    # return render_template(
-    #     'events.html',
-    #     events=events,
-    #     auth=is_auth,
-    # )
-    return events
+    return render_template(
+        'events.html',
+        events=events,
+        auth=is_auth,
+    )
 
 
 def get_posts():
@@ -76,35 +75,18 @@ def parsed_posts(posts):
 
 def get_events():
     """Gets all sub-events from events service."""
-    # TODO(cmei4444): integrate with events service to pull event info from
-    # database
     url = os.environ.get("EVENTS_ENDPOINT")
     r = requests.get(url, params={})
     if r.status_code == 200:
-        return r.json()
+        return parsed_events(r.json())
     else:
         return "Error in getting events"
-    # events = [{'event_id': '1',
-    #            'name': 'concert 1',
-    #            'description': 'listen to fun music here!',
-    #            'author': 'admin',
-    #            'created_at': '7-9-2019',
-    #            'event_time': '7-10-2019',
-    #            },
-    #           {'event_id': '2',
-    #            'name': 'concert 2',
-    #            'description': 'listen to fun music here!',
-    #            'author': 'admin',
-    #            'created_at': '7-9-2019',
-    #            'event_time': '7-12-2019',
-    #            }]
-    # return parsed_events(events)
 
 
-def parsed_events(events):
+def parsed_events(events_dict):
     # TODO(cmei4444): implement parsing on events pulled from events service in
     # a format for web display
-    return events
+    return events_dict['events']
 
 
 def get_user_info(user):
