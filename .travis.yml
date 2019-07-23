@@ -35,6 +35,7 @@ script:
 
 after_success:
   - cd ..
+  - coverage report -m
   - coveralls
 
 notifications:
