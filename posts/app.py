@@ -48,7 +48,7 @@ def upload_new_post():
             "text":  request.form["text"],
             "files": [file for file in request.files.values()]
         }
-        return str(upload_new_post_to_db(post, DB.posts_collection)), 201
+        return str(upload_new_post_to_db(post, POSTS_COLLECTION)), 201
     except BadRequestKeyError as error:
         return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
     except AttributeError as error:
@@ -87,7 +87,7 @@ def get_all_posts_for_event(event_id):
 def find_posts_in_db(collection, post_id=None, event_id=None):
     """Finds all matching posts in the database.
 
-    Query is configured using one or none of args `post_id` and `event_id`. 
+    Query is configured using one or none of args `post_id` and `event_id`.
     If one is not None, searches for matching posts.
     If both are not None, post_id takes precedence.
     If both are None, then searches for all posts.
@@ -207,10 +207,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).posts_db
+    return pymongo.MongoClient(mongodb_uri).posts_db.posts_collection
 
 
-DB = connect_to_mongodb()  # None if can't connect
+POSTS_COLLECTION = connect_to_mongodb()  # None if can't connect
 
 
 if __name__ == "__main__":  # pragma: no cover
