@@ -62,23 +62,24 @@ def upload_new_post():
 def get_all_posts():
     """Get all posts for the whole event."""
     # serialize otherwise nonserializable ObjectIDs
-    return json_util.dumps(find_posts_in_db(POSTS_COLLECTION))
+    return json_util.loads(json_util.dumps(
+        find_posts_in_db(POSTS_COLLECTION)))
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
 def get_post_by_id(post_id):
     """Get the post with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    return json_util.dumps(
-        find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id)))
+    return json_util.loads(json_util.dumps(
+        find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id))))
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
 def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    return json_util.dumps(
-        find_posts_in_db(POSTS_COLLECTION, event_id=event_id))
+    return json_util.loads(json_util.dumps(
+        find_posts_in_db(POSTS_COLLECTION, event_id=event_id)))
 
 
 def find_posts_in_db(collection, post_id=None, event_id=None):
