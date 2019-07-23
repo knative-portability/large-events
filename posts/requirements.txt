@@ -1,3 +1,5 @@
 Flask
 gunicorn
-pymongo
+pymongo[srv]
+mongomock
+google-cloud-storage
