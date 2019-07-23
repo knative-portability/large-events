@@ -97,7 +97,7 @@ def find_posts_in_db(collection, post_id=None, event_id=None):
         query = {"post_id": post_id}
     elif event_id is not None:
         query = {"event_id": event_id}
-    cursor = collection.find_many(query)
+    cursor = collection.find(query)
     list_of_posts = []
     for post in cursor:
         list_of_posts.append(post)
