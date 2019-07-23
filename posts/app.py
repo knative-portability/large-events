@@ -60,28 +60,20 @@ def upload_new_post():
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
     """Get all posts for the whole event."""
-    # TODO(mukobi) change from fake data to real query from db
-    return jsonify({
-        "post_id": "abc123",
-        "event_id": "all",
-        "author_id": "mukobi",
-        "created_at": "2017-10-06T00:00:00+00:00",
-        "text": "This is the description of a post. The post is tagged with "
-                "the event id of 'all' and should be viewable by default.",
-        "images": [
-            "https://upload.wikimedia.org/wikipedia/commons/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg",
-            "http://4.bp.blogspot.com/-w8U75TCuhgU/Tzw8TmaclvI/AAAAAAAABJ0/6fMMcRLAceM/s1600/Rabbit3.jpg"
-        ]})
+    # TODO(mukobi) verify jsonification of pymongo ObjectIDs
+    return jsonify(find_posts_in_db(POSTS_COLLECTION))
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
 def get_post_by_id(post_id):
     """Get the post with the specified ID."""
+    return jsonify(find_posts_in_db(POSTS_COLLECTION, post_id=post_id))
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
 def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
+    return jsonify(find_posts_in_db(POSTS_COLLECTION, event_id=event_id))
 
 
 def find_posts_in_db(collection, post_id=None, event_id=None):
