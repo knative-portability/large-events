@@ -84,6 +84,34 @@ def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
 
 
+def find_posts_in_db(collection, post_id=None, event_id=None):
+    """Finds all matching posts in the database.
+
+    Query is configured using one or none of args `post_id` and `event_id`. 
+    If one is not None, searches for matching posts.
+    If both are not None, post_id takes precedence.
+    If both are None, then searches for all posts.
+
+    Args:
+        collection (pymongo.collection): The collection to search in.
+        post_id (string): ID of a post to search for.
+        event_id (string): ID of an event to find all posts for.
+
+    Returns:
+        list: List of all matching post objects.
+    """
+    query = {}
+    if post_id is not None:
+        query = {"post_id": post_id}
+    elif event_id is not None:
+        query = {"event_id": event_id}
+    cursor = collection.find_many(query)
+    list_of_posts = []
+    for post in cursor:
+        list_of_posts.append(post)
+    return list_of_posts
+
+
 def upload_new_post_to_db(post, collection):
     """Uploads a new post to the db collection.
 
