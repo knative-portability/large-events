@@ -64,9 +64,7 @@ def get_all_posts():
     """Get all posts for the whole event."""
     # serialize otherwise nonserializable ObjectIDs
     post_list = find_posts_in_db(POSTS_COLLECTION)
-    return json.loads(json_util.dumps(
-        {"posts": post_list,
-         "num_posts": len(post_list)}))
+    return serialize_posts_to_json(post_list)
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
@@ -74,9 +72,7 @@ def get_post_by_id(post_id):
     """Get the post with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
     post_list = find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id))
-    return json.loads(json_util.dumps(
-        {"posts": post_list,
-         "num_posts": len(post_list)}))
+    return serialize_posts_to_json(post_list)
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
@@ -84,9 +80,7 @@ def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
     post_list = find_posts_in_db(POSTS_COLLECTION, event_id=event_id)
-    return json.loads(json_util.dumps(
-        {"posts": post_list,
-         "num_posts": len(post_list)}))
+    return serialize_posts_to_json(post_list)
 
 
 def find_posts_in_db(collection, post_id=None, event_id=None):
@@ -115,6 +109,24 @@ def find_posts_in_db(collection, post_id=None, event_id=None):
     for post in cursor:
         list_of_posts.append(post)
     return list_of_posts
+
+
+def serialize_posts_to_json(post_list):
+    """Serialize the post list into a json object.
+
+    Used for sending the results of a post query in an HTTP response.
+    Handles non-serializable fields like bson.ObjectID.
+
+    Args:
+        post_list (list): List of post objects to serialize
+
+    Returns:
+        dict: json-like wrapper around the list of posts in a "posts" key
+            and the number of posts in a "num_posts" key.
+    """
+    return json.loads(json_util.dumps(
+        {"posts": post_list,
+         "num_posts": len(post_list)}))
 
 
 def upload_new_post_to_db(post, collection):
