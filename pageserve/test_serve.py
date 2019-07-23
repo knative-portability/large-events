@@ -33,8 +33,7 @@ class TestServe(unittest.TestCase):
 
         mock_requests.post.assert_called_with(
             'example_url', data={'user_id': 'example_user'})
-        valid_response = (response['edit_access'] is True or
-                          response['edit_access'] is False)
+        valid_response = response['edit_access'] is True
         self.assertTrue(valid_response)
 
     def test_edit_access(self):
