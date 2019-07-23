@@ -26,7 +26,7 @@ app = Flask(__name__)
 def index():
     """Displays home page with all past posts."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user))
+    is_auth = has_edit_access(get_user_info(user, get_users_url()))
     posts = get_posts()
     return render_template(
         'index.html',
@@ -101,12 +101,19 @@ def parsed_events(events):
     return events
 
 
-def get_user_info(user):
-    """Gets info about the current user from the users service."""
+def get_users_url():
+    """Retrieves users URL, throws error if not found."""
     url = os.environ.get("USER_ENDPOINT")
+    if url is None:
+        raise Exception("Users endpoint was undefined.")
+    return url
+
+
+def get_user_info(user, url):
+    """Gets info about the current user from the users service."""
     r = requests.post(url, data={'user_id': user})
     response = r.json()
-    return response['edit_access']
+    return response
 
 
 def has_edit_access(user_data):
