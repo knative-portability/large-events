@@ -16,16 +16,22 @@
 # limitations under the License.
 
 import unittest
+from unittest import mock
+import collections
 import mongomock
 import app
 
+MOCK_FILE_URL = "the url of an uploaded file"
+File = collections.namedtuple('File', 'filename')
+MOCK_FILE = File(filename="the name of a file")
+
 VALID_POST_FULL = {
     "event_id": "abc123",
-    "author_id": "kurt_vonnegut",
-    "text": "This is a very valid post.",
+    "author_id": "jrr_tolkien",
+    "text": "This is a very valid post with text and files.",
     "files": [
-        "Pretend I am a long base-64 encoded file",
-        "Another pretend encoded file"
+        MOCK_FILE,
+        MOCK_FILE
     ]}
 VALID_POST_TEXT_NO_FILES = {
     "event_id": "abc123",
@@ -34,14 +40,14 @@ VALID_POST_TEXT_NO_FILES = {
     "files": []}
 VALID_POST_FILES_NO_TEXT = {
     "event_id": "abc123",
-    "author_id": "douglas_adams",
+    "author_id": "No text is alright if I have files.",
     "text": "",
     "files": [
-        "This post has no text but is valid because it has at least one file."
+        MOCK_FILE
     ]}
 INVALID_POST_NO_TEXT_NOR_FILES = {
     "event_id": "abc123",
-    "author_id": "jrr_tolkien",
+    "author_id": "I'm missing text and files and am invalid.",
     "text": "",
     "files": []}
 INVALID_POST_NOT_ENOUGH_ATTRS = {
@@ -69,12 +75,19 @@ class TestPostUploading(unittest.TestCase):
         self.assertEqual(first["files"], second["files"])
 
     def setUp(self):
-        """Set up mock DB for testing"""
+        """Set up mocks for testing."""
+        # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
+        # mock Google Cloud Storage bucket for file uploading
+        patcher = mock.patch("app.CLOUD_STORAGE_BUCKET")
+        self.mock_bucket = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.mock_bucket.blob().public_url = MOCK_FILE_URL
 
     def test_full_upload(self):
         """Can upload a full post object with both text and files."""
         app.upload_new_post_to_db(VALID_POST_FULL, self.mock_collection)
+        self.mock_bucket.blob().upload_from_file.assert_called()
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_FULL, post_in_db)
@@ -83,6 +96,8 @@ class TestPostUploading(unittest.TestCase):
         """Can upload a post with text but no files."""
         app.upload_new_post_to_db(
             VALID_POST_TEXT_NO_FILES, self.mock_collection)
+        # no files to upload to bucket
+        self.mock_bucket.blob().upload_from_file.assert_not_called()
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_TEXT_NO_FILES, post_in_db)
@@ -91,6 +106,7 @@ class TestPostUploading(unittest.TestCase):
         """Can upload a post with files but no text."""
         app.upload_new_post_to_db(
             VALID_POST_FILES_NO_TEXT, self.mock_collection)
+        self.mock_bucket.blob().upload_from_file.assert_called()
         post_in_db = self.mock_collection.find_one({})
         self.assertIsNotNone(post_in_db)
         self.assert_posts_are_equal(VALID_POST_FILES_NO_TEXT, post_in_db)
