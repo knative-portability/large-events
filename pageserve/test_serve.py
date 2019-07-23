@@ -15,16 +15,26 @@ limitations under the License.
 
 import unittest
 import app
+from unittest.mock import patch
 
 
 class TestServe(unittest.TestCase):
-    def test_auth_json(self):
+    @patch('app.requests')
+    def test_auth_json(self, mock_requests):
         """Checks if users service returns a correctly formatted object.
 
         A dictionary with a boolean 'edit_access' field should be received.
         """
-        response = app.get_auth_json('example_user')
-        valid_response = response['edit_access'] or not response['edit_access']
+        mock_response = unittest.mock.MagicMock()
+        mock_requests.post.return_value = mock_response
+        mock_response.json.return_value = {"edit_access": True}
+
+        response = app.get_user_info('example_user', 'example_url')
+
+        mock_requests.post.assert_called_with(
+            'example_url', data={'user_id': 'example_user'})
+        valid_response = (response['edit_access'] is True or
+                          response['edit_access'] is False)
         self.assertTrue(valid_response)
 
     def test_edit_access(self):
