@@ -34,7 +34,10 @@ script:
   - coverage run --parallel-mode --source app -m unittest discover
   - cp .coverage* ../coverage/
 
-after_success:
-  - cd ../coverage
-  - coverage combine
-  - coveralls
+jobs:
+  include:
+    - stage: coveralls
+      script:
+        - cd coverage
+        - coverage combine
+        - coveralls
