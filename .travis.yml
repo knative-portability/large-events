@@ -35,5 +35,6 @@ script:
 
 after_success:
   - cd ..
-  - ls -a
-  - coveralls
+
+notifications:
+  webhooks: https://coveralls.io/webhook
