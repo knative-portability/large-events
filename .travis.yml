@@ -34,5 +34,4 @@ script:
   - coverage run --parallel-mode --source app -m unittest discover
 
 after_success:
-  - coverage combine
   - coveralls
