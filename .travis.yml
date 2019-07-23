@@ -1,5 +1,4 @@
 # Copyright 2019 The Knative Authors
-
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +26,15 @@ env:
     USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=posts
 before_script:
+  - mkdir coverage
   - cd $TEST_DIR
   - pip install -r requirements.txt
 script:
   # run coverage on *test*.py files testing the app module 
   - coverage run --parallel-mode --source app -m unittest discover
+  - cp .coverage* ../coverage/
 
 after_success:
+  - cd ../coverage
+  - coverage combine
   - coveralls
