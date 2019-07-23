@@ -171,7 +171,7 @@ def upload_file_to_cloud(file):
 def connect_to_cloud_storage():  # pragma: no cover
     """Connect to Google Cloud Storage using env vars."""
 
-    class StorageNotConnectedError(EnvironmentError):
+    class StorageNotConnectedError(ConnectionError):
         """Raised when not able to connect to the storage."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
@@ -194,7 +194,7 @@ CLOUD_STORAGE_BUCKET = connect_to_cloud_storage()
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
-    class DBNotConnectedError(EnvironmentError):
+    class DBNotConnectedError(ConnectionError):
         """Raised when not able to connect to the db."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
