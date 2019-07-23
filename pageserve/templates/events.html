@@ -20,6 +20,23 @@
         <hr/>
         {% endfor %}
 
+
+        <h2>Create New Event</h2>
+        <!-- TODO: add correct endpoint -->
+        <form action="/" method="post">
+      			<div>
+      			    <label for="name">Name:</label>
+                <input type="text" id="name" name="user_name">
+      			</div>
+      			<div>
+      			    <label for="message">Message:</label>
+                <input type="text" id="message" name="user_message">
+      			</div>
+      			<div class="button">
+                <button type="submit">Send your message</button>
+            </div>
+    		</form>
+
         <a href='/v1/'>See all posts</a>
 
     </body>
