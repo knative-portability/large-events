@@ -10,3 +10,6 @@ __pycache__
 
 # testing
 .coverage
+
+# authentication
+*credentials.json

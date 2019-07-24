@@ -14,23 +14,27 @@ limitations under the License.
 """
 
 import unittest
-import app
 from unittest.mock import patch
+import app
 
 
 class TestServe(unittest.TestCase):
     @patch('app.requests')
-    def test_auth_json(self, mock_post):
+    def test_auth_json(self, mock_requests):
         """Checks if users service returns a correctly formatted object.
 
         A dictionary with a boolean 'edit_access' field should be received.
         """
+        mock_response = unittest.mock.MagicMock()
+        mock_requests.post.return_value = mock_response
+        mock_response.json.return_value = {"edit_access": True}
 
-        response = app.get_user_info('example_user')
-        # valid_response = (response['edit_access'] is True or
-        #                   response['edit_access'] is False)
-        # self.assertTrue(valid_response)
-        expected_content = mock_post.get.return_value
+        response = app.get_user_info('example_user', 'example_url')
+
+        mock_requests.post.assert_called_with(
+            'example_url', data={'user_id': 'example_user'})
+        valid_response = response['edit_access'] is True
+        self.assertTrue(valid_response)
 
     def test_edit_access(self):
         """Tests if edit access is correctly retrieved from a user dict."""
@@ -38,6 +42,17 @@ class TestServe(unittest.TestCase):
         no_access = {'edit_access': False}
         self.assertTrue(app.has_edit_access(has_access))
         self.assertFalse(app.has_edit_access(no_access))
+
+    @patch('app.os')
+    def test_user_url(self, mock_os):
+        """Test retrieval of users URL when defined or not defined."""
+        existing_url = "this url exists!"
+        mock_os.environ.get.return_value = existing_url
+        self.assertEqual(app.get_users_url(), existing_url)
+
+        mock_os.environ.get.return_value = None
+        with self.assertRaises(Exception):
+            app.get_users_url()
 
 
 if __name__ == '__main__':

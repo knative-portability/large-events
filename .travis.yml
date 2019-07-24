@@ -16,7 +16,7 @@ language: python
 python:
   - "3.6"
 install:
-  - pip install coverage coveralls
+  - pip install coverage python-coveralls
 env:
   # Travis build matrix will test all permutations of the build
   - TEST_DIR=pageserve
@@ -30,7 +30,14 @@ before_script:
   - cd $TEST_DIR
   - pip install -r requirements.txt
 script:
-  # run coverage on *test*.py files testing the app module 
-  - coverage run --source app test_runner.py
+  # run coverage on files testing the app module
+  - coverage run --source app -m unittest discover
+  - cp .coverage* ../
+
 after_success:
+  - cd ..
+  - coverage report -m
   - coveralls
+
+notifications:
+  webhooks: https://coveralls.io/webhook
