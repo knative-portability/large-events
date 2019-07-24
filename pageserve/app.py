@@ -86,8 +86,18 @@ def get_events():
 
 
 def parsed_events(events_dict):
-    # TODO(cmei4444): implement parsing on events pulled from events service in
-    # a format for web display - timestamps are formatted unreadably currently
+    """Parses response from events service to be used in HTML templates.
+
+    Args:
+        events_dict: JSON returned by events service, includes:
+            events (list): list of events
+            num_events (int): number of events returned
+
+    Returns:
+        list: parsed list of events.
+    """
+    # TODO(cmei4444): implement parsing on events - timestamps are formatted
+    # unreadably currently
     return events_dict['events']
 
 
