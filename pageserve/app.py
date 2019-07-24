@@ -39,7 +39,7 @@ def index():
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user))
+    is_auth = has_edit_access(get_user_info(user, get_users_url()))
     events = get_events()
     return render_template(
         'events.html',
@@ -86,7 +86,7 @@ def get_events():
 
 def parsed_events(events_dict):
     # TODO(cmei4444): implement parsing on events pulled from events service in
-    # a format for web display
+    # a format for web display - timestamps are formatted unreadably currently
     return events_dict['events']
 
 

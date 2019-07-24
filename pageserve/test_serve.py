@@ -14,8 +14,8 @@ limitations under the License.
 """
 
 import unittest
-import app
 from unittest.mock import patch
+import app
 
 
 class TestServe(unittest.TestCase):
