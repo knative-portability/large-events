@@ -51,7 +51,7 @@ DbFile = collections.namedtuple('File', 'filename')
 MOCK_DB_FILE = DbFile(filename="the name of a file")
 
 VALID_DB_POST_FULL = {
-    "event_id": "abc123",
+    "event_id": "foo",
     "author_id": "jrr_tolkien",
     "text": "This is a very valid post with text and files.",
     "files": [
@@ -59,12 +59,12 @@ VALID_DB_POST_FULL = {
         MOCK_DB_FILE
     ]}
 VALID_DB_POST_TEXT_NO_FILES = {
-    "event_id": "abc123",
+    "event_id": "foo",
     "author_id": "ray_bradbury",
     "text": "This post has no files but is still valid.",
     "files": []}
 VALID_DB_POST_FILES_NO_TEXT = {
-    "event_id": "abc123",
+    "event_id": "bar",
     "author_id": "No text is alright if I have files.",
     "text": "",
     "files": [
@@ -170,6 +170,42 @@ class TestGetAllPostsRoute(unittest.TestCase):
         data = json_util.loads(result.data)
         self.assertEqual(data["num_posts"], num_expected_posts)
         self.assertEqual(len(data["posts"]), num_expected_posts)
+
+
+class TestGetPostByIDRoute(unittest.TestCase):
+    """Test get post by ID endpoint GET /v1/<post_id>."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        self.mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        app.config["COLLECTION"].insert_many(self.mock_posts)
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_no_post_found(self):
+        """Can't find post with given ID in the db."""
+        num_expected_posts = 0
+        id_not_in_db = "C001""1C3D""C0FFEE""D0000000DE"
+        result = self.client.get(f"/v1/{id_not_in_db}")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
+
+    def test_yes_post_found(self):
+        """Find a post by ID."""
+        num_expected_posts = 1
+        post_id = self.mock_posts[0]["_id"]
+        result = self.client.get(f"/v1/{str(post_id)}")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
+        self.assertEqual(data["posts"][0]["_id"], post_id)
 
 
 if __name__ == '__main__':
