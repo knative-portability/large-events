@@ -42,7 +42,7 @@ def show_events():
     user = get_user()
     is_auth = has_edit_access(get_user_info(user, get_users_url()))
     events = get_events()
-    url = os.environ.get("EVENTS_ENDPOINT")
+    url = get_events_url()
     return render_template(
         'events.html',
         events=events,
@@ -80,7 +80,7 @@ def parsed_posts(posts):
 
 def get_events():
     """Gets all sub-events from events service."""
-    url = os.environ.get("EVENTS_ENDPOINT")
+    url = get_events_url()
     r = requests.get(url, params={})
     if r.status_code == 200:
         return parsed_events(r.json())
@@ -93,6 +93,14 @@ def parsed_events(events_dict):
     # TODO(cmei4444): implement parsing on events pulled from events service in
     # a format for web display - timestamps are formatted unreadably currently
     return events_dict['events']
+
+
+def get_events_url():
+    """Retrieves events URL, throws error if not found."""
+    url = os.environ.get("EVENTS_ENDPOINT")
+    if url is None:
+        raise Exception("Events endpoint was undefined.")
+    return url
 
 
 def get_users_url():
