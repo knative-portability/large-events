@@ -39,7 +39,7 @@ def index():
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user))
+    is_auth = has_edit_access(get_user_info(user, get_users_url()))
     events = get_events()
     return render_template(
         'events.html',
