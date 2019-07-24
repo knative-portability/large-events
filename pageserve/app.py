@@ -32,6 +32,7 @@ def index():
         'index.html',
         posts=posts,
         auth=is_auth,
+        user=user,
     )
 
 
@@ -41,10 +42,13 @@ def show_events():
     user = get_user()
     is_auth = has_edit_access(get_user_info(user, get_users_url()))
     events = get_events()
+    url = os.environ.get("EVENTS_ENDPOINT")
     return render_template(
         'events.html',
         events=events,
         auth=is_auth,
+        events_url=url,
+        user=user,
     )
 
 
