@@ -76,36 +76,36 @@ def parsed_posts(posts):
 
 def get_events():
     """Gets all sub-events from events service."""
-    # TODO(cmei4444): integrate with events service to pull event info from
-    # database
-    events = [{'event_id': '1',
-               'name': 'concert 1',
-               'description': 'listen to fun music here!',
-               'author': 'admin',
-               'created_at': '7-9-2019',
-               'event_time': '7-10-2019',
-               },
-              {'event_id': '2',
-               'name': 'concert 2',
-               'description': 'listen to fun music here!',
-               'author': 'admin',
-               'created_at': '7-9-2019',
-               'event_time': '7-12-2019',
-               }]
-    return parsed_events(events)
+    url = os.environ.get("EVENTS_ENDPOINT")
+    r = requests.get(url, params={})
+    if r.status_code == 200:
+        return parsed_events(r.json())
+    else:
+        # TODO(cmei4444): handle error in a way that doesn't break page display
+        return "Error in getting events"
 
 
-def parsed_events(events):
-    # TODO(cmei4444): implement parsing on events pulled from events service in
-    # a format for web display
-    return events
+def parsed_events(events_dict):
+    """Parses response from events service to be used in HTML templates.
+
+    Args:
+        events_dict: JSON returned by events service, includes:
+            events (list): list of events
+            num_events (int): number of events returned
+
+    Returns:
+        list: parsed list of events.
+    """
+    # TODO(cmei4444): implement parsing on events - timestamps are formatted
+    # unreadably currently
+    return events_dict['events']
 
 
 def get_users_url():
     """Retrieves users URL, throws error if not found."""
-    url = os.environ.get("USER_ENDPOINT")
+    url = os.environ.get("USERS_ENDPOINT")
     if url is None:
-        raise Exception("Users endpoint was undefined.")
+        raise NameError("Users endpoint was undefined.")
     return url
 
 
