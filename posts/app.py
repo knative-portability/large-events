@@ -36,11 +36,11 @@ REQUIRED_ATTRIBUTES = {"event_id", "author_id", "text", "files"}
 def upload_new_post():
     """Make a new post upload to the server.
 
-    Post request body should contain:
+    Post request body should contain multipart/form-data with:
     event_id: id of the event to post to
     author_id: user id of the user making the post
     text: text to be sent
-    Post request files should contain all the files the user wants to upload
+    All the files the user wants to upload
     to the server.
     """
     try:
