@@ -51,10 +51,8 @@ def upload_new_post():
             "files": [file for file in request.files.values()]
         }
         return str(upload_new_post_to_db(post, app.config["COLLECTION"])), 201
-    except BadRequestKeyError as error:
+    except BadRequestKeyError:
         return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
-    except AttributeError as error:
-        return f"Invalid request. {str(error)}", 400
     except ValueError:
         return "Post must contain text and/or files.", 400
 
