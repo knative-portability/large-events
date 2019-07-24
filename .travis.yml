@@ -20,11 +20,11 @@ install:
 env:
   # Travis build matrix will test all permutations of the build
   - TEST_DIR=pageserve
-    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
-    EVENTS_ENDPOINT=https://events-l3zyoxchqa-uc.a.run.app
+    USERS_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+    EVENTS_ENDPOINT=https://events-l3zyoxchqa-uc.a.run.app/v1/
   - TEST_DIR=users
   - TEST_DIR=events
-    USER_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
+    USERS_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/authorization
   - TEST_DIR=posts
 before_script:
   - cd $TEST_DIR
