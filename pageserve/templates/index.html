@@ -46,18 +46,27 @@ limitations under the License.
 
 
         <h2>Create New Post</h2>
-        <!-- TODO: add correct endpoint -->
+        <!-- TODO: add correct endpoint and make sure fields are correct-->
         <form action="/" method="post">
-      			<div>
-      			    <label for="name">Name:</label>
-                <input type="text" id="name" name="user_name">
-      			</div>
-      			<div>
-      			    <label for="message">Message:</label>
-                <input type="text" id="message" name="user_message">
-      			</div>
-      			<div class="button">
-                <button type="submit">Send your message</button>
+            <div> <!-- TODO(cmei4444): implement event picker -->
+                <label for="event_id">Event ID:</label>
+                <input type="text" id="event_id" name="event_id">
+            </div>
+            <div>
+                <label for="text">Text:</label>
+                <textarea type="text" rows = "5" cols = "60" id="text" name="text">
+                  Enter your post here.
+                </textarea>
+            </div>
+            <div>
+                <label for="images">Images:</label>
+                <textarea type="text" rows = "5" cols = "60" id="images" name="images">
+                  Enter image URLs here.
+                </textarea>
+            </div>
+            <input type="hidden" id="author" name="author_id" value="{{user}}">
+            <div class="button">
+                <button type="submit">Post</button>
             </div>
     		</form>
 
