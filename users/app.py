@@ -32,7 +32,7 @@ def get_authorization():
     """Finds whether the given user is authorized for edit access."""
     user = request.form.get('user_id')
     if user is None:
-        return jsonify(error="You must supply a 'user_id' POST parameter!")
+        return "Error: You must supply a 'user_id' POST parameter!", 400
     authorized = find_authorization_in_db(user, app.config["COLLECTION"])
     return jsonify(edit_access=authorized)
 
