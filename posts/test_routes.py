@@ -172,8 +172,8 @@ class TestGetAllPostsRoute(unittest.TestCase):
         self.assertEqual(len(data["posts"]), num_expected_posts)
 
 
-class TestGetPostByIDRoute(unittest.TestCase):
-    """Test get post by ID endpoint GET /v1/<post_id>."""
+class TestGetPostByPostIDRoute(unittest.TestCase):
+    """Test get post by post ID endpoint GET /v1/<post_id>."""
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
@@ -206,6 +206,44 @@ class TestGetPostByIDRoute(unittest.TestCase):
         self.assertEqual(data["num_posts"], num_expected_posts)
         self.assertEqual(len(data["posts"]), num_expected_posts)
         self.assertEqual(data["posts"][0]["_id"], post_id)
+
+
+class TestGetPostByEventIDRoute(unittest.TestCase):
+    """Test get post by event  endpoint GET /v1/by_event/<event_id>."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        self.mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        app.config["COLLECTION"].insert_many(self.mock_posts)
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_no_post_found(self):
+        """Can't find post with given event ID in the db."""
+        num_expected_posts = 0
+        id_not_in_db = "C001""1C3D""C0FFEE""D0000000DE"
+        result = self.client.get(f"/v1/by_event/{id_not_in_db}")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
+
+    def test_yes_post_found(self):
+        """Find multiple posts by event ID."""
+        event_id = self.mock_posts[0]["event_id"]
+        expected_posts = [
+            post for post in self.mock_posts if post["event_id"] is event_id]
+        num_expected_posts = len(expected_posts)
+        result = self.client.get(f"/v1/by_event/{str(event_id)}")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
+        self.assertEqual(data["posts"], expected_posts)
 
 
 if __name__ == '__main__':
