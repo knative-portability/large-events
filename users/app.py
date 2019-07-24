@@ -43,14 +43,17 @@ def add_update_user():
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
         return "Error: You must supply a valid gauth_token.", 400
-    # TODO(mukobi) verify token and get the user object
     try:
-        user = None
-        if user is None:
-            raise NotImplementedError
+        user = get_user_from_gauth_token(gauth_token)
         return upsert_user_in_db(user, app.config["COLLECTION"]), 201
-    except NotImplementedError:
-        return "Error: Authentication not yet implemented", 400
+    except NotImplementedError as error:
+        return f"Error: {error}", 503
+
+
+def get_user_from_gauth_token(gauth_token):
+    """Validate the Google auth token and return it's user object."""
+    # TODO(mukobi) verify token and get the user object
+    raise NotImplementedError("Authentication not yet implemented")
 
 
 def upsert_user_in_db(user_object, users_collection):
