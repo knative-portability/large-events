@@ -20,8 +20,10 @@
 
 import os
 import uuid
+import json
 import pymongo
-from flask import Flask, jsonify, request
+from bson import json_util, ObjectId
+from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
 from google.cloud import storage
 
@@ -48,7 +50,7 @@ def upload_new_post():
             "text":  request.form["text"],
             "files": [file for file in request.files.values()]
         }
-        return str(upload_new_post_to_db(post, DB.posts_collection)), 201
+        return str(upload_new_post_to_db(post, POSTS_COLLECTION)), 201
     except BadRequestKeyError as error:
         return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
     except AttributeError as error:
@@ -60,28 +62,71 @@ def upload_new_post():
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
     """Get all posts for the whole event."""
-    # TODO(mukobi) change from fake data to real query from db
-    return jsonify({
-        "post_id": "abc123",
-        "event_id": "all",
-        "author_id": "mukobi",
-        "created_at": "2017-10-06T00:00:00+00:00",
-        "text": "This is the description of a post. The post is tagged with "
-                "the event id of 'all' and should be viewable by default.",
-        "images": [
-            "https://upload.wikimedia.org/wikipedia/commons/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg",
-            "http://4.bp.blogspot.com/-w8U75TCuhgU/Tzw8TmaclvI/AAAAAAAABJ0/6fMMcRLAceM/s1600/Rabbit3.jpg"
-        ]})
+    # serialize otherwise nonserializable ObjectIDs
+    post_list = find_posts_in_db(POSTS_COLLECTION)
+    return serialize_posts_to_json(post_list)
 
 
 @app.route('/v1/<post_id>', methods=['GET'])
 def get_post_by_id(post_id):
     """Get the post with the specified ID."""
+    # serialize otherwise nonserializable ObjectIDs
+    post_list = find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id))
+    return serialize_posts_to_json(post_list)
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
 def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
+    # serialize otherwise nonserializable ObjectIDs
+    post_list = find_posts_in_db(POSTS_COLLECTION, event_id=event_id)
+    return serialize_posts_to_json(post_list)
+
+
+def find_posts_in_db(collection, post_id=None, event_id=None):
+    """Finds all matching posts in the database.
+
+    Query is configured using one or none of args `post_id` and `event_id`.
+    If one is not None, searches for matching posts.
+    If both are not None, post_id takes precedence.
+    If both are None, then searches for all posts.
+
+    Args:
+        collection (pymongo.collection): The collection to search in.
+        post_id (string): ID of a post to search for.
+        event_id (string): ID of an event to find all posts for.
+
+    Returns:
+        list: List of all matching post objects.
+    """
+    query = {}
+    if post_id is not None:
+        query = {"_id": post_id}
+    elif event_id is not None:
+        query = {"event_id": event_id}
+    cursor = collection.find(query)
+    list_of_posts = []
+    for post in cursor:
+        list_of_posts.append(post)
+    return list_of_posts
+
+
+def serialize_posts_to_json(post_list):
+    """Serialize the post list into a json object.
+
+    Used for sending the results of a post query in an HTTP response.
+    Handles non-serializable fields like bson.ObjectID.
+
+    Args:
+        post_list (list): List of post objects to serialize
+
+    Returns:
+        dict: json-like wrapper around the list of posts in a "posts" key
+            and the number of posts in a "num_posts" key.
+    """
+    return json.loads(json_util.dumps(
+        {"posts": post_list,
+         "num_posts": len(post_list)}))
 
 
 def upload_new_post_to_db(post, collection):
@@ -143,7 +188,7 @@ def upload_file_to_cloud(file):
 def connect_to_cloud_storage():  # pragma: no cover
     """Connect to Google Cloud Storage using env vars."""
 
-    class StorageNotConnectedError(EnvironmentError):
+    class StorageNotConnectedError(ConnectionError):
         """Raised when not able to connect to the storage."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
@@ -166,7 +211,7 @@ CLOUD_STORAGE_BUCKET = connect_to_cloud_storage()
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
-    class DBNotConnectedError(EnvironmentError):
+    class DBNotConnectedError(ConnectionError):
         """Raised when not able to connect to the db."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
@@ -179,10 +224,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).posts_db
+    return pymongo.MongoClient(mongodb_uri).posts_db.posts_collection
 
 
-DB = connect_to_mongodb()  # None if can't connect
+POSTS_COLLECTION = connect_to_mongodb()  # None if can't connect
 
 
 if __name__ == "__main__":  # pragma: no cover
