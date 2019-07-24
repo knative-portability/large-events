@@ -51,7 +51,7 @@ class TestServe(unittest.TestCase):
         self.assertEqual(app.get_users_url(), existing_url)
 
         mock_os.environ.get.return_value = None
-        with self.assertRaises(Exception):
+        with self.assertRaises(NameError):
             app.get_users_url()
 
 
