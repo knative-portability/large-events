@@ -18,7 +18,8 @@
 import unittest
 from unittest import mock
 import io
-from bson import ObjectId
+import collections
+from bson import ObjectId, json_util
 import mongomock
 from app import app
 
@@ -45,6 +46,30 @@ INVALID_REQUEST_NO_TEXT_NOR_FILES = {
     "text": ""}
 INVALID_REQUEST_NOT_ENOUGH_ATTRS = {
     "where_did_all_the_attributes_go?": "I don't know"}
+
+DbFile = collections.namedtuple('File', 'filename')
+MOCK_DB_FILE = DbFile(filename="the name of a file")
+
+VALID_DB_POST_FULL = {
+    "event_id": "abc123",
+    "author_id": "jrr_tolkien",
+    "text": "This is a very valid post with text and files.",
+    "files": [
+        MOCK_DB_FILE,
+        MOCK_DB_FILE
+    ]}
+VALID_DB_POST_TEXT_NO_FILES = {
+    "event_id": "abc123",
+    "author_id": "ray_bradbury",
+    "text": "This post has no files but is still valid.",
+    "files": []}
+VALID_DB_POST_FILES_NO_TEXT = {
+    "event_id": "abc123",
+    "author_id": "No text is alright if I have files.",
+    "text": "",
+    "files": [
+        MOCK_DB_FILE
+    ]}
 
 
 class TestUploadNewPostRoute(unittest.TestCase):
@@ -105,6 +130,46 @@ class TestUploadNewPostRoute(unittest.TestCase):
                                   content_type="multipart/form-data")
         self.assertEqual(result.status_code, 400)
         self.assert_count_in_collection({}, 0)
+
+
+class TestGetAllPostsRoute(unittest.TestCase):
+    """Test get all posts endpoint GET /v1/."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def assert_count_in_collection(self, query, target_count):
+        """Assert the count of a given object in the database."""
+        self.assertEqual(
+            app.config["COLLECTION"].count_documents(query), target_count)
+
+    def test_no_posts_found(self):
+        """Get all posts but no posts are in the db."""
+        num_expected_posts = 0
+        self.assert_count_in_collection({}, num_expected_posts)
+        result = self.client.get("/v1/")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
+
+    def test_multiple_posts_found(self):
+        """Get all posts and multiple posts in the db."""
+        mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        num_expected_posts = len(mock_posts)
+        app.config["COLLECTION"].insert_many(mock_posts)
+        self.assert_count_in_collection({}, num_expected_posts)
+        result = self.client.get("/v1/")
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data["num_posts"], num_expected_posts)
+        self.assertEqual(len(data["posts"]), num_expected_posts)
 
 
 if __name__ == '__main__':
