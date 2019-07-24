@@ -50,7 +50,7 @@ def upload_new_post():
             "text":  request.form["text"],
             "files": [file for file in request.files.values()]
         }
-        return str(upload_new_post_to_db(post, POSTS_COLLECTION)), 201
+        return str(upload_new_post_to_db(post, app.config["COLLECTION"])), 201
     except BadRequestKeyError as error:
         return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
     except AttributeError as error:
@@ -63,7 +63,7 @@ def upload_new_post():
 def get_all_posts():
     """Get all posts for the whole event."""
     # serialize otherwise nonserializable ObjectIDs
-    post_list = find_posts_in_db(POSTS_COLLECTION)
+    post_list = find_posts_in_db(app.config["COLLECTION"])
     return serialize_posts_to_json(post_list)
 
 
@@ -71,7 +71,8 @@ def get_all_posts():
 def get_post_by_id(post_id):
     """Get the post with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    post_list = find_posts_in_db(POSTS_COLLECTION, post_id=ObjectId(post_id))
+    post_list = find_posts_in_db(
+        app.config["COLLECTION"], post_id=ObjectId(post_id))
     return serialize_posts_to_json(post_list)
 
 
@@ -79,7 +80,7 @@ def get_post_by_id(post_id):
 def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    post_list = find_posts_in_db(POSTS_COLLECTION, event_id=event_id)
+    post_list = find_posts_in_db(app.config["COLLECTION"], event_id=event_id)
     return serialize_posts_to_json(post_list)
 
 
@@ -227,7 +228,7 @@ def connect_to_mongodb():  # pragma: no cover
     return pymongo.MongoClient(mongodb_uri).posts_db.posts_collection
 
 
-POSTS_COLLECTION = connect_to_mongodb()  # None if can't connect
+app.config["COLLECTION"] = connect_to_mongodb()
 
 
 if __name__ == "__main__":  # pragma: no cover
