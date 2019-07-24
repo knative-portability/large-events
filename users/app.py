@@ -33,7 +33,7 @@ def get_authorization():
     user = request.form.get('user_id')
     if user is None:
         return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = find_authorization_in_db(user, DB.users_collection)
+    authorized = find_authorization_in_db(user, USERS_COLLECTION)
     return jsonify(edit_access=authorized)
 
 
@@ -130,10 +130,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).users_db
+    return pymongo.MongoClient(mongodb_uri).users_db.users_collection
 
 
-DB = connect_to_mongodb()  # None if can't connect
+USERS_COLLECTION = connect_to_mongodb()
 
 
 if __name__ == "__main__":  # pragma: no cover
