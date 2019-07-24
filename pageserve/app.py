@@ -81,6 +81,7 @@ def get_events():
     if r.status_code == 200:
         return parsed_events(r.json())
     else:
+        # TODO(cmei4444): handle error in a way that doesn't break page display
         return "Error in getting events"
 
 
