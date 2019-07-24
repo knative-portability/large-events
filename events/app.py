@@ -10,7 +10,7 @@ from eventclass import Event
 app = Flask(__name__)
 
 
-class DBNotConnectedError(EnvironmentError):
+class DBNotConnectedError(ConnectionError):
     """Raised when not able to connect to the db."""
 
 

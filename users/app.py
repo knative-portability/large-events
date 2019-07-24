@@ -117,7 +117,7 @@ def find_authorization_in_db(username, users_collection):
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
-    class DBNotConnectedError(EnvironmentError):
+    class DBNotConnectedError(ConnectionError):
         """Raised when not able to connect to the db."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
