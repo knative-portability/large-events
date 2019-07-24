@@ -19,10 +19,10 @@ import requests
 
 from flask import Flask, render_template, request, Response
 
-app = Flask(__name__)
+APP = Flask(__name__)
 
 
-@app.route('/v1/')
+@APP.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
@@ -35,7 +35,7 @@ def index():
     )
 
 
-@app.route('/v1/events')
+@APP.route('/v1/events')
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
@@ -128,4 +128,4 @@ def get_user():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    APP.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

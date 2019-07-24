@@ -55,5 +55,16 @@ class TestServe(unittest.TestCase):
             app.get_users_url()
 
 
+class TestEndpoints(unittest.TestCase):
+    def setUp(self):
+        """Set up test client."""
+        self.client = app.APP.test_client()
+
+    def test_index(self):
+        """Check that index page is rendered correctly."""
+        self.client.get('/v1/')
+        self.assert_template_used('index.html')
+
+
 if __name__ == '__main__':
     unittest.main()
