@@ -40,17 +40,17 @@ def get_authorization():
 @app.route('/v1/', methods=['PUT'])
 def add_update_user():
     """Add or update the user in the db and returns new user object."""
-    user = request.getJSON()
-    if user is None:
-        # TODO(mukobi) validate the user object has everything it needs
-        return jsonify(error="You must supply a valid user in the body")
-    # TODO(mukobi) add or update the user in the database
-    added_new_user = True
-    # TODO(mukobi) get the new user object from the db to return
-    user_object = {
-        "user_id": "0", "username": "Dummy User", "edit_access": False
-    }
-    return jsonify(user_object), (201 if added_new_user else 200)
+    gauth_token = request.form.get('gauth_token')
+    if gauth_token is None:
+        return "Error: You must supply a valid gauth_token.", 400
+    # TODO(mukobi) verify token and get the user object
+    try:
+        user = None
+        if user is None:
+            raise NotImplementedError
+        return upsert_user_in_db(user, app.config["COLLECTION"]), 201
+    except NotImplementedError:
+        return "Error: Authentication not yet implemented", 400
 
 
 def upsert_user_in_db(user_object, users_collection):
@@ -137,4 +137,5 @@ app.config["COLLECTION"] = connect_to_mongodb()
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run(debug=True, host='0.0.0.0',
+            port=int(os.environ.get('PORT', 8080)))
