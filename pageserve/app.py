@@ -68,7 +68,7 @@ def get_posts():
     return parsed_posts(posts)
 
 
-def parsed_posts(posts):
+def parse_posts(posts):
     # TODO(cmei4444): implement parsing on posts pulled from posts service in
     # a format for web display
     return posts
@@ -85,7 +85,7 @@ def get_events():
         return "Error in getting events"
 
 
-def parsed_events(events_dict):
+def parse_events(events_dict):
     """Parses response from events service to be used in HTML templates.
 
     Args:
