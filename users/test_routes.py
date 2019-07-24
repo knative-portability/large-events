@@ -37,7 +37,7 @@ FAKE_USERS = [
 
 
 class TestGetAuthorization(unittest.TestCase):
-    """Test get authorization endpoint /v1/authorization."""
+    """Test get authorization endpoint POST /v1/authorization."""
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
@@ -74,6 +74,16 @@ class TestGetAuthorization(unittest.TestCase):
         """Try to get authorization but don't supply user_id."""
         result = self.client.post("/v1/authorization")
         self.assertEqual(result.status_code, 400)
+
+
+class TestAddUpdateUser(unittest.TestCase):
+    """Test add/update user endpoint PUT /v1/."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
 
 
 if __name__ == '__main__':
