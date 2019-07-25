@@ -42,7 +42,7 @@ def add_update_user():
     """Add or update the user in the db and returns new user object."""
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
-        return "Error: You must supply a valid gauth_token.", 400
+        return "Error: You must authenticate through Google.", 400
     try:
         user = get_user_from_gauth_token(gauth_token)
         return upsert_user_in_db(user, app.config["COLLECTION"]), 201
