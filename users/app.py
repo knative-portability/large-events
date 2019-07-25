@@ -42,8 +42,8 @@ def get_authorization():
 
 
 @app.route('/v1/authenticate', methods=['PUT'])
-def add_update_user():
-    """Add or update the user in the db and returns new user object.
+def authenticate_user():
+    """Authenticate user, upsert in the db, and return new user object.
 
     Request data:
         'gauth_token': Google ID token to authenticate.
