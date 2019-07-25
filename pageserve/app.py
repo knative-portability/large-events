@@ -22,11 +22,26 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)
 
 
+def config_endpoints(endpoints):
+    """Sets given list of endpoints globally from environment variables.
+
+    Throws a NameError if any endpoint is not found."""
+    for endpoint in endpoints:
+        if endpoint in os.environ:
+            app.config[endpoint] = os.environ.get(endpoint)
+        else:
+            raise NameError("Endpoint {} not defined.".format(endpoint))
+
+
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
+
+
 @app.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user, get_users_url()))
+    is_auth = has_edit_access(get_user_info(user,
+                                            app.config['USERS_ENDPOINT']))
     posts = get_posts()
     return render_template(
         'index.html',
@@ -39,7 +54,8 @@ def index():
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user, get_users_url()))
+    is_auth = has_edit_access(get_user_info(user,
+                                            app.config['USERS_ENDPOINT']))
     events = get_events()
     return render_template(
         'events.html',
@@ -65,10 +81,10 @@ def get_posts():
               'created_at': '7-9-2019',
               'text': 'abcdefghi',
               }]
-    return parsed_posts(posts)
+    return parse_posts(posts)
 
 
-def parsed_posts(posts):
+def parse_posts(posts):
     # TODO(cmei4444): implement parsing on posts pulled from posts service in
     # a format for web display
     return posts
@@ -76,37 +92,29 @@ def parsed_posts(posts):
 
 def get_events():
     """Gets all sub-events from events service."""
-    # TODO(cmei4444): integrate with events service to pull event info from
-    # database
-    events = [{'event_id': '1',
-               'name': 'concert 1',
-               'description': 'listen to fun music here!',
-               'author': 'admin',
-               'created_at': '7-9-2019',
-               'event_time': '7-10-2019',
-               },
-              {'event_id': '2',
-               'name': 'concert 2',
-               'description': 'listen to fun music here!',
-               'author': 'admin',
-               'created_at': '7-9-2019',
-               'event_time': '7-12-2019',
-               }]
-    return parsed_events(events)
+    url = app.config['EVENTS_ENDPOINT']
+    r = requests.get(url, params={})
+    if r.status_code == 200:
+        return parse_events(r.json())
+    else:
+        # TODO(cmei4444): handle error in a way that doesn't break page display
+        return "Error in getting events"
 
 
-def parsed_events(events):
-    # TODO(cmei4444): implement parsing on events pulled from events service in
-    # a format for web display
-    return events
+def parse_events(events_dict):
+    """Parses response from events service to be used in HTML templates.
 
+    Args:
+        events_dict: JSON returned by events service, includes:
+            events (list): list of events
+            num_events (int): number of events returned
 
-def get_users_url():
-    """Retrieves users URL, throws error if not found."""
-    url = os.environ.get("USER_ENDPOINT")
-    if url is None:
-        raise Exception("Users endpoint was undefined.")
-    return url
+    Returns:
+        list: parsed list of events.
+    """
+    # TODO(cmei4444): implement parsing on events - timestamps are formatted
+    # unreadably currently
+    return events_dict['events']
 
 
 def get_user_info(user, url):
