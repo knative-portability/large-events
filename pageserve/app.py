@@ -22,10 +22,9 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)  # pylint: disable=invalid-name
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-# TODO(mukobi) make env var $USERS_ENDPOINT stop at /v1
+# TODO(mukobi) make env var $USERS_ENDPOINT stop at /v1 (remove /authorization)
 # Makes this cleaner after cmei444 merges PR #26
-app.config["GAUTH_CALLBACK_ENDPOINT"] = os.environ.get(
-    "USERS_ENDPOINT").replace("/authorization", '') + "/authentication/callback"
+app.config["GAUTH_CALLBACK_ENDPOINT"] = "TODO: Construct authentication endpoint"
 
 
 @app.route('/v1/')
