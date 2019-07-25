@@ -21,12 +21,17 @@ from flask import Flask, render_template, request, Response
 
 app = Flask(__name__)
 
-ENDPOINTS = ['USERS_ENDPOINT', 'EVENTS_ENDPOINT']
-for ENDPOINT in ENDPOINTS:
-    if ENDPOINT in os.environ:
-        app.config[ENDPOINT] = os.environ.get(ENDPOINT)
-    else:
-        raise NameError("Endpoint {} not defined.".format(ENDPOINT))
+
+def config_endpoints(endpoints):
+    ENDPOINTS = ['USERS_ENDPOINT', 'EVENTS_ENDPOINT']
+    for ENDPOINT in ENDPOINTS:
+        if ENDPOINT in os.environ:
+            app.config[ENDPOINT] = os.environ.get(ENDPOINT)
+        else:
+            raise NameError("Endpoint {} not defined.".format(ENDPOINT))
+
+
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
 
 @app.route('/v1/')
@@ -74,7 +79,7 @@ def get_posts():
               'created_at': '7-9-2019',
               'text': 'abcdefghi',
               }]
-    return parsed_posts(posts)
+    return parse_posts(posts)
 
 
 def parse_posts(posts):
@@ -88,7 +93,7 @@ def get_events():
     url = app.config['EVENTS_ENDPOINT']
     r = requests.get(url, params={})
     if r.status_code == 200:
-        return parsed_events(r.json())
+        return parse_events(r.json())
     else:
         # TODO(cmei4444): handle error in a way that doesn't break page display
         return "Error in getting events"
