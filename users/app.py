@@ -32,8 +32,8 @@ def get_authorization():
     """Finds whether the given user is authorized for edit access."""
     user = request.form.get('user_id')
     if user is None:
-        return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = find_authorization_in_db(user, DB.users_collection)
+        return "Error: You must supply a 'user_id' POST parameter!", 400
+    authorized = find_authorization_in_db(user, app.config["COLLECTION"])
     return jsonify(edit_access=authorized)
 
 
@@ -117,7 +117,7 @@ def find_authorization_in_db(username, users_collection):
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
-    class DBNotConnectedError(EnvironmentError):
+    class DBNotConnectedError(ConnectionError):
         """Raised when not able to connect to the db."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
@@ -130,10 +130,10 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).users_db
+    return pymongo.MongoClient(mongodb_uri).users_db.users_collection
 
 
-DB = connect_to_mongodb()  # None if can't connect
+app.config["COLLECTION"] = connect_to_mongodb()
 
 
 if __name__ == "__main__":  # pragma: no cover
