@@ -21,11 +21,6 @@ from flask import Flask, render_template, request, Response
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-# TODO(mukobi) make env var $USERS_ENDPOINT stop at /v1 (remove /authorization)
-# Makes this cleaner after cmei444 merges PR #26
-app.config["GAUTH_CALLBACK_ENDPOINT"] = "TODO: Construct authentication endpoint"
-
 
 def config_endpoints(endpoints):
     """Sets given list of endpoints globally from environment variables.
@@ -40,13 +35,18 @@ def config_endpoints(endpoints):
 
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
+                                         + "/authenticate")
+
 
 @app.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']))
+                                            app.config['USERS_ENDPOINT']
+                                            + "/authorization"))
     posts = get_posts()
     return render_template(
         'index.html',
@@ -61,7 +61,8 @@ def show_events():
     """Displays page with all sub-events."""
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']))
+                                            app.config['USERS_ENDPOINT']
+                                            + "/authorization"))
     events = get_events()
     return render_template(
         'events.html',
