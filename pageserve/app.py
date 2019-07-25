@@ -19,7 +19,7 @@ import requests
 
 from flask import Flask, render_template, request, Response
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
 
 
 def config_endpoints(endpoints):
@@ -35,18 +35,24 @@ def config_endpoints(endpoints):
 
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
+                                         + "authenticate")
+
 
 @app.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']))
+                                            app.config['USERS_ENDPOINT']
+                                            + "authorization"))
     posts = get_posts()
     return render_template(
         'index.html',
         posts=posts,
         auth=is_auth,
+        app_config=app.config
     )
 
 
@@ -55,12 +61,14 @@ def show_events():
     """Displays page with all sub-events."""
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']))
+                                            app.config['USERS_ENDPOINT']
+                                            + "authorization"))
     events = get_events()
     return render_template(
         'events.html',
         events=events,
         auth=is_auth,
+        app_config=app.config
     )
 
 
