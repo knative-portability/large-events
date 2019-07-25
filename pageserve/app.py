@@ -37,7 +37,7 @@ config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
-                                         + "/authenticate")
+                                         + "authenticate")
 
 
 @app.route('/v1/')
@@ -46,7 +46,7 @@ def index():
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
                                             app.config['USERS_ENDPOINT']
-                                            + "/authorization"))
+                                            + "authorization"))
     posts = get_posts()
     return render_template(
         'index.html',
@@ -62,7 +62,7 @@ def show_events():
     user = get_user()
     is_auth = has_edit_access(get_user_info(user,
                                             app.config['USERS_ENDPOINT']
-                                            + "/authorization"))
+                                            + "authorization"))
     events = get_events()
     return render_template(
         'events.html',
