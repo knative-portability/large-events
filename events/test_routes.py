@@ -32,6 +32,7 @@ INVALID_INFO_EXTRA_ATTRIBUTE = {
     'event_time': EXAMPLE_TIME,
     'extra_attribute': 'I am invalid'}
 
+# TODO(cmei4444): use for posting event information to /v1/add
 FAKE_INFO = [
     VALID_INFO,
     VALID_INFO_WITH_ID
