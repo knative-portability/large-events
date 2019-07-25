@@ -19,7 +19,9 @@ import requests
 
 from flask import Flask, render_template, request, Response
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 
 
 @app.route('/v1/')
@@ -32,6 +34,7 @@ def index():
         'index.html',
         posts=posts,
         auth=is_auth,
+        app_config=app.config
     )
 
 
@@ -45,6 +48,7 @@ def show_events():
         'events.html',
         events=events,
         auth=is_auth,
+        app_config=app.config
     )
 
 
