@@ -43,7 +43,16 @@ def get_authorization():
 
 @app.route('/v1/authenticate', methods=['PUT'])
 def add_update_user():
-    """Add or update the user in the db and returns new user object."""
+    """Add or update the user in the db and returns new user object.
+
+    Request data:
+        'gauth_token': Google ID token to authenticate.
+
+    Response:
+        201: user object as it is in the db if authentication
+            was successful.
+        400: error message if authentication was not successful.
+    """
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
         return "Error: You must supply a valid gauth_token.", 400
@@ -53,9 +62,10 @@ def add_update_user():
             "user_id": idinfo["sub"],
             "name": idinfo["name"],
             "is_organizer": False}  # authorization defaults false
-        return upsert_user_in_db(user_object, app.config["COLLECTION"]), 201
-    except NotImplementedError as error:
-        return f"Error: {error}", 503
+        upsert_user_in_db(user_object, app.config["COLLECTION"])
+        return user_object, 201
+    except (AttributeError, ValueError) as error:
+        return f"Error: {error}", 400
 
 
 def get_user_from_gauth_token(gauth_token):
@@ -74,20 +84,15 @@ def get_user_from_gauth_token(gauth_token):
     Raises:
         ValueError: Token is invalid.
     """
-    try:
-            # Specify the CLIENT_ID of the app that accesses the backend:
-        idinfo = id_token.verify_oauth2_token(
-            gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
+    # Authenticate token and match to client ID
+    idinfo = id_token.verify_oauth2_token(
+        gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
 
-        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            raise ValueError('Wrong authentication token issuer.')
+    if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+        raise ValueError('Wrong authentication token issuer.')
 
-        # ID token is valid. Return the user object
-        return idinfo
-
-    except ValueError:
-        # Invalid token
-        raise ValueError('Token invalid. Log out then try again.')
+    # ID token is valid. Return the user object.
+    return idinfo
 
 
 def upsert_user_in_db(user_object, users_collection):
