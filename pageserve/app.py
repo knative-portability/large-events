@@ -103,7 +103,7 @@ def parsed_events(events):
 
 def get_users_url():
     """Retrieves users URL, throws error if not found."""
-    url = os.environ.get("USER_ENDPOINT")
+    url = os.environ.get("USERS_ENDPOINT")
     if url is None:
         raise Exception("Users endpoint was undefined.")
     return url
