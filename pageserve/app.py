@@ -23,12 +23,14 @@ app = Flask(__name__)
 
 
 def config_endpoints(endpoints):
-    ENDPOINTS = ['USERS_ENDPOINT', 'EVENTS_ENDPOINT']
-    for ENDPOINT in ENDPOINTS:
-        if ENDPOINT in os.environ:
-            app.config[ENDPOINT] = os.environ.get(ENDPOINT)
+    """Sets given list of endpoints globally from environment variables.
+
+    Throws a NameError if any endpoint is not found."""
+    for endpoint in endpoints:
+        if endpoint in os.environ:
+            app.config[endpoint] = os.environ.get(endpoint)
         else:
-            raise NameError("Endpoint {} not defined.".format(ENDPOINT))
+            raise NameError("Endpoint {} not defined.".format(endpoint))
 
 
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
