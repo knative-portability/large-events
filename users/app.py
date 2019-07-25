@@ -55,7 +55,7 @@ def authenticate_user():
     """
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
-        return "Error: You must supply a valid gauth_token.", 400
+        return "Error: You must authenticate through Google.", 400
     try:
         idinfo = get_user_from_gauth_token(gauth_token)
         user_object = {
