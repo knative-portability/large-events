@@ -23,8 +23,12 @@ Features include
 import os
 from flask import Flask, jsonify, request
 import pymongo
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = Flask(__name__)  # pylint: disable=invalid-name
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -51,9 +55,35 @@ def add_update_user():
 
 
 def get_user_from_gauth_token(gauth_token):
-    """Validate the Google auth token and return it's user object."""
-    # TODO(mukobi) verify token and get the user object
-    raise NotImplementedError("Authentication not yet implemented")
+    """Validate the Google auth token and return it's user object.
+
+    Args:
+        gauth_token (str): Google ID token to authenticate.
+
+    Returns:
+        dict: User object. Contains attributes including:
+            'sub': Unique user ID.
+            'name': Full name of user.
+            'email': Email of user.
+            ...
+
+    Raises:
+        ValueError: Token is invalid.
+    """
+    try:
+            # Specify the CLIENT_ID of the app that accesses the backend:
+        idinfo = id_token.verify_oauth2_token(
+            gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
+
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError('Wrong authentication token issuer.')
+
+        # ID token is valid. Return the user object
+        return idinfo
+
+    except ValueError:
+        # Invalid token
+        raise ValueError('Token invalid. Log out then try again.')
 
 
 def upsert_user_in_db(user_object, users_collection):
