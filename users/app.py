@@ -41,15 +41,19 @@ def get_authorization():
     return jsonify(edit_access=authorized)
 
 
-@app.route('/v1/', methods=['PUT'])
+@app.route('/v1/authenticate', methods=['PUT'])
 def add_update_user():
     """Add or update the user in the db and returns new user object."""
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
         return "Error: You must supply a valid gauth_token.", 400
     try:
-        user = get_user_from_gauth_token(gauth_token)
-        return upsert_user_in_db(user, app.config["COLLECTION"]), 201
+        idinfo = get_user_from_gauth_token(gauth_token)
+        user_object = {
+            "user_id": idinfo["sub"],
+            "name": idinfo["name"],
+            "is_organizer": False}  # authorization defaults false
+        return upsert_user_in_db(user_object, app.config["COLLECTION"]), 201
     except NotImplementedError as error:
         return f"Error: {error}", 503
 
