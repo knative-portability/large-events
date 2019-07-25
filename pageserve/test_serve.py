@@ -43,17 +43,6 @@ class TestServe(unittest.TestCase):
         self.assertTrue(app.has_edit_access(has_access))
         self.assertFalse(app.has_edit_access(no_access))
 
-    @patch('app.os')
-    def test_user_url(self, mock_os):
-        """Test retrieval of users URL when defined or not defined."""
-        existing_url = "this url exists!"
-        mock_os.environ.get.return_value = existing_url
-        self.assertEqual(app.get_users_url(), existing_url)
-
-        mock_os.environ.get.return_value = None
-        with self.assertRaises(NameError):
-            app.get_users_url()
-
 
 if __name__ == '__main__':
     unittest.main()
