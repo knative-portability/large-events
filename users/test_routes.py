@@ -42,7 +42,7 @@ IDINFO_VALID = {
     "name": "John Doe"}
 IDINFO_INVALID_ISSUER = {
     "iss": "malicious.site.net"}
-DUMMY_GAUTH_PUT_DATA = {"gauth_token": "fake_token_0123"}
+DUMMY_GAUTH_REQUEST_DATA = {"gauth_token": "fake_token_0123"}
 
 
 class TestGetAuthorization(unittest.TestCase):
@@ -86,7 +86,7 @@ class TestGetAuthorization(unittest.TestCase):
 
 
 class TestAuthenticateUser(unittest.TestCase):
-    """Test authenticate user endpoint PUT /v1/authenticate."""
+    """Test authenticate user endpoint POST /v1/authenticate."""
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
@@ -111,15 +111,15 @@ class TestAuthenticateUser(unittest.TestCase):
     def test_valid_token(self):
         """Simulate extracting a valid token."""
         self.verify_oauth2_token.return_value = IDINFO_VALID
-        result = self.client.put(
-            "/v1/authenticate", data=DUMMY_GAUTH_PUT_DATA)
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = json.loads(result.data)
         self.assert_equal_idinfos(response_body, IDINFO_VALID)
         self.assertEqual(result.status_code, 201)
 
     def test_no_authentication_token(self):
         """No token provided."""
-        result = self.client.put(
+        result = self.client.post(
             "/v1/authenticate")
         response_body = result.data.decode()
         self.assertIn("Error", response_body)
@@ -128,8 +128,8 @@ class TestAuthenticateUser(unittest.TestCase):
     def test_bad_issuer(self):
         """Bad token issuer (not Google Accounts)."""
         self.verify_oauth2_token.return_value = IDINFO_INVALID_ISSUER
-        result = self.client.put(
-            "/v1/authenticate", data=DUMMY_GAUTH_PUT_DATA)
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = result.data.decode()
         self.assertIn("Error", response_body)
         self.assertEqual(result.status_code, 400)
@@ -142,8 +142,8 @@ class TestAuthenticateUser(unittest.TestCase):
         otherwise invalid.
         """
         self.verify_oauth2_token.side_effect = ValueError("Bad token.")
-        result = self.client.put(
-            "/v1/authenticate", data=DUMMY_GAUTH_PUT_DATA)
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = result.data.decode()
         self.assertIn("Error", response_body)
         self.assertEqual(result.status_code, 400)

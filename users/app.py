@@ -41,7 +41,7 @@ def get_authorization():
     return jsonify(edit_access=authorized)
 
 
-@app.route('/v1/authenticate', methods=['PUT'])
+@app.route('/v1/authenticate', methods=['POST'])
 def authenticate_user():
     """Authenticate user, upsert in the db, and return new user object.
 
