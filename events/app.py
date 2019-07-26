@@ -10,7 +10,7 @@ from eventclass import Event
 app = Flask(__name__)
 
 
-class DBNotConnectedError(EnvironmentError):
+class DBNotConnectedError(ConnectionError):
     """Raised when not able to connect to the db."""
 
 
@@ -34,7 +34,7 @@ def connect_to_mongodb():
     return pymongo.MongoClient(mongodb_uri).eventsDB.all_events
 
 
-EVENTS_COLL = connect_to_mongodb()  # None if can't connect
+app.config["COLLECTION"] = connect_to_mongodb()  # None if can't connect
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -52,7 +52,7 @@ def add_event():
             response="Event info was entered incorrectly.",
         )
     try:
-        EVENTS_COLL.insert_one(event.dict)
+        app.config["COLLECTION"].insert_one(event.dict)
         return Response(
             status=201,
         )
@@ -78,7 +78,7 @@ def edit_event(event_id):
 def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
-        events = EVENTS_COLL.find({})
+        events = app.config["COLLECTION"].find({})
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
         # TODO(cmei4444): test with pageserve to make sure the json format is
