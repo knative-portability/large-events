@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 <!--
 Copyright 2019 The Knative Authors
 
@@ -13,62 +14,61 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<html lang="en">
-    <head>
 
-    </head>
-    <body>
-        <h1>Event Main Page</h1>
-        <h2>test user auth</h2>
+{% block header %}
+<h1>{% block title %}Event Main Page{% endblock title %}</h1>
+{% endblock header %}
 
-        {% if auth %}
-        <p>user has edit authorization</p>
-        {% else %}
-        <p>user does not have edit authorization</p>
-        {% endif %}
+{% block content %}
+<h2>test user auth</h2>
 
-        <a href='/v1/events'>See sub-events</a>
+{% if auth %}
+<p>user has edit authorization</p>
+{% else %}
+<p>user does not have edit authorization</p>
+{% endif %}
 
-        <h2>Past posts</h2>
-        {% for post in posts %}
-            <p>Posted by {{post.author}} at {{post.created_at}}</p>
+<a href='/v1/events'>See sub-events</a>
 
-            {% if post.type == 'text' %}
-                <p>{{post.text}}</p>
-            {% elif post.type == 'image' %}
-                <p>This is an image but we can't display it right now</p>
-            {% else %}
-                <p>This post type is unrecognized.</p>
-            {% endif %}
+<h2>Past posts</h2>
+{% for post in posts %}
+<p>Posted by {{post.author}} at {{post.created_at}}</p>
 
-            <hr/>
-        {% endfor %}
+{% if post.type == 'text' %}
+<p>{{post.text}}</p>
+{% elif post.type == 'image' %}
+<p>This is an image but we can't display it right now</p>
+{% else %}
+<p>This post type is unrecognized.</p>
+{% endif %}
 
+<hr>
 
-        <h2>Create New Post</h2>
-        <!-- TODO: add correct endpoint and make sure fields are correct-->
-        <form action="/" method="post">
-            <div> <!-- TODO(cmei4444): implement event picker -->
-                <label for="event_id">Event ID:</label>
-                <input type="text" id="event_id" name="event_id">
-            </div>
-            <div>
-                <label for="text">Text:</label>
-                <textarea type="text" rows = "5" cols = "60" id="text" name="text">
-                  Enter your post here.
-                </textarea>
-            </div>
-            <div>
-                <label for="images">Images:</label>
-                <textarea type="text" rows = "5" cols = "60" id="images" name="images">
-                  Enter image URLs here.
-                </textarea>
-            </div>
-            <input type="hidden" id="author" name="author_id" value="{{user}}">
-            <div class="button">
-                <button type="submit">Post</button>
-            </div>
-    		</form>
+{% endfor %}
 
-    </body>
-</html>
+<h2>Create New Post</h2>
+<!-- TODO: add correct endpoint and make sure fields are correct-->
+<form action="/" method="post">
+    <div> <!-- TODO(cmei4444): implement event picker -->
+        <label for="event_id">Event ID:</label>
+        <input type="text" id="event_id" name="event_id">
+    </div>
+    <div>
+        <label for="text">Text:</label>
+        <textarea type="text" rows = "5" cols = "60" id="text" name="text">
+          Enter your post here.
+        </textarea>
+    </div>
+    <div>
+        <label for="images">Images:</label>
+        <textarea type="text" rows = "5" cols = "60" id="images" name="images">
+          Enter image URLs here.
+        </textarea>
+    </div>
+    <input type="hidden" id="author" name="author_id" value="{{user}}">
+    <div class="button">
+        <button type="submit">Post</button>
+    </div>
+</form>
+
+{% endblock content%}
