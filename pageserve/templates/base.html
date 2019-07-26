@@ -40,7 +40,7 @@ limitations under the License.
             xhr.onload = function () {
                 console.log('Signed in as: ' + xhr.responseText);
             };
-            xhr.send('idtoken=' + id_token);
+            xhr.send('gauth_token=' + id_token);
         }
     </script>
     {% else %}

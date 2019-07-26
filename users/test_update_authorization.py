@@ -29,7 +29,7 @@ class TestUpdateAuthorization(unittest.TestCase):
     """Test /authorization endpoint of users service."""
 
     def setUp(self):
-        """Seed mock DB for testing"""
+        """Seed mock DB for testing."""
         self.mock_collection = mongomock.MongoClient().db.collection
         mock_data = [
             {"user_id": AUTHORIZED_USER,
