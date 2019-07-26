@@ -43,5 +43,30 @@ limitations under the License.
 {% endif %}
 
 <hr>
+
 {% endfor %}
+
+<h2>Create New Post</h2>
+<!-- TODO: add correct endpoint and make sure fields are correct-->
+<form action="/v1/add_post" method="post" enctype="multipart/form-data">
+    <div> <!-- TODO(cmei4444): implement event picker -->
+        <label for="event_id">Event ID:</label>
+        <input type="text" id="event_id" name="event_id">
+    </div>
+    <div>
+        <label for="text">Text:</label>
+        <textarea type="text" rows = "5" cols = "60" id="text" name="text">
+          Enter your post here.
+        </textarea>
+    </div>
+    <div>
+        <label for="images">Images:</label>
+        <input type="file" name="images" multiple>
+    </div>
+    <input type="hidden" id="author" name="author_id" value="{{user}}">
+    <div class="button">
+        <button type="submit">Post</button>
+    </div>
+</form>
+
 {% endblock content%}
