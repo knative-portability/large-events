@@ -109,7 +109,6 @@ def sign_out():
     Removes the 'user' object from the session.
     Redirects to the index page.
     """
-    print(f"Loggin out, found: {session['user']}")
     session.pop("user")
     return redirect(url_for("index"))
 
