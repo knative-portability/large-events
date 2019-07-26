@@ -21,7 +21,7 @@ Features include
 # limitations under the License.
 
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import pymongo
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -63,7 +63,9 @@ def authenticate_user():
             "name": idinfo["name"],
             "is_organizer": False}  # authorization defaults false
         upsert_user_in_db(user_object, app.config["COLLECTION"])
-        return user_object, 201
+        response = make_response(jsonify(user_object), 201)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
     except (AttributeError, ValueError) as error:
         return f"Error: {error}", 400
 
