@@ -20,7 +20,15 @@ limitations under the License.
     <title>{% block title %}{% endblock title %} - Large Events</title>
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+    <script>
+        // initialize gapi.auth2 to make sign out button work
+        function onLoad() {
+            gapi.load('auth2', function () {
+                gapi.auth2.init();
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -28,6 +36,7 @@ limitations under the License.
         {% block header %}{% endblock header %}
     </header>
     {% block login_buttons %}
+    {% if not session['user'] %}
     <div id="sign_in_button">
         <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
         <script>
@@ -40,13 +49,14 @@ limitations under the License.
                 xhr.onload = function () {
                     console.log('Signed in as: ' + xhr.responseText);
                     // show the "Sign out" button
-                    document.getElementById("sign_out_button").style.display = "block";
+                    window.location.reload()
                 };
                 xhr.send('gauth_token=' + id_token);
             }
         </script>
     </div>
-    <div id="sign_out_button" style="display: none;">
+    {% else %}
+    <div id="sign_out_button">
         <a href="#" onclick="signOut();">Sign out</a>
         <script>
             function signOut() {
@@ -58,6 +68,7 @@ limitations under the License.
             }
         </script>
     </div>
+    {% endif %}
     {% endblock login_buttons %}
     {% block content %}{% endblock content %}
 </body>
