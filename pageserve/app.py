@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import os
-from flask import Flask, render_template, request, Response, url_for, session
+from flask import Flask, render_template, request, url_for, session, redirect
 from werkzeug.exceptions import BadRequestKeyError  # WSGI library for Flask
 
 import requests
@@ -100,6 +100,18 @@ def authenticate():
         return response.content, response.status_code
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
+
+
+@app.route('/v1/sign_out', methods=['GET'])
+def sign_out():
+    """Sign the user out.
+
+    Removes the 'user' object from the session.
+    Redirects to the index page.
+    """
+    print(f"Loggin out, found: {session['user']}")
+    session.pop("user")
+    return redirect(url_for("index"))
 
 
 def get_posts():
