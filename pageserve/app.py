@@ -18,6 +18,7 @@ import os
 import requests
 
 from flask import Flask, render_template, request, Response, url_for
+from werkzeug.exceptions import BadRequestKeyError  # WSGI library for Flask
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -86,6 +87,14 @@ def authenticate():
             201: user object as it is in the db if authentication was successful.
             400: error message if authentication was not successful.
     """
+    try:
+        gauth_token = request.form["gauth_token"]
+        response = requests.post(
+            app.config["USERS_ENDPOINT"] + "authenticate",
+            data={"gauth_token": gauth_token})
+        return response.content, response.status_code
+    except BadRequestKeyError as error:
+        return f"Error: {error}.", 400
 
 
 def get_posts():
