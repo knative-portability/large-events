@@ -3,3 +3,4 @@ gunicorn
 pymongo[srv]
 mongomock
 google-auth
+requests
