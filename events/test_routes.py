@@ -13,11 +13,6 @@ VALID_REQUEST_INFO = {
     'description': 'This event is formatted correctly!',
     'author_id': 'admin',
     'event_time': EXAMPLE_TIME}
-VALID_REQUEST_INFO_DIFFERENT = {
-    'event_name': 'different_valid_event',
-    'description': 'This event is formatted correctly too!',
-    'author_id': 'admin',
-    'event_time': EXAMPLE_TIME}
 INVALID_REQUEST_INFO_MISSING_ATTRIBUTE = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing an author!',
@@ -38,10 +33,6 @@ VALID_DB_EVENT_WITH_ID = {
     'created_at': EXAMPLE_TIME,
     'event_id': 'unique_event_id1'}
 
-FAKE_INFO = [
-    VALID_REQUEST_INFO,
-]
-
 FAKE_EVENTS = [
     VALID_DB_EVENT,
     VALID_DB_EVENT_WITH_ID
@@ -51,13 +42,25 @@ FAKE_EVENTS = [
 class TestUploadEventRoute(unittest.TestCase):
     """Test add events endpoint POST /v1/add."""
     def setUp(self):
-        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        self.coll = mongomock.MongoClient().db.collection
+        app.config["COLLECTION"] = self.coll
         app.config["TESTING"] = True
         self.client = app.test_client()
 
-    def test_post_event(self):
-        """Test posting of event."""
-        # TODO(cmei4444): test once retrieving form info is implemented
+    def test_add_valid_event(self):
+        """Test posting of valid event."""
+        response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
+        self.assertEqual(response.status_code, 201)
+
+        self.assertEqual(self.coll.count_documents({}), 1)
+
+    def test_add_invalid_event_missing(self):
+        """Test posting of invalid event with missing attributes."""
+        response = self.client.post(
+            '/v1/add', data=INVALID_REQUEST_INFO_MISSING_ATTRIBUTE)
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(self.coll.count_documents({}), 0)
 
 
 class TestGetEventsRoute(unittest.TestCase):
