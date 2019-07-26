@@ -204,7 +204,8 @@ def get_user():
 
 # set GAuth callback to the route defined by the authenticate() function
 with app.test_request_context():
-    app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for("authenticate")
+    app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for(
+        "authenticate_and_get_user")
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
