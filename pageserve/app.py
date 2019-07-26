@@ -17,7 +17,7 @@ limitations under the License.
 import os
 import requests
 
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, url_for
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -36,8 +36,7 @@ def config_endpoints(endpoints):
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
-                                         + "authenticate")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for("/v1/authenticate")
 
 
 @app.route('/v1/')
@@ -70,6 +69,24 @@ def show_events():
         auth=is_auth,
         app_config=app.config
     )
+
+
+@app.route('/v1/authenticate', methods=['POST'])
+def authenticate():
+    """Proxy for user authentication service.
+
+    Call the users service to verify user authentication token and
+    upload user profile to users db.
+    Set user object in secure session cookies (`session[‘user’]`).
+
+    Request data:
+        gauth_token: Google ID token to authenticate.
+
+    Response:
+        Response:
+            201: user object as it is in the db if authentication was successful.
+            400: error message if authentication was not successful.
+    """
 
 
 def get_posts():
