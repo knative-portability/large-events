@@ -109,7 +109,7 @@ def sign_out():
     Removes the 'user' object from the session.
     Redirects to the index page.
     """
-    session.pop("user")
+    session.pop("user", None)
     return redirect(url_for("index"))
 
 
