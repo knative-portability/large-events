@@ -62,7 +62,7 @@ def add_post():
     """Add post by calling posts service."""
     url = app.config['POSTS_ENDPOINT'] + 'add'
     r = requests.post(url, data=request.form)
-    if r.status_code == 200:
+    if r.status_code == 201:
         return "Post successfully added"
     else:
         return r.content
@@ -73,7 +73,7 @@ def add_event():
     """Add event by calling events service."""
     url = app.config['EVENTS_ENDPOINT'] + 'add'
     r = requests.post(url, data=request.form)
-    if r.status_code == 200:
+    if r.status_code == 201:
         return "Event successfully added"
     else:
         return r.content
