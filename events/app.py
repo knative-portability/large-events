@@ -5,6 +5,7 @@ import pymongo
 from bson import json_util
 
 from flask import Flask, request, Response
+from werkzeug.exceptions import BadRequestKeyError
 from eventclass import Event
 
 app = Flask(__name__)
@@ -39,28 +40,25 @@ app.config["COLLECTION"] = connect_to_mongodb()  # None if can't connect
 
 @app.route('/v1/add', methods=['POST'])
 def add_event():
-    # TODO(cmei4444): Get event information from request data
-    info = request.form['info']
-    # TODO(cmei4444): Verify that user has event editing access
-    current_time = datetime.datetime.now()
-    info = build_event_info(info, current_time)
+    """Adds the posted event into the database."""
     try:
+        info = {
+            'name': request.form['event_name'],
+            'description': request.form['description'],
+            'author': request.form['author_id'],
+            'event_time': request.form['event_time']
+        }
+        # TODO(cmei4444): Athenticate user and verify that user has event
+        # editing access
+        current_time = datetime.datetime.now()
+        info = build_event_info(info, current_time)
         event = Event(**info)
-    except ValueError:      # missing or extra event attributes
-        return Response(
-            status=400,
-            response="Event info was entered incorrectly.",
-        )
-    try:
         app.config["COLLECTION"].insert_one(event.dict)
-        return Response(
-            status=201,
-        )
+        return "Event added.", 201
+    except BadRequestKeyError:      # missing event attributes
+        return "Event info was entered incorrectly.", 400
     except DBNotConnectedError as e:
-        return Response(
-            status=500,
-            response="Events database was undefined.",
-        )
+        return "Events database was undefined.", 500
 
 
 def build_event_info(info, time):
@@ -81,8 +79,6 @@ def get_all_events():
         events = app.config["COLLECTION"].find({})
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
-        # TODO(cmei4444): test with pageserve to make sure the json format is
-        # correct in the response
         # handle objects from MongoDB (e.g. ObjectID) that aren't JSON
         # serializable
         return json.loads(json_util.dumps(events_dict))
