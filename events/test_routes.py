@@ -35,11 +35,6 @@ VALID_DB_EVENT_WITH_ID = {
     'created_at': EXAMPLE_TIME,
     'event_id': 'unique_event_id1'}
 
-FAKE_EVENTS = [
-    VALID_DB_EVENT,
-    VALID_DB_EVENT_WITH_ID
-]
-
 
 class TestUploadEventRoute(unittest.TestCase):
     """Test add events endpoint POST /v1/add."""
@@ -75,8 +70,8 @@ class TestGetEventsRoute(unittest.TestCase):
         app.config["TESTING"] = True
         self.client = app.test_client()
         self.FAKE_EVENTS = [
-            {**VALID_INFO, 'created_at': EXAMPLE_TIME, 'event_id': None},
-            {**VALID_INFO_WITH_ID, 'created_at': EXAMPLE_TIME}
+            VALID_DB_EVENT,
+            VALID_DB_EVENT_WITH_ID
         ]
 
     def test_get_existing_events(self):
