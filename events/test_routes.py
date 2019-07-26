@@ -54,7 +54,7 @@ class TestUploadEventRoute(unittest.TestCase):
 
         self.assertEqual(self.coll.count_documents({}), 1)
 
-    def test_add_invalid_event_missing(self):
+    def test_add_invalid_event(self):
         """Test posting of invalid event with missing attributes."""
         response = self.client.post(
             '/v1/add', data=INVALID_REQUEST_INFO_MISSING_ATTRIBUTE)
