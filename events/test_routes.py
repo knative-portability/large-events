@@ -8,36 +8,43 @@ from eventclass import Event
 
 EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
-VALID_INFO = {
+VALID_REQUEST_INFO = {
+    'event_name': 'valid_event',
+    'description': 'This event is formatted correctly!',
+    'author_id': 'admin',
+    'event_time': EXAMPLE_TIME}
+VALID_REQUEST_INFO_DIFFERENT = {
+    'event_name': 'different_valid_event',
+    'description': 'This event is formatted correctly too!',
+    'author_id': 'admin',
+    'event_time': EXAMPLE_TIME}
+INVALID_REQUEST_INFO_MISSING_ATTRIBUTE = {
+    'event_name': 'invalid_event_missing',
+    'description': 'This event is missing an author!',
+    'event_time': EXAMPLE_TIME}
+
+VALID_DB_EVENT = {
     'name': 'valid_event',
     'description': 'This event is formatted correctly!',
     'author': 'admin',
-    'event_time': EXAMPLE_TIME}
-VALID_INFO_WITH_ID = {
+    'event_time': EXAMPLE_TIME,
+    'created_at': EXAMPLE_TIME,
+    'event_id': 'unique_event_id0'}
+VALID_DB_EVENT_WITH_ID = {
     'name': 'test_event',
     'description': 'This event is formatted correctly too!',
     'author': 'admin',
     'event_time': EXAMPLE_TIME,
-    'event_id': "unique_event_id"}
-INVALID_INFO_MISSING_ATTRIBUTE = {
-    'name': 'invalid_event_missing',
-    'description': 'This event is missing an author!',
-    'event_time': EXAMPLE_TIME}
-INVALID_INFO_EXTRA_ATTRIBUTE = {
-    'name': 'invalid_event_extra',
-    'description': 'This event has an extra attribute.',
-    'author': 'admin',
-    'event_time': EXAMPLE_TIME,
-    'extra_attribute': 'I am invalid'}
+    'created_at': EXAMPLE_TIME,
+    'event_id': 'unique_event_id1'}
 
 FAKE_INFO = [
-    VALID_INFO,
-    VALID_INFO_WITH_ID
+    VALID_REQUEST_INFO,
 ]
 
 FAKE_EVENTS = [
-    {**VALID_INFO, 'created_at': EXAMPLE_TIME, 'event_id': None},
-    {**VALID_INFO_WITH_ID, 'created_at': EXAMPLE_TIME}
+    VALID_DB_EVENT,
+    VALID_DB_EVENT_WITH_ID
 ]
 
 
