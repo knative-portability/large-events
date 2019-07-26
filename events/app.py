@@ -5,6 +5,7 @@ import pymongo
 from bson import json_util
 
 from flask import Flask, request, Response
+from werkzeug.exceptions import BadRequestKeyError
 from eventclass import Event
 
 app = Flask(__name__)
@@ -39,22 +40,19 @@ app.config["COLLECTION"] = connect_to_mongodb()  # None if can't connect
 
 @app.route('/v1/add', methods=['POST'])
 def add_event():
-    info = {
-        'name': request.form.get('name'),
-        'description': request.form.get('description'),
-        'author': request.form.get('author_id'),
-        'event_time': request.form.get('event_time')
-    }
-    # TODO(cmei4444): Verify that user has event editing access
-    current_time = datetime.datetime.now()
-    info = build_event_info(info, current_time)
     try:
+        info = {
+            'name': request.form['event_name'],
+            'description': request.form['description'],
+            'author': request.form['author_id'],
+            'event_time': request.form['event_time']
+        }
+        # TODO(cmei4444): Verify that user has event editing access
+        current_time = datetime.datetime.now()
+        info = build_event_info(info, current_time)
         event = Event(**info)
-    except ValueError:      # missing or extra event attributes
-        return Response(
-            status=400,
-            response="Event info was entered incorrectly.",
-        )
+    except BadRequestKeyError:      # missing event attributes
+        return "Event info was entered incorrectly.", 400
     try:
         app.config["COLLECTION"].insert_one(event.dict)
         return Response(
