@@ -55,14 +55,9 @@ def add_event():
         return "Event info was entered incorrectly.", 400
     try:
         app.config["COLLECTION"].insert_one(event.dict)
-        return Response(
-            status=201,
-        )
+        return "Event added.", 201
     except DBNotConnectedError as e:
-        return Response(
-            status=500,
-            response="Events database was undefined.",
-        )
+        return "Events database was undefined.", 500
 
 
 def build_event_info(info, time):
