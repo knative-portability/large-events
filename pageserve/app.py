@@ -15,10 +15,10 @@ limitations under the License.
 """
 
 import os
-import requests
-
-from flask import Flask, render_template, request, Response, url_for
+from flask import Flask, render_template, request, Response, url_for, session
 from werkzeug.exceptions import BadRequestKeyError  # WSGI library for Flask
+
+import requests
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -37,6 +37,8 @@ def config_endpoints(endpoints):
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 
 @app.route('/v1/')
@@ -77,7 +79,7 @@ def authenticate():
 
     Call the users service to verify user authentication token and
     upload user profile to users db.
-    Set user object in secure session cookies (`session[‘user’]`).
+    Set user object in secure session cookies (session['user']).
 
     Request data:
         gauth_token: Google ID token to authenticate.
@@ -92,6 +94,9 @@ def authenticate():
         response = requests.post(
             app.config["USERS_ENDPOINT"] + "authenticate",
             data={"gauth_token": gauth_token})
+        if response.status_code == 201:
+            # authentication successful, store login in cookie
+            session["user"] = response.json()
         return response.content, response.status_code
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
