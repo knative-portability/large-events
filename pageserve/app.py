@@ -57,9 +57,20 @@ def index():
     )
 
 
-@app.route('/v1/addevent', methods=['POST'])
+@app.route('/v1/add_post', methods=['POST'])
+def add_post():
+    """Add post by calling posts service."""
+    url = app.config['POSTS_ENDPOINT'] + 'add'
+    r = requests.post(url, data=request.form)
+    if r.status_code == 200:
+        return "Post successfully added"
+    else:
+        return r.content
+
+
+@app.route('/v1/add_event', methods=['POST'])
 def add_event():
-    """Endpoint to connect to events service to add event."""
+    """Add event by calling events service."""
     url = app.config['EVENTS_ENDPOINT'] + 'add'
     r = requests.post(url, data=request.form)
     if r.status_code == 200:
