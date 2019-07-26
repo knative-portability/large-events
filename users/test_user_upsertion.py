@@ -40,8 +40,7 @@ class TestUserUpsertion(unittest.TestCase):
         """
         user_to_insert = {
             "user_id": USER_ID,
-            "name": USER_NAME,
-            "is_organizer": False
+            "name": USER_NAME
         }
         upserted_id = app.upsert_user_in_db(
             user_to_insert, self.mock_collection)
@@ -50,8 +49,6 @@ class TestUserUpsertion(unittest.TestCase):
         # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
-        self.assertEqual(
-            user_to_insert["is_organizer"], found_user["is_organizer"])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
@@ -68,25 +65,20 @@ class TestUserUpsertion(unittest.TestCase):
         # missing name
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"user_id": USER_ID, "is_organizer": False},
+                {"user_id": USER_ID},
                 self.mock_collection)
         # missing user_id
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"name": USER_NAME, "is_organizer": False},
+                {"name": USER_NAME},
                 self.mock_collection)
-        # missing is_organizer
-        with self.assertRaises(AttributeError):
-            app.upsert_user_in_db(
-                {"user_id": USER_ID, "name": USER_NAME},
-                self.mock_collection)
-        # missing all
+        # missing both
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db({}, self.mock_collection)
         # too much info
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"user_id": USER_ID, "name": USER_NAME, "is_organizer": False,
+                {"user_id": USER_ID, "name": USER_NAME,
                  "additional_info": ADDITIONAL_INFORMATION},
                 self.mock_collection)
         # no users should have been inserted
@@ -96,8 +88,7 @@ class TestUserUpsertion(unittest.TestCase):
         """Upserting the same user multiple times should insert once."""
         user_to_insert = {
             "user_id": USER_ID,
-            "name": USER_NAME,
-            "is_organizer": False
+            "name": USER_NAME
         }
         upserted_id = None
         # upsert many times
@@ -110,8 +101,6 @@ class TestUserUpsertion(unittest.TestCase):
         # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
-        self.assertEqual(
-            user_to_insert["is_organizer"], found_user["is_organizer"])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)

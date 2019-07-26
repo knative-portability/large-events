@@ -63,8 +63,7 @@ def authenticate_and_get_user():
         idinfo = get_user_from_gauth_token(gauth_token)
         user_object = {
             "user_id": idinfo["sub"],
-            "name": idinfo["name"],
-            "is_organizer": False}  # authorization defaults false
+            "name": idinfo["name"]}
         upsert_user_in_db(user_object, app.config["COLLECTION"])
         response = make_response(jsonify(user_object), 201)
         response.headers['Access-Control-Allow-Origin'] = '*'
@@ -105,8 +104,8 @@ def upsert_user_in_db(user_object, users_collection):
     """Updates or inserts the user object into users_collection.
 
     Args:
-        user_object (dict): must contain a user_id, name, and is_organizer,
-            and must not contain other attributes.
+        user_object (dict): must contain a user_id and name and must not
+            contain other attributes.
         users_collection (pymongo.collection): the MongoDB collection to use.
 
     Returns:
@@ -116,13 +115,14 @@ def upsert_user_in_db(user_object, users_collection):
     Raises:
         AttributeError: if user_object is malformatted.
     """
-    required_attributes = {"user_id", "name", "is_organizer"}
+    required_attributes = {"user_id", "name"}
     if user_object.keys() != required_attributes:
         raise AttributeError("malformatted user object")
     # upsert user in db
     return users_collection.update_one(
         {"user_id": user_object["user_id"]},
-        {"$set": user_object},
+        {"$set": user_object,
+         "$setOnInsert": {"is_organizer": False}},
         upsert=True).upserted_id
 
 
