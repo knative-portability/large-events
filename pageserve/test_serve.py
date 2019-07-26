@@ -44,15 +44,19 @@ class TestServe(unittest.TestCase):
         self.assertFalse(app.has_edit_access(no_access))
 
     @patch('app.os')
-    def test_user_url(self, mock_os):
-        """Test retrieval of users URL when defined or not defined."""
-        existing_url = "this url exists!"
-        mock_os.environ.get.return_value = existing_url
-        self.assertEqual(app.get_users_url(), existing_url)
+    def test_config_endpoints(self, mock_os):
+        """Test retrieval of endpoint env vars when defined or not defined."""
+        existing_endpoint = 'this endpoint exists!'
+        example_endpoints = ['url1', 'url2']
+        mock_os.environ.__contains__.return_value = True
+        mock_os.environ.get.return_value = existing_endpoint
+        app.config_endpoints(example_endpoints)
+        self.assertEqual(app.app.config['url1'], existing_endpoint)
+        self.assertEqual(app.app.config['url2'], existing_endpoint)
 
-        mock_os.environ.get.return_value = None
+        mock_os.environ.__contains__.return_value = False
         with self.assertRaises(NameError):
-            app.get_users_url()
+            app.config_endpoints(['url3'])
 
 
 if __name__ == '__main__':

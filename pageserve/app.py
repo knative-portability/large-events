@@ -19,19 +19,40 @@ import requests
 
 from flask import Flask, render_template, request, Response
 
-APP = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
+
+
+def config_endpoints(endpoints):
+    """Sets given list of endpoints globally from environment variables.
+
+    Throws a NameError if any endpoint is not found."""
+    for endpoint in endpoints:
+        if endpoint in os.environ:
+            app.config[endpoint] = os.environ.get(endpoint)
+        else:
+            raise NameError("Endpoint {} not defined.".format(endpoint))
+
+
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
+                                         + "authenticate")
 
 
 @APP.route('/v1/')
 def index():
     """Displays home page with all past posts."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user, get_users_url()))
+    is_auth = has_edit_access(get_user_info(user,
+                                            app.config['USERS_ENDPOINT']
+                                            + "authorization"))
     posts = get_posts()
     return render_template(
         'index.html',
         posts=posts,
         auth=is_auth,
+        app_config=app.config
     )
 
 
@@ -39,12 +60,15 @@ def index():
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
-    is_auth = has_edit_access(get_user_info(user, get_users_url()))
+    is_auth = has_edit_access(get_user_info(user,
+                                            app.config['USERS_ENDPOINT']
+                                            + "authorization"))
     events = get_events()
     return render_template(
         'events.html',
         events=events,
         auth=is_auth,
+        app_config=app.config
     )
 
 
@@ -65,10 +89,10 @@ def get_posts():
               'created_at': '7-9-2019',
               'text': 'abcdefghi',
               }]
-    return parsed_posts(posts)
+    return parse_posts(posts)
 
 
-def parsed_posts(posts):
+def parse_posts(posts):
     # TODO(cmei4444): implement parsing on posts pulled from posts service in
     # a format for web display
     return posts
@@ -76,16 +100,16 @@ def parsed_posts(posts):
 
 def get_events():
     """Gets all sub-events from events service."""
-    url = os.environ.get("EVENTS_ENDPOINT")
+    url = app.config['EVENTS_ENDPOINT']
     r = requests.get(url, params={})
     if r.status_code == 200:
-        return parsed_events(r.json())
+        return parse_events(r.json())
     else:
         # TODO(cmei4444): handle error in a way that doesn't break page display
         return "Error in getting events"
 
 
-def parsed_events(events_dict):
+def parse_events(events_dict):
     """Parses response from events service to be used in HTML templates.
 
     Args:
@@ -99,14 +123,6 @@ def parsed_events(events_dict):
     # TODO(cmei4444): implement parsing on events - timestamps are formatted
     # unreadably currently
     return events_dict['events']
-
-
-def get_users_url():
-    """Retrieves users URL, throws error if not found."""
-    url = os.environ.get("USERS_ENDPOINT")
-    if url is None:
-        raise NameError("Users endpoint was undefined.")
-    return url
 
 
 def get_user_info(user, url):
@@ -128,4 +144,4 @@ def get_user():
 
 
 if __name__ == "__main__":
-    APP.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

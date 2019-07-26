@@ -1,0 +1,61 @@
+<!--
+Copyright 2019 The Knative Authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}{% endblock title %} - Large Events</title>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+</head>
+
+<body>
+    <header>
+        {% block header %}{% endblock header %}
+    </header>
+    {% block login_buttons %}
+    {% if not signed_in %}
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    <script>
+        function onSignIn(googleUser) {
+            // Secure Google ID token to send to backend for verification
+            var id_token = googleUser.getAuthResponse().id_token;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', "{{ app_config['GAUTH_CALLBACK_ENDPOINT'] }}");
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function () {
+                console.log('Signed in as: ' + xhr.responseText);
+            };
+            xhr.send('gauth_token=' + id_token);
+        }
+    </script>
+    {% else %}
+    <a href="#" onclick="signOut();">Sign out</a>
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+            });
+        }
+    </script>
+    {% endif %}
+    {% endblock login_buttons %}
+    {% block content %}{% endblock content %}
+</body>
+
+</html>

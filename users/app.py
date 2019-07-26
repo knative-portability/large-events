@@ -21,10 +21,17 @@ Features include
 # limitations under the License.
 
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import pymongo
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = Flask(__name__)  # pylint: disable=invalid-name
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+
+VALID_GAUTH_TOKEN_ISSUERS = [
+    'accounts.google.com', 'https://accounts.google.com']
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -32,25 +39,66 @@ def get_authorization():
     """Finds whether the given user is authorized for edit access."""
     user = request.form.get('user_id')
     if user is None:
-        return jsonify(error="You must supply a 'user_id' POST parameter!")
-    authorized = find_authorization_in_db(user, DB.users_collection)
+        return "Error: You must supply a 'user_id' POST parameter!", 400
+    authorized = find_authorization_in_db(user, app.config["COLLECTION"])
     return jsonify(edit_access=authorized)
 
 
-@app.route('/v1/', methods=['PUT'])
-def add_update_user():
-    """Add or update the user in the db and returns new user object."""
-    user = request.getJSON()
-    if user is None:
-        # TODO(mukobi) validate the user object has everything it needs
-        return jsonify(error="You must supply a valid user in the body")
-    # TODO(mukobi) add or update the user in the database
-    added_new_user = True
-    # TODO(mukobi) get the new user object from the db to return
-    user_object = {
-        "user_id": "0", "username": "Dummy User", "edit_access": False
-    }
-    return jsonify(user_object), (201 if added_new_user else 200)
+@app.route('/v1/authenticate', methods=['POST'])
+def authenticate_and_get_user():
+    """Authenticate user, upsert in the db, and return new user object.
+
+    Request data:
+        'gauth_token': Google ID token to authenticate.
+
+    Response:
+        201: user object as it is in the db if authentication
+            was successful.
+        400: error message if authentication was not successful.
+    """
+    gauth_token = request.form.get('gauth_token')
+    if gauth_token is None:
+        return "Error: You must authenticate through Google.", 400
+    try:
+        idinfo = get_user_from_gauth_token(gauth_token)
+        user_object = {
+            "user_id": idinfo["sub"],
+            "name": idinfo["name"],
+            "is_organizer": False}  # authorization defaults false
+        upsert_user_in_db(user_object, app.config["COLLECTION"])
+        response = make_response(jsonify(user_object), 201)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except (AttributeError, ValueError, KeyError) as error:
+        return f"Error: {error}", 400
+
+
+def get_user_from_gauth_token(gauth_token):
+    """Validate the Google auth token and return it's user object.
+
+    Args:
+        gauth_token (str): Google ID token to authenticate.
+
+    Returns:
+        dict: User object. Contains attributes including:
+            'sub': Unique user ID.
+            'name': Full name of user.
+            'email': Email of user.
+            ...
+
+    Raises:
+        ValueError: Token is invalid.
+    """
+    # Authenticate token and match to client ID
+    idinfo = id_token.verify_oauth2_token(
+        gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
+
+    issuer = idinfo['iss']
+    if issuer not in VALID_GAUTH_TOKEN_ISSUERS:
+        raise ValueError(f'Invalid authentication token issuer "{issuer}".')
+
+    # ID token is valid. Return the user object.
+    return idinfo
 
 
 def upsert_user_in_db(user_object, users_collection):
@@ -117,7 +165,7 @@ def find_authorization_in_db(username, users_collection):
 def connect_to_mongodb():  # pragma: no cover
     """Connect to MongoDB instance using env vars."""
 
-    class DBNotConnectedError(EnvironmentError):
+    class DBNotConnectedError(ConnectionError):
         """Raised when not able to connect to the db."""
 
     class Thrower():  # pylint: disable=too-few-public-methods
@@ -130,11 +178,12 @@ def connect_to_mongodb():  # pragma: no cover
     mongodb_uri = os.environ.get("MONGODB_URI")
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
-    return pymongo.MongoClient(mongodb_uri).users_db
+    return pymongo.MongoClient(mongodb_uri).users_db.users_collection
 
 
-DB = connect_to_mongodb()  # None if can't connect
+app.config["COLLECTION"] = connect_to_mongodb()
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run(debug=True, host='0.0.0.0',
+            port=int(os.environ.get('PORT', 8080)))
