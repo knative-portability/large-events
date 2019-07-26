@@ -53,6 +53,34 @@ class TestUserUpsertion(unittest.TestCase):
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
 
+    def test_update_existing_user(self):
+        """A valid user object should be upserted and retrieved correctly.
+
+        Checks the user found after upsertion both against the original
+        object added to the database and against the object found with
+        the ObjectID returned from app.upsert_user_in_db.
+        """
+        user_to_insert = {
+            "user_id": USER_ID,
+            "name": USER_NAME
+        }
+        # add a user
+        self.assertIsNotNone(app.upsert_user_in_db(
+            user_to_insert, self.mock_collection))
+        # give that user organizer authorization
+        self.mock_collection.update(
+            {"user_id": USER_ID}, {"$set": {"is_organizer": True}})
+        # update the user
+        user_to_insert["name"] += "...look I changed my name!"
+        self.assertIsNone(app.upsert_user_in_db(
+            user_to_insert, self.mock_collection))  # None on update
+        found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        # original user attributes matches found user attributes
+        self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
+        self.assertEqual(user_to_insert["name"], found_user["name"])
+        # update didn't override authorization field
+        self.assertTrue(found_user["is_organizer"])
+
     def test_malformatted_user_not_inserted(self):
         """A malformatted user_object should not be inserted.
 
