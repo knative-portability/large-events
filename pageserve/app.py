@@ -40,7 +40,7 @@ app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
                                          + "authenticate")
 
 
-@app.route('/v1/')
+@app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
     user = get_user()
@@ -57,7 +57,18 @@ def index():
     )
 
 
-@app.route('/v1/events')
+@app.route('/v1/addevent', methods=['POST'])
+def add_event():
+    """Endpoint to connect to events service to add event."""
+    url = app.config['EVENTS_ENDPOINT'] + 'add'
+    r = requests.post(url, data=request.form)
+    if r.status_code == 200:
+        return "Event successfully added"
+    else:
+        return r.content
+
+
+@app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
     user = get_user()
@@ -65,12 +76,10 @@ def show_events():
                                             app.config['USERS_ENDPOINT']
                                             + "authorization"))
     events = get_events()
-    url = get_events_url()
     return render_template(
         'events.html',
         events=events,
         auth=is_auth,
-        events_url=url,
         user=user,
         app_config=app.config
     )
