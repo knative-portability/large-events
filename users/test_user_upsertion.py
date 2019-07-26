@@ -28,7 +28,7 @@ class TestUserUpsertion(unittest.TestCase):
     """Test updating/inserting users into the db."""
 
     def setUp(self):
-        """Seed mock DB for testing"""
+        """Seed mock DB for testing."""
         self.mock_collection = mongomock.MongoClient().db.collection
 
     def test_insert_valid_user(self):
