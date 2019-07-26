@@ -36,7 +36,6 @@ def config_endpoints(endpoints):
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for("/v1/authenticate")
 
 
 @app.route('/v1/')
@@ -159,6 +158,10 @@ def get_user():
     # TODO: get user info using OAuth
     return "Voldemort"
 
+
+# set GAuth callback to the route defined by the authenticate() function
+with app.test_request_context():
+    app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for("authenticate")
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
