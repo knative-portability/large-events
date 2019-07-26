@@ -51,11 +51,10 @@ def add_event():
         current_time = datetime.datetime.now()
         info = build_event_info(info, current_time)
         event = Event(**info)
-    except BadRequestKeyError:      # missing event attributes
-        return "Event info was entered incorrectly.", 400
-    try:
         app.config["COLLECTION"].insert_one(event.dict)
         return "Event added.", 201
+    except BadRequestKeyError:      # missing event attributes
+        return "Event info was entered incorrectly.", 400
     except DBNotConnectedError as e:
         return "Events database was undefined.", 500
 
