@@ -74,7 +74,7 @@ def show_events():
 
 
 @app.route('/v1/authenticate', methods=['POST'])
-def authenticate():
+def authenticate_and_get_user():
     """Proxy for user authentication service.
 
     Call the users service to verify user authentication token and
@@ -86,18 +86,12 @@ def authenticate():
 
     Response:
         Response:
-            201: user object as it is in the db if authentication was successful.
+            201: user object from the db if authentication was successful.
             400: error message if authentication was not successful.
     """
     try:
         gauth_token = request.form["gauth_token"]
-        response = requests.post(
-            app.config["USERS_ENDPOINT"] + "authenticate",
-            data={"gauth_token": gauth_token})
-        if response.status_code == 201:
-            # authentication successful, store login in cookie
-            session["user"] = response.json()
-        return response.content, response.status_code
+        return authenticate_with_users_service(gauth_token)
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
 
@@ -111,6 +105,27 @@ def sign_out():
     """
     session.pop("user", None)
     return redirect(url_for("index"))
+
+
+def authenticate_with_users_service(gauth_token):
+    """Proxy the user service for authentication and return user object.
+
+    Args:
+        gauth_token (str): Google ID token to authenticate.
+
+    Response:
+        tuple (str, int):
+            (response data, status code) from users service.
+            (user object from the db, 201) if authentication was successful.
+            (error message, 400) if authentication was not successful.
+    """
+    response = requests.post(
+        app.config["USERS_ENDPOINT"] + "authenticate",
+        data={"gauth_token": gauth_token})
+    if response.status_code == 201:
+        # authentication successful, store login in cookie
+        session["user"] = response.json()
+    return response.content, response.status_code
 
 
 def get_posts():
