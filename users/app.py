@@ -66,7 +66,7 @@ def authenticate_user():
         response = make_response(jsonify(user_object), 201)
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
-    except (AttributeError, ValueError) as error:
+    except (AttributeError, ValueError, KeyError) as error:
         return f"Error: {error}", 400
 
 

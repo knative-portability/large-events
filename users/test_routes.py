@@ -42,6 +42,9 @@ IDINFO_VALID = {
     "name": "John Doe"}
 IDINFO_INVALID_ISSUER = {
     "iss": "malicious.site.net"}
+IDINFO_MISSING_NAME = {
+    "iss": "accounts.google.com",
+    "sub": "I have an ID but no name"}
 DUMMY_GAUTH_REQUEST_DATA = {"gauth_token": "fake_token_0123"}
 
 
@@ -116,6 +119,15 @@ class TestAuthenticateUser(unittest.TestCase):
         response_body = json.loads(result.data)
         self.assert_equal_idinfos(response_body, IDINFO_VALID)
         self.assertEqual(result.status_code, 201)
+
+    def test_missing_name(self):
+        """User object missing name, perhaps from lack of permissions."""
+        self.verify_oauth2_token.return_value = IDINFO_MISSING_NAME
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+        response_body = result.data.decode()
+        self.assertIn("Error", response_body)
+        self.assertEqual(result.status_code, 400)
 
     def test_no_authentication_token(self):
         """No token provided."""
