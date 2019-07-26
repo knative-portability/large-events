@@ -67,6 +67,7 @@ limitations under the License.
                 window.location.replace("/v1/sign_out")
             }
         </script>
+        <h4>Hi {{ session['user']['name'] }}!</h4>
     </div>
     {% endif %}
     {% endblock login_buttons %}
