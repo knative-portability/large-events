@@ -30,6 +30,9 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 
+VALID_GAUTH_TOKEN_ISSUERS = [
+    'accounts.google.com', 'https://accounts.google.com']
+
 
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
@@ -42,7 +45,7 @@ def get_authorization():
 
 
 @app.route('/v1/authenticate', methods=['POST'])
-def authenticate_user():
+def authenticate_and_get_user():
     """Authenticate user, upsert in the db, and return new user object.
 
     Request data:
@@ -90,8 +93,9 @@ def get_user_from_gauth_token(gauth_token):
     idinfo = id_token.verify_oauth2_token(
         gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
 
-    if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-        raise ValueError('Wrong authentication token issuer.')
+    issuer = idinfo['iss']
+    if issuer not in VALID_GAUTH_TOKEN_ISSUERS:
+        raise ValueError(f'Invalid authentication token issuer "{issuer}".')
 
     # ID token is valid. Return the user object.
     return idinfo
