@@ -40,6 +40,7 @@ app.config["COLLECTION"] = connect_to_mongodb()  # None if can't connect
 
 @app.route('/v1/add', methods=['POST'])
 def add_event():
+    """Adds the posted event into the database."""
     try:
         info = {
             'name': request.form['event_name'],
@@ -47,7 +48,8 @@ def add_event():
             'author': request.form['author_id'],
             'event_time': request.form['event_time']
         }
-        # TODO(cmei4444): Verify that user has event editing access
+        # TODO(cmei4444): Athenticate user and verify that user has event
+        # editing access
         current_time = datetime.datetime.now()
         info = build_event_info(info, current_time)
         event = Event(**info)
@@ -77,8 +79,6 @@ def get_all_events():
         events = app.config["COLLECTION"].find({})
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
-        # TODO(cmei4444): test with pageserve to make sure the json format is
-        # correct in the response
         # handle objects from MongoDB (e.g. ObjectID) that aren't JSON
         # serializable
         return json.loads(json_util.dumps(events_dict))
