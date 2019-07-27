@@ -44,10 +44,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 @app.route('/v1/')
 def index():
     """Displays home page with all past posts."""
-    user = get_user()
-    is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']
-                                            + "authorization"))
+    is_auth = has_edit_access(get_user())
     posts = get_posts()
     return render_template(
         'index.html',
@@ -60,10 +57,7 @@ def index():
 @app.route('/v1/events')
 def show_events():
     """Displays page with all sub-events."""
-    user = get_user()
-    is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']
-                                            + "authorization"))
+    is_auth = has_edit_access(get_user())
     events = get_events()
     return render_template(
         'events.html',
@@ -184,22 +178,16 @@ def parse_events(events_dict):
     return events_dict['events']
 
 
-def get_user_info(user, url):
-    """Gets info about the current user from the users service."""
-    r = requests.post(url, data={'user_id': user})
-    response = r.json()
-    return response
-
-
-def has_edit_access(user_data):
+def has_edit_access(user):
     """Determines if the user with the given info has edit access."""
-    return user_data['edit_access']
+    return bool(user['is_organizer']) if user else False
 
 
 def get_user():
     """Retrieves the current user of the app."""
-    # TODO: get user info using OAuth
-    return "Voldemort"
+    if "user" in session:
+        return authenticate_with_users_service(session["user"]["gauth_token"])
+    return None  # Not signed in
 
 
 # set GAuth callback to the route defined by the authenticate() function
