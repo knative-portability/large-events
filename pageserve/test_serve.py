@@ -46,6 +46,11 @@ class TestServe(unittest.TestCase):
             valid_response = result["is_organizer"] is True
             self.assertTrue(valid_response)
 
+            # now test no user in session
+            app.session.clear()
+            result = app.get_user()
+            self.assertIsNone(result)
+
     def test_edit_access(self):
         """Tests if authorization is correctly retrieved from a user dict.
 
