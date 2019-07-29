@@ -69,7 +69,6 @@ def show_events():
 
 @app.route('/v1/authenticate', methods=['POST'])
 def authenticate_and_get_user():
-    # TODO(mukobi) Test me!
     """Proxy for user authentication service.
 
     Call the users service to verify user authentication token and
@@ -93,7 +92,6 @@ def authenticate_and_get_user():
 
 @app.route('/v1/sign_out', methods=['GET'])
 def sign_out():
-    # TODO(mukobi) Test me!
     """Sign the user out.
 
     Removes the 'user' object from the session.
@@ -105,6 +103,8 @@ def sign_out():
 
 def authenticate_with_users_service(gauth_token):
     """Proxy the user service for authentication and return user object.
+
+    On successful authentication, stores user info in the session.
 
     Args:
         gauth_token (str): Google ID token to authenticate.

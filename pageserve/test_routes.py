@@ -20,9 +20,67 @@ from unittest import mock
 import flask
 from app import app
 
-VALID_USER_SESSION = {
+VALID_USER_IN_SESSION = {
     "user_id": "42",
     "name": "Ford Prefect"}
+
+
+class TestAuthenticateAndGetUser(unittest.TestCase):
+    """Test authentication endpoint POST /v1/authenticate."""
+
+    def setUp(self):
+        """Set up test client."""
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        app.secret_key = "Dummy key used for testing the flask session"
+
+    def test_valid_authentication(self):
+        """GAuth token successfully authenticates."""
+        with app.test_request_context():
+            with app.test_client() as client:
+                with mock.patch("app.requests") as mock_requests:
+                    mock_response = mock.MagicMock()
+                    mock_response.status_code = 201
+                    mock_response.json.return_value = VALID_USER_IN_SESSION
+                    mock_response.content = str(VALID_USER_IN_SESSION)
+                    mock_requests.post.return_value = mock_response
+                    result = client.post("/v1/authenticate", data={
+                        "gauth_token": "I don't matter because requests is mocked"})
+                    self.assertEqual(result.status_code, 201)
+                    self.assertEqual(result.data.decode(),
+                                     str(VALID_USER_IN_SESSION))
+                    # user stored in session
+                    self.assertEqual(len(flask.session), 1)
+                    self.assertEqual(
+                        flask.session["user"], VALID_USER_IN_SESSION)
+
+    def test_failed_authentication(self):
+        """GAuth token fails authentication."""
+        response_content = "Error: bad gauth_token."
+        response_status_code = 400
+        with app.test_request_context():
+            with app.test_client() as client:
+                with mock.patch("app.requests") as mock_requests:
+                    mock_response = mock.MagicMock()
+                    mock_response.status_code = response_status_code
+                    mock_response.content = response_content
+                    mock_requests.post.return_value = mock_response
+                    result = client.post("/v1/authenticate", data={
+                        "gauth_token": "I don't matter because requests is mocked"})
+                    self.assertEqual(result.status_code, response_status_code)
+                    self.assertEqual(result.data.decode(), response_content)
+                    # user not stored in session
+                    self.assertEqual(len(flask.session), 0)
+                    self.assertNotIn("user", flask.session)
+
+    def test_no_token_given(self):
+        """Failed to provide a GAuth token to authenticate."""
+        with app.test_request_context():
+            with app.test_client() as client:
+                result = client.post("/v1/authenticate")
+                self.assertEqual(result.status_code, 400)
+                self.assertIn("Error", result.data.decode())
+                # nothing stored in session
+                self.assertEqual(len(flask.session), 0)
 
 
 class TestSignOut(unittest.TestCase):
@@ -37,7 +95,7 @@ class TestSignOut(unittest.TestCase):
         """Sign out a user that was logged in (usual behaviour)."""
         with app.test_request_context():
             with app.test_client() as client:
-                flask.session["user"] = VALID_USER_SESSION
+                flask.session["user"] = VALID_USER_IN_SESSION
                 # user in session before
                 self.assertIn("user", flask.session)
                 self.assertEqual(len(flask.session), 1)
