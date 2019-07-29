@@ -59,7 +59,19 @@ def index():
 
 @app.route('/v1/add_post', methods=['POST'])
 def add_post():
-    """Add post by calling posts service."""
+    """Add post by calling posts service.
+
+    Adds user id of the user making the post as author_id to form data sent to
+    posts service.
+
+    Received form data should be multipart/form-data and contain:
+        event_id: id of the event to post to
+        text: text content of post
+        All files to be uploaded (can be multiple)
+
+    Response:
+        string response and response code returned by posts service
+    """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     r = requests.post(url, data=request.form)
     if r.status_code == 201:
@@ -70,7 +82,19 @@ def add_post():
 
 @app.route('/v1/add_event', methods=['POST'])
 def add_event():
-    """Add event by calling events service."""
+    """Add event by calling events service.
+
+    Adds user id of the user creating the event as author_id to form data sent
+    to events service.
+
+    Received form data should contain:
+        event_name: name of the created event
+        description: description of event
+        event_time: time of event
+
+    Response:
+        string response and response code returned by events service
+    """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
     r = requests.post(url, data=request.form)
     if r.status_code == 201:
