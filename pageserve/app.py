@@ -203,7 +203,11 @@ def parse_events(events_dict):
 
 def has_edit_access(user):
     """Determines if the user with the given info has edit access."""
-    return bool(user['is_organizer']) if user else False
+    if user is None:
+        return False
+    url = app.config["USERS_ENDPOINT"] + "authorization"
+    response = requests.post(url, data={"user_id": user["user_id"]})
+    return bool(response.json()["edit_access"]) if user else False
 
 
 def get_user():
