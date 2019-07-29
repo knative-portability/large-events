@@ -35,16 +35,15 @@ class TestServe(unittest.TestCase):
             "is_organizer": True}
         mock_requests.post.return_value.status_code = 201
 
-        with app.app.test_client():
-            app.session = {"user": {
-                "user_id": "I don't matter, requests is mocked.",
-                "gauth_token": "Pretend I am a valid GAuth token."}}
-            content, status_code = app.get_user()
+        app.session = {"user": {
+            "user_id": "I don't matter, requests is mocked.",
+            "gauth_token": "Pretend I am a valid GAuth token."}}
+        content, status_code = app.get_user()
 
-            mock_requests.post.assert_called_once()
-            valid_response = content["is_organizer"] is True
-            self.assertTrue(valid_response)
-            self.assertEqual(status_code, 201)
+        mock_requests.post.assert_called_once()
+        valid_response = content["is_organizer"] is True
+        self.assertTrue(valid_response)
+        self.assertEqual(status_code, 201)
 
     def test_edit_access(self):
         """Tests if authorization is correctly retrieved from a user dict."""
