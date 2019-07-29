@@ -72,7 +72,6 @@ def add_post():
         string response and response code returned by posts service
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    # TODO: send authenticated user instead of placeholder
     form_data = dict(**request.form.to_dict(), author_id=get_user())
     r = requests.post(url, data=form_data)
     return r.content, r.status_code
@@ -94,7 +93,6 @@ def add_event():
         string response and response code returned by events service
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
-    # TODO: send authenticated user instead of placeholder
     form_data = dict(**request.form.to_dict(), author_id=get_user())
     r = requests.post(url, data=form_data)
     return r.content, r.status_code
