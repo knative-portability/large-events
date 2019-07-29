@@ -17,7 +17,7 @@ import unittest
 from unittest.mock import patch
 from flask import Flask
 from flask_testing import TestCase
-from app import app
+import app
 
 
 class TestRoutes(TestCase):
@@ -31,14 +31,16 @@ class TestRoutes(TestCase):
 
     def setUp(self):
         """Set up test client."""
-        self.client = app.test_client()
+        self.client = app.app.test_client()
 
     def test_index(self):
         """Check that index page is rendered correctly."""
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
 
     def test_show_events(self):
         """Check that sub-events page is rendered correctly."""
         response = self.client.get('/v1/events')
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('events.html')
