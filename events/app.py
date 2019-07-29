@@ -15,7 +15,7 @@ class DBNotConnectedError(ConnectionError):
     """Raised when not able to connect to the db."""
 
 
-def connect_to_mongodb():
+def connect_to_mongodb():   # pragma: no cover
     # TODO(cmei4444): restructure to be consistent with other services
     # TODO(cmei4444): test with deployed service
     """Connects to MongoDB Atlas database.
@@ -105,5 +105,5 @@ def get_one_event(event_id):
     """Retrieve one event by event_id."""
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
