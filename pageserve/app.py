@@ -22,24 +22,6 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)  # pylint: disable=invalid-name
 
 
-def config_endpoints(endpoints):
-    """Sets given list of endpoints globally from environment variables.
-
-    Throws a NameError if any endpoint is not found."""
-    for endpoint in endpoints:
-        if endpoint in os.environ:
-            app.config[endpoint] = os.environ.get(endpoint)
-        else:
-            raise NameError("Endpoint {} not defined.".format(endpoint))
-
-
-config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
-
-app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
-                                         + "authenticate")
-
-
 @app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
@@ -51,6 +33,23 @@ def index():
     return render_template(
         'index.html',
         posts=posts,
+        auth=is_auth,
+        user=user,
+        app_config=app.config
+    )
+
+
+@app.route('/v1/events', methods=['GET'])
+def show_events():
+    """Displays page with all sub-events."""
+    user = get_user()
+    is_auth = has_edit_access(get_user_info(user,
+                                            app.config['USERS_ENDPOINT']
+                                            + "authorization"))
+    events = get_events()
+    return render_template(
+        'events.html',
+        events=events,
         auth=is_auth,
         user=user,
         app_config=app.config
@@ -99,23 +98,6 @@ def add_event():
     form_data = dict(**request.form.to_dict(), author_id=get_user())
     r = requests.post(url, data=form_data)
     return r.content, r.status_code
-
-
-@app.route('/v1/events', methods=['GET'])
-def show_events():
-    """Displays page with all sub-events."""
-    user = get_user()
-    is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']
-                                            + "authorization"))
-    events = get_events()
-    return render_template(
-        'events.html',
-        events=events,
-        auth=is_auth,
-        user=user,
-        app_config=app.config
-    )
 
 
 def get_posts():
@@ -188,6 +170,23 @@ def get_user():
     # TODO: get user info using OAuth
     return "Voldemort"
 
+
+def config_endpoints(endpoints):
+    """Sets given list of endpoints globally from environment variables.
+
+    Throws a NameError if any endpoint is not found."""
+    for endpoint in endpoints:
+        if endpoint in os.environ:
+            app.config[endpoint] = os.environ.get(endpoint)
+        else:
+            raise NameError("Endpoint {} not defined.".format(endpoint))
+
+
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
+                                         + "authenticate")
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
