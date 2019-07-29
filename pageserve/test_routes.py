@@ -18,6 +18,7 @@
 import unittest
 from unittest import mock
 import flask
+import ast
 from app import app
 
 VALID_USER_IN_SESSION = {
@@ -27,6 +28,16 @@ VALID_USER_IN_SESSION = {
 
 class TestAuthenticateAndGetUser(unittest.TestCase):
     """Test authentication endpoint POST /v1/authenticate."""
+
+    def assert_sessions_are_equal(self, first, second):
+        """Asserts the two sessions are the same.
+
+        Only compares the "user_id" and "name" fields, but ignores the
+        "gauth_token" field which is not returned from the users service
+        but is stored in the session by app.authenticate_with_users_service.
+        """
+        self.assertEqual(first["user_id"], second["user_id"])
+        self.assertEqual(first["name"], second["name"])
 
     def setUp(self):
         """Set up test client."""
@@ -46,8 +57,9 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
                     result = client.post("/v1/authenticate", data={
                         "gauth_token": "I don't matter because requests is mocked"})
                     self.assertEqual(result.status_code, 201)
-                    self.assertEqual(result.data.decode(),
-                                     str(VALID_USER_IN_SESSION))
+                    result_dict = ast.literal_eval(result.data.decode())
+                    self.assert_sessions_are_equal(
+                        result_dict, VALID_USER_IN_SESSION)
                     # user stored in session
                     self.assertEqual(len(flask.session), 1)
                     self.assertEqual(

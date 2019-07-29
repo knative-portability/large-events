@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 import unittest
-from unittest.mock import patch
+from unittest import mock
 import app
 
 
@@ -25,34 +25,49 @@ class TestServe(unittest.TestCase):
         """Create secret key for test session."""
         app.app.secret_key = "Secret test key!"
 
-    @patch('app.requests')
-    def test_get_user(self, mock_requests):
+    def test_get_user(self):
         """Checks if users service returns a correctly formatted object.
 
         Expects a user dictionary with a boolean 'is_organizer' field.
+        This test mocks app.authenticate_with_users_service() to always
+        return the response of an authenticated user that is authorized.
         """
-        mock_requests.post.return_value.content = {
-            "is_organizer": True}
-        mock_requests.post.return_value.status_code = 201
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 201
+        mock_response.json.return_value = {"is_organizer": True}
+        with mock.patch("app.authenticate_with_users_service",
+                        return_value=mock_response):
+            app.session = {"user": {
+                "user_id": "abc123 pretend I am a user ID.",
+                "name": "Boaty McBoatface",
+                "gauth_token": "Pretend I am a valid GAuth token."}}
+            result = app.get_user()
 
-        app.session = {"user": {
-            "user_id": "I don't matter, requests is mocked.",
-            "gauth_token": "Pretend I am a valid GAuth token."}}
-        content, status_code = app.get_user()
-
-        mock_requests.post.assert_called_once()
-        valid_response = content["is_organizer"] is True
-        self.assertTrue(valid_response)
-        self.assertEqual(status_code, 201)
+            valid_response = result["is_organizer"] is True
+            self.assertTrue(valid_response)
 
     def test_edit_access(self):
-        """Tests if authorization is correctly retrieved from a user dict."""
-        has_access = {'is_organizer': True}
-        no_access = {'is_organizer': False}
-        self.assertTrue(app.has_edit_access(has_access))
-        self.assertFalse(app.has_edit_access(no_access))
+        """Tests if authorization is correctly retrieved from a user dict.
 
-    @patch('app.os')
+        This test mocks away requests to the users service which is normally
+        called by app.has_edit_access.
+        """
+        # is authorized
+        mock_response = mock.MagicMock()
+        mock_response.json.return_value = {"edit_access": True}
+        with mock.patch("app.requests.post", return_value=mock_response):
+            self.assertTrue(app.has_edit_access(
+                {"user_id": "Pretend I am authorized."}))
+        # not authorized
+        mock_response.json.return_value = {"edit_access": False}
+        with mock.patch("app.requests.post", return_value=mock_response):
+            self.assertFalse(app.has_edit_access(
+                {"user_id": "Pretend I am NOT authorized."}))
+        # No user sent give no authorization. This might happens when a user
+        # is logged out so app.get_user() returns None.
+        self.assertFalse(app.has_edit_access(None))
+
+    @mock.patch('app.os')
     def test_config_endpoints(self, mock_os):
         """Test retrieval of endpoint env vars when defined or not defined."""
         existing_endpoint = 'this endpoint exists!'
