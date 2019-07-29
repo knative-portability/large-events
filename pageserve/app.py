@@ -85,7 +85,8 @@ def authenticate_and_get_user():
     """
     try:
         gauth_token = request.form["gauth_token"]
-        return authenticate_with_users_service(gauth_token)
+        response = authenticate_with_users_service(gauth_token)
+        return response.content, response.status_code
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
 
@@ -110,10 +111,7 @@ def authenticate_with_users_service(gauth_token):
         gauth_token (str): Google ID token to authenticate.
 
     Response:
-        tuple (str, int):
-            (response data, status code) from users service.
-            (user object from the db, 201) if authentication was successful.
-            (error message, 400) if authentication was not successful.
+        response: response from the users service
     """
     response = requests.post(
         app.config["USERS_ENDPOINT"] + "authenticate",
@@ -121,7 +119,9 @@ def authenticate_with_users_service(gauth_token):
     if response.status_code == 201:
         # authentication successful, store login in cookie
         session["user"] = response.json()
-    return response.content, response.status_code
+        # also store the valid login token
+        session["user"]["gauth_token"] = gauth_token
+    return response
 
 
 def get_posts():
@@ -186,7 +186,10 @@ def get_user():
     """Retrieves the current user of the app."""
     if "user" in session:
         # TODO(mukobi) make sure session["user"] has "gauth_token"/this works
-        return authenticate_with_users_service(session["user"]["gauth_token"])
+        response = authenticate_with_users_service(
+            session["user"]["gauth_token"])
+        if response.status_code == 201:
+            return response.json()
     return None  # Not signed in
 
 
