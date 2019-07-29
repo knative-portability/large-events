@@ -19,6 +19,10 @@ from flask import Flask
 from flask_testing import TestCase
 import app
 
+EXAMPLE_USER = "app_user"
+EXAMPLE_POSTS = ['example', 'posts', 'list']
+EXAMPLE_EVENTS = ['example', 'events', 'list']
+
 
 class TestRoutes(TestCase):
     def create_app(self):
@@ -33,14 +37,32 @@ class TestRoutes(TestCase):
         """Set up test client."""
         self.client = app.app.test_client()
 
-    def test_index(self):
+    @patch('app.get_user', return_value=EXAMPLE_USER)
+    @patch('app.has_edit_access', return_value=True)
+    @patch('app.get_posts', return_value=EXAMPLE_POSTS)
+    def test_index(self, mock_posts, mock_access, mock_user):
         """Check that index page is rendered correctly."""
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('index.html')
 
-    def test_show_events(self):
+        self.assertContext('user', EXAMPLE_USER)
+        self.assertContext('auth', True)
+        self.assertContext('posts', EXAMPLE_POSTS)
+
+    @patch('app.get_user', return_value=EXAMPLE_USER)
+    @patch('app.has_edit_access', return_value=True)
+    @patch('app.get_events', return_value=EXAMPLE_EVENTS)
+    def test_show_events(self, mock_events, mock_access, mock_user):
         """Check that sub-events page is rendered correctly."""
         response = self.client.get('/v1/events')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('events.html')
+
+        self.assertContext('user', EXAMPLE_USER)
+        self.assertContext('auth', True)
+        self.assertContext('events', EXAMPLE_EVENTS)
+
+
+if __name__ == '__main__':
+    unittest.main()
