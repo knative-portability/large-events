@@ -185,6 +185,7 @@ def has_edit_access(user):
 def get_user():
     """Retrieves the current user of the app."""
     if "user" in session:
+        # TODO(mukobi) make sure session["user"] has "gauth_token"/this works
         return authenticate_with_users_service(session["user"]["gauth_token"])
     return None  # Not signed in
 
