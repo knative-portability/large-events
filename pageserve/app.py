@@ -23,25 +23,7 @@ import requests
 app = Flask(__name__)  # pylint: disable=invalid-name
 
 
-def config_endpoints(endpoints):
-    """Sets given list of endpoints globally from environment variables.
-
-    Throws a NameError if any endpoint is not found."""
-    for endpoint in endpoints:
-        if endpoint in os.environ:
-            app.config[endpoint] = os.environ.get(endpoint)
-        else:
-            raise NameError("Endpoint {} not defined.".format(endpoint))
-
-
-config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
-
-app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-
-app.secret_key = os.environ.get("FLASK_SECRET_KEY")
-
-
-@app.route('/v1/')
+@app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
     is_auth = has_edit_access(get_user())
@@ -54,7 +36,7 @@ def index():
     )
 
 
-@app.route('/v1/events')
+@app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
     is_auth = has_edit_access(get_user())
@@ -122,6 +104,48 @@ def authenticate_with_users_service(gauth_token):
         # also store the valid login token
         session["user"]["gauth_token"] = gauth_token
     return response
+
+
+@app.route('/v1/add_post', methods=['POST'])
+def add_post():
+    """Add post by calling posts service.
+
+    Adds user id of the user making the post as author_id to form data sent to
+    posts service.
+
+    Received form data should be multipart/form-data and contain:
+        event_id: id of the event to post to
+        text: text content of post
+        All files to be uploaded (can be multiple)
+
+    Response:
+        string response and response code returned by posts service
+    """
+    url = app.config['POSTS_ENDPOINT'] + 'add'
+    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    r = requests.post(url, data=form_data)
+    return r.content, r.status_code
+
+
+@app.route('/v1/add_event', methods=['POST'])
+def add_event():
+    """Add event by calling events service.
+
+    Adds user id of the user creating the event as author_id to form data sent
+    to events service.
+
+    Received form data should contain:
+        event_name: name of the created event
+        description: description of event
+        event_time: time of event
+
+    Response:
+        string response and response code returned by events service
+    """
+    url = app.config['EVENTS_ENDPOINT'] + 'add'
+    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    r = requests.post(url, data=form_data)
+    return r.content, r.status_code
 
 
 def get_posts():
@@ -197,6 +221,25 @@ def get_user():
 with app.test_request_context():
     app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for(
         "authenticate_and_get_user")
+
+
+def config_endpoints(endpoints):
+    """Sets given list of endpoints globally from environment variables.
+
+    Throws a NameError if any endpoint is not found."""
+    for endpoint in endpoints:
+        if endpoint in os.environ:
+            app.config[endpoint] = os.environ.get(endpoint)
+        else:
+            raise NameError("Endpoint {} not defined.".format(endpoint))
+
+
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
+
+app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
+                                         + "authenticate")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
