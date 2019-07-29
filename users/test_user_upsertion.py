@@ -49,6 +49,8 @@ class TestUserUpsertion(unittest.TestCase):
         # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
+        # authorization false by default
+        self.assertFalse(found_user["is_organizer"])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
@@ -129,6 +131,8 @@ class TestUserUpsertion(unittest.TestCase):
         # original user attributes matches found user attributes
         self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
         self.assertEqual(user_to_insert["name"], found_user["name"])
+        # authorization false by default
+        self.assertFalse(found_user["is_organizer"])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
