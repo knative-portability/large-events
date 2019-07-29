@@ -22,8 +22,7 @@ from app import app
 
 VALID_USER_SESSION = {
     "user_id": "42",
-    "name": "Ford Prefect"
-}
+    "name": "Ford Prefect"}
 
 
 class TestSignOut(unittest.TestCase):
@@ -33,32 +32,39 @@ class TestSignOut(unittest.TestCase):
         """Set up test client."""
         app.config["TESTING"] = True  # propagate exceptions to test client
         app.secret_key = "Dummy key used for testing the flask session"
-        self.client = app.test_client()
 
     def test_was_logged_in(self):
         """Sign out a user that was logged in (usual behaviour)."""
         with app.test_request_context():
-            with mock.patch.dict("app.session", VALID_USER_SESSION, clear=True):
-                result = self.client.get(
+            with app.test_client() as client:
+                flask.session["user"] = VALID_USER_SESSION
+                # user in session before
+                self.assertIn("user", flask.session)
+                self.assertEqual(len(flask.session), 1)
+                result = client.get(
                     "/v1/sign_out")
-                # popped session
+                # empty session after
                 self.assertNotIn("user", flask.session)
-                # correct response
+                self.assertEqual(len(flask.session), 0)
+                # correct redirect response
                 self.assertEqual(result.status_code, 302)  # redirect
                 self.assertIn("redirect", result.data.decode())
 
     def test_was_not_logged_in(self):
         """Try to sign out a user that was not logged in."""
         with app.test_request_context():
-            # empty session before
-            self.assertNotIn("user", flask.session)
-            result = self.client.get(
-                "/v1/sign_out")
-            # empty session after
-            self.assertNotIn("user", flask.session)
-            # correct response
-            self.assertEqual(result.status_code, 302)  # redirect
-            self.assertIn("redirect", result.data.decode())
+            with app.test_client() as client:
+                # empty session before
+                self.assertNotIn("user", flask.session)
+                self.assertEqual(len(flask.session), 0)
+                result = client.get(
+                    "/v1/sign_out")
+                # empty session after
+                self.assertNotIn("user", flask.session)
+                self.assertEqual(len(flask.session), 0)
+                # correct redirect response
+                self.assertEqual(result.status_code, 302)  # redirect
+                self.assertIn("redirect", result.data.decode())
 
 
 if __name__ == '__main__':
