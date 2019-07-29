@@ -104,7 +104,6 @@ def sign_out():
 
 
 def authenticate_with_users_service(gauth_token):
-    # TODO(mukobi) Test me!
     """Proxy the user service for authentication and return user object.
 
     Args:

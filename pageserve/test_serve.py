@@ -19,27 +19,32 @@ import app
 
 
 class TestServe(unittest.TestCase):
+    """Test helper functions in pageserve app."""
+
+    def setUp(self):
+        """Create secret key for test session."""
+        app.app.secret_key = "Secret test key!"
+
     @patch('app.requests')
     def test_get_user(self, mock_requests):
         """Checks if users service returns a correctly formatted object.
 
         Expects a user dictionary with a boolean 'is_organizer' field.
         """
-        mock_response = unittest.mock.MagicMock()
-        mock_requests.post.return_value = mock_response
-        mock_response.json.return_value = {"is_organizer": True}
+        mock_requests.post.return_value.content = {
+            "is_organizer": True}
+        mock_requests.post.return_value.status_code = 201
 
-        # TODO(mukobi) fix this test
-        pass
-        # with app.app.test_client() as client:
-        #     with client.session_transaction() as session:
-        #         session["user"] = {
-        #             "user_id": "I don't matter, requests is mocked."}
-        #         response = app.get_user()
+        with app.app.test_client():
+            app.session = {"user": {
+                "user_id": "I don't matter, requests is mocked.",
+                "gauth_token": "Pretend I am a valid GAuth token."}}
+            content, status_code = app.get_user()
 
-        #         mock_requests.post.assert_called_once()
-        #         valid_response = response["is_organizer"] is True
-        #         self.assertTrue(valid_response)
+            mock_requests.post.assert_called_once()
+            valid_response = content["is_organizer"] is True
+            self.assertTrue(valid_response)
+            self.assertEqual(status_code, 201)
 
     def test_edit_access(self):
         """Tests if authorization is correctly retrieved from a user dict."""
