@@ -69,7 +69,6 @@ def build_event_info(info, time):
 @app.route('/v1/edit/<event_id>', methods=['PUT'])
 def edit_event(event_id):
     """Edit the event with the given id."""
-    pass
 
 
 @app.route('/v1/', methods=['GET'])
@@ -99,13 +98,11 @@ def build_events_dict(events):
 @app.route('/v1/search', methods=['GET'])
 def search_event():
     """Search for the event with the given name in the DB."""
-    pass
 
 
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
     """Retrieve one event by event_id."""
-    pass
 
 
 if __name__ == "__main__":
