@@ -73,11 +73,10 @@ def add_post():
         string response and response code returned by posts service
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    r = requests.post(url, data=request.form)
-    if r.status_code == 201:
-        return "Post successfully added"
-    else:
-        return r.content
+    # TODO: send authenticated user instead of placeholder
+    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    r = requests.post(url, data=form_data)
+    return r.content, r.status_code
 
 
 @app.route('/v1/add_event', methods=['POST'])
@@ -96,11 +95,10 @@ def add_event():
         string response and response code returned by events service
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
-    r = requests.post(url, data=request.form)
-    if r.status_code == 201:
-        return "Event successfully added"
-    else:
-        return r.content
+    # TODO: send authenticated user instead of placeholder
+    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    r = requests.post(url, data=form_data)
+    return r.content, r.status_code
 
 
 @app.route('/v1/events', methods=['GET'])
