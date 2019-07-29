@@ -213,7 +213,6 @@ def has_edit_access(user):
 def get_user():
     """Retrieves the current user of the app."""
     if "user" in session:
-        # TODO(mukobi) make sure session["user"] has "gauth_token"/this works
         response = authenticate_with_users_service(
             session["user"]["gauth_token"])
         if response.status_code == 201:
