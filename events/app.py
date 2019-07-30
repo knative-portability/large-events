@@ -4,7 +4,7 @@ import json
 import pymongo
 from bson import json_util
 
-from flask import Flask, request, Response
+from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
 from eventclass import Event
 
@@ -17,7 +17,6 @@ class DBNotConnectedError(ConnectionError):
 
 def connect_to_mongodb():   # pragma: no cover
     # TODO(cmei4444): restructure to be consistent with other services
-    # TODO(cmei4444): test with deployed service
     """Connects to MongoDB Atlas database.
 
     Returns events collection if connection is successful, and None otherwise.
@@ -78,8 +77,7 @@ def get_all_events():
         events = app.config["COLLECTION"].find({})
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
-        # handle objects from MongoDB (e.g. ObjectID) that aren't JSON
-        # serializable
+        # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
     except DBNotConnectedError as e:
         return "Events database was undefined.", 500

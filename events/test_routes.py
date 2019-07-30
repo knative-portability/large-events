@@ -1,7 +1,7 @@
 """Unit tests for events service HTTP routes."""
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 import datetime
 from bson import json_util
 import mongomock
