@@ -24,6 +24,12 @@ This project is organized into microservices. Although this repository contains 
     * You will need to supply environmental variable to the microservices specifying each others' endpoints
 * Each subfolder has its own README.md with more specific information regarding building, testing, deployment, etc.
 
+There are 4 microservices in this project. They are:
+- __events__ - Add, edit, and fetch events list.
+- __pageserve__ - Serve web UI and proxy an API gateway to some other services.
+- __posts__ - Add, edit, and fetch posts list.
+- __users__ - Authenticate with Google Login, edit and fetch authorization level of users.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system. Because of this microservice architecture, each subfolder will need to be deployed as its own independent subfolder. For specific instructions, see the README.md file in each subfolder, but generally, they all follow the following pattern:
@@ -54,7 +60,7 @@ Install the required python modules.
 pip3 install -r requirements.txt
 ```
 
-Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable.
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable (this step is not needed for the pageserve service).
 
 ```
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
