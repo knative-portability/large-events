@@ -26,9 +26,9 @@ This project is organized into microservices. Although this repository contains 
 
 There are 4 microservices in this project. They are:
 - __events__ - Add, edit, and fetch events list.
-- __pageserve__ - Serve web UI and proxy an API gateway to some other services.
+- __pageserve__ - Serve web UI and act as an API gateway to other services.
 - __posts__ - Add, edit, and fetch posts list.
-- __users__ - Authenticate with Google Login, edit and fetch authorization level of users.
+- __users__ - Authenticate with Google Sign-In, edit and fetch authorization level of users.
 
 ## Getting Started
 
@@ -107,7 +107,7 @@ coverage report -m
 
 ## Deployment
 
-This project is built for Knative and should be able to be deployed on any cloud product built on Knative. It has been tested on [Google Cloud Run](https://cloud.google.com/run/).
+This project is built for Knative and should be able to be deployed on any cloud product built on Knative or on any Kubernetes cluster. It has been tested on [Google Cloud Run](https://cloud.google.com/run/).
 
 This project is set up for continuous deployment to Google Cloud Run (managed) via [Cloud Build](https://cloud.google.com/run/docs/continuous-deployment), and it will automatically be built and deployed on pushes to the master branch of [this repository](https://github.com/knative-portability/large-events).
 
