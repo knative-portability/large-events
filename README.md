@@ -91,8 +91,27 @@ gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[SERVICE] --platform managed
 
 ## Built With
 
+### Development
+
+* [Python 3](https://www.python.org/) - Python programming language
 * [Flask](http://flask.pocoo.org/) - Python web service framework
+* [pymongo](https://api.mongodb.com/python/current/) - MongoDB Python client
+* [GitHub](https://github.com) - Development platform for open source
+* [Travis CI](https://travis-ci.com/) - Hosted continuous integration service
+* [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+
+### Testing
+
+* [unittest](https://docs.python.org/3/library/unittest.html) - Python unit testing framework
+* [Coverage.py](https://coverage.readthedocs.io/en/v4.5.x/) - Python code coverage measurement tool
+* [Coveralls](http://coveralls.io) - Test coverage history and statistics service 
+
+### Services
+
 * [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Cloud NoSQL database
+* [Google Sign-In for Websites](https://developers.google.com/identity/sign-in/web/sign-in) - OAuth 2.0 authentication library
+* [Google Cloud Build](https://cloud.google.com/cloud-build/) - Continuous build, test, deploy in the cloud
+* [Google Cloud Run](https://cloud.google.com/run/) - On top of Knative, run fully managed stateless containers
 
 ## Contributing
 
