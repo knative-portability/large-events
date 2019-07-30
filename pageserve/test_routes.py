@@ -64,5 +64,37 @@ class TestRoutes(TestCase):
         self.assertContext('events', EXAMPLE_EVENTS)
 
 
+class TestAddPostRoute(unittest.TestCase):
+    """Tests adding posts at POST /v1/add_post."""
+
+    def setUp(self):
+        self.coll = mongomock.MongoClient().db.collection
+        app.config["COLLECTION"] = self.coll
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+
+    def test_add_valid_post(self):
+        """Tests adding a valid post."""
+
+    def test_add_valid_post(self):
+        """Tests adding an invalid post."""
+
+
+class TestAddEventRoute(unittest.TestCase):
+    """Tests adding events at POST /v1/add_event."""
+
+    def setUp(self):
+        self.coll = mongomock.MongoClient().db.collection
+        app.config["COLLECTION"] = self.coll
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+
+    def test_add_valid_event(self):
+        """Tests adding a valid event."""
+
+    def test_add_valid_event(self):
+        """Tests adding an invalid event."""
+
+
 if __name__ == '__main__':
     unittest.main()
