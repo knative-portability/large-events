@@ -138,6 +138,7 @@ gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[SERVICE] --platform managed
 ### Services
 
 * [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Cloud NoSQL database
+* [Google Cloud Storage](https://cloud.google.com/storage/) - Unified object storage for developers and enterprises
 * [Google Sign-In for Websites](https://developers.google.com/identity/sign-in/web/sign-in) - OAuth 2.0 authentication library
 * [Google Cloud Build](https://cloud.google.com/cloud-build/) - Continuous build, test, deploy in the cloud
 * [Google Cloud Run](https://cloud.google.com/run/) - On top of Knative, run fully managed stateless containers
