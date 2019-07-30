@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import datetime
 from bson import json_util
 import mongomock
-from app import app, DBNotConnectedError
+from app import app, os, connect_to_mongodb
 
 EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
@@ -44,6 +44,7 @@ class TestUploadEventRoute(unittest.TestCase):
         app.config["COLLECTION"] = self.coll
         app.config["TESTING"] = True
         self.client = app.test_client()
+        self.mongodb_uri = os.environ["MONGODB_URI"]
 
     def test_add_valid_event(self):
         """Test posting of valid event."""
@@ -62,11 +63,13 @@ class TestUploadEventRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test adding event when DB connection is undefined."""
-        self.coll.insert_one = MagicMock(side_effect=DBNotConnectedError)
+        del os.environ["MONGODB_URI"]
+        app.config["COLLECTION"] = connect_to_mongodb()
         response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
         self.assertEqual(response.status_code, 500)
 
         self.assertEqual(self.coll.count_documents({}), 0)
+        os.environ["MONGODB_URI"] = self.mongodb_uri    # put back variable
 
 
 class TestGetEventsRoute(unittest.TestCase):
@@ -82,6 +85,7 @@ class TestGetEventsRoute(unittest.TestCase):
             VALID_DB_EVENT,
             VALID_DB_EVENT_WITH_ID
         ]
+        self.mongodb_uri = os.environ["MONGODB_URI"]
 
     def test_get_existing_events(self):
         """Test retrieving all events when valid events are added to the DB."""
@@ -105,6 +109,9 @@ class TestGetEventsRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
-        self.coll.find = MagicMock(side_effect=DBNotConnectedError)
+        del os.environ["MONGODB_URI"]
+        app.config["COLLECTION"] = connect_to_mongodb()
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 500)
+
+        os.environ["MONGODB_URI"] = self.mongodb_uri    # put back variable
