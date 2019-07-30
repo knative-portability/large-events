@@ -33,8 +33,7 @@ FAKE_USERS = [
     {"user_id": NON_AUTHORIZED_USER,
      "name": NON_AUTHORIZED_USER,
      "is_organizer": False},
-    {"user_id": MALFORMATTED_IN_DB_USER}
-]
+    {"user_id": MALFORMATTED_IN_DB_USER}]
 
 IDINFO_VALID = {
     "iss": "accounts.google.com",
@@ -86,6 +85,20 @@ class TestGetAuthorization(unittest.TestCase):
         """Try to get authorization but don't supply user_id."""
         result = self.client.post("/v1/authorization")
         self.assertEqual(result.status_code, 400)
+
+
+class TestUpdateAuthorization(unittest.TestCase):
+    """Test update authorization endpoint POST /v1/authorization/update."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.config["COLLECTION"].insert_many(FAKE_USERS)
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_authorized_change_other(self):
+        """Authorized user can change authorization of others."""
 
 
 class TestAuthenticateUser(unittest.TestCase):
