@@ -132,3 +132,7 @@ class TestGetEventsRoute(unittest.TestCase):
             app.config["COLLECTION"] = connect_to_mongodb()
             response = self.client.get('/v1/')
             self.assertEqual(response.status_code, 500)
+
+
+if __name__ == '__main__':
+    unittest.main()
