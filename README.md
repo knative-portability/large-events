@@ -91,7 +91,18 @@ python3 app.py
 Testing again is handled on the microservice level. To test, ensure your working directory is the microservice's subfolder then use `unittest`.
 
 ```sh
-python3 -m unittest test.py
+python3 -m unittest discover
+```
+
+To see code coverage, use Coverage.py
+
+```sh
+# install coverage if you don't already have it
+python3 -m pip install --upgrade coverage
+# run coverage on all discovered tests analyzing the 'app' package
+coverage run -m --source app unittest discover
+# report coverage with line numbers
+coverage report -m
 ```
 
 ## Deployment
