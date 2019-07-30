@@ -15,7 +15,11 @@ limitations under the License.
 
 import unittest
 from unittest import mock
+import requests_mock
 import app
+
+AUTHORIZED_RESPONSE_JSON = {"edit_access": True}
+UNAUTHORIZED_RESPONSE_JSON = {"edit_access": False}
 
 
 class TestServe(unittest.TestCase):
@@ -51,23 +55,23 @@ class TestServe(unittest.TestCase):
             result = app.get_user()
             self.assertIsNone(result)
 
-    def test_edit_access(self):
-        """Tests if authorization is correctly retrieved from a user dict.
+    @requests_mock.Mocker()
+    def test_edit_access(self, requests_mocker):
+        """Tests if authorization is correctly retrieved from users service.
 
         This test mocks away requests to the users service which is normally
         called by app.has_edit_access.
         """
         # is authorized
-        mock_response = mock.MagicMock()
-        mock_response.json.return_value = {"edit_access": True}
-        with mock.patch("app.requests.post", return_value=mock_response):
-            self.assertTrue(app.has_edit_access(
-                {"user_id": "Pretend I am authorized."}))
+        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+                             json=AUTHORIZED_RESPONSE_JSON)
+        self.assertTrue(app.has_edit_access(
+            {"user_id": "Pretend I am authorized."}))
         # not authorized
-        mock_response.json.return_value = {"edit_access": False}
-        with mock.patch("app.requests.post", return_value=mock_response):
-            self.assertFalse(app.has_edit_access(
-                {"user_id": "Pretend I am NOT authorized."}))
+        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+                             json=UNAUTHORIZED_RESPONSE_JSON)
+        self.assertFalse(app.has_edit_access(
+            {"user_id": "Pretend I am NOT authorized."}))
         # No user sent give no authorization. This might happens when a user
         # is logged out so app.get_user() returns None.
         self.assertFalse(app.has_edit_access(None))

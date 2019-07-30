@@ -16,14 +16,17 @@
 # limitations under the License.
 
 import unittest
-from unittest import mock
-import flask
 import ast
+import requests_mock
+import flask
 from app import app
 
 VALID_USER_IN_SESSION = {
     "user_id": "42",
     "name": "Ford Prefect"}
+ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
+ERROR_BAD_TOKEN_STATUS = 400
+VALID_USER_AUTH_STATUS = 201
 
 
 class TestAuthenticateAndGetUser(unittest.TestCase):
@@ -44,55 +47,47 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
         app.config["TESTING"] = True  # propagate exceptions to test client
         app.secret_key = "Dummy key used for testing the flask session"
 
-    def test_valid_authentication(self):
+    @requests_mock.Mocker()
+    def test_valid_authentication(self, requests_mocker):
         """GAuth token successfully authenticates."""
-        with app.test_request_context():
-            with app.test_client() as client:
-                with mock.patch("app.requests") as mock_requests:
-                    mock_response = mock.MagicMock()
-                    mock_response.status_code = 201
-                    mock_response.json.return_value = VALID_USER_IN_SESSION
-                    mock_response.content = str(VALID_USER_IN_SESSION)
-                    mock_requests.post.return_value = mock_response
-                    result = client.post("/v1/authenticate", data={
-                        "gauth_token": "I don't matter because requests is mocked"})
-                    self.assertEqual(result.status_code, 201)
-                    result_dict = ast.literal_eval(result.data.decode())
-                    self.assert_sessions_are_equal(
-                        result_dict, VALID_USER_IN_SESSION)
-                    # user stored in session
-                    self.assertEqual(len(flask.session), 1)
-                    self.assertEqual(
-                        flask.session["user"], VALID_USER_IN_SESSION)
+        with app.test_request_context(), app.test_client() as client:
+            requests_mocker.post(app.config["USERS_ENDPOINT"] + "authenticate",
+                                 json=VALID_USER_IN_SESSION,
+                                 status_code=VALID_USER_AUTH_STATUS)
+            result = client.post("/v1/authenticate", data={
+                "gauth_token": "I don't matter because requests is mocked"})
+            self.assertEqual(result.status_code, VALID_USER_AUTH_STATUS)
+            result_dict = ast.literal_eval(result.data.decode())
+            self.assert_sessions_are_equal(
+                result_dict, VALID_USER_IN_SESSION)
+            # user stored in session
+            self.assertEqual(len(flask.session), 1)
+            self.assert_sessions_are_equal(
+                flask.session["user"], VALID_USER_IN_SESSION)
 
-    def test_failed_authentication(self):
+    @requests_mock.Mocker()
+    def test_failed_authentication(self, requests_mocker):
         """GAuth token fails authentication."""
-        response_content = "Error: bad gauth_token."
-        response_status_code = 400
-        with app.test_request_context():
-            with app.test_client() as client:
-                with mock.patch("app.requests") as mock_requests:
-                    mock_response = mock.MagicMock()
-                    mock_response.status_code = response_status_code
-                    mock_response.content = response_content
-                    mock_requests.post.return_value = mock_response
-                    result = client.post("/v1/authenticate", data={
-                        "gauth_token": "I don't matter because requests is mocked"})
-                    self.assertEqual(result.status_code, response_status_code)
-                    self.assertEqual(result.data.decode(), response_content)
-                    # user not stored in session
-                    self.assertEqual(len(flask.session), 0)
-                    self.assertNotIn("user", flask.session)
+        with app.test_request_context(), app.test_client() as client:
+            requests_mocker.post(app.config["USERS_ENDPOINT"] + "authenticate",
+                                 text=ERROR_BAD_TOKEN_TEXT,
+                                 status_code=ERROR_BAD_TOKEN_STATUS)
+            result = client.post("/v1/authenticate", data={
+                "gauth_token": "I don't matter because requests is mocked"})
+            self.assertEqual(result.status_code, ERROR_BAD_TOKEN_STATUS)
+            self.assertEqual(result.data.decode(), ERROR_BAD_TOKEN_TEXT)
+            # user not stored in session
+            self.assertEqual(len(flask.session), 0)
+            self.assertNotIn("user", flask.session)
 
     def test_no_token_given(self):
         """Failed to provide a GAuth token to authenticate."""
-        with app.test_request_context():
-            with app.test_client() as client:
-                result = client.post("/v1/authenticate")
-                self.assertEqual(result.status_code, 400)
-                self.assertIn("Error", result.data.decode())
-                # nothing stored in session
-                self.assertEqual(len(flask.session), 0)
+        with app.test_request_context(), app.test_client() as client:
+            result = client.post("/v1/authenticate")
+            self.assertEqual(result.status_code, 400)
+            self.assertIn("Error", result.data.decode())
+            # nothing stored in session
+            self.assertEqual(len(flask.session), 0)
 
 
 class TestSignOut(unittest.TestCase):
@@ -105,36 +100,34 @@ class TestSignOut(unittest.TestCase):
 
     def test_was_logged_in(self):
         """Sign out a user that was logged in (usual behaviour)."""
-        with app.test_request_context():
-            with app.test_client() as client:
-                flask.session["user"] = VALID_USER_IN_SESSION
-                # user in session before
-                self.assertIn("user", flask.session)
-                self.assertEqual(len(flask.session), 1)
-                result = client.get(
-                    "/v1/sign_out")
-                # empty session after
-                self.assertNotIn("user", flask.session)
-                self.assertEqual(len(flask.session), 0)
-                # correct redirect response
-                self.assertEqual(result.status_code, 302)  # redirect
-                self.assertIn("redirect", result.data.decode())
+        with app.test_request_context(), app.test_client() as client:
+            flask.session["user"] = VALID_USER_IN_SESSION
+            # user in session before
+            self.assertIn("user", flask.session)
+            self.assertEqual(len(flask.session), 1)
+            result = client.get(
+                "/v1/sign_out")
+            # empty session after
+            self.assertNotIn("user", flask.session)
+            self.assertEqual(len(flask.session), 0)
+            # correct redirect response
+            self.assertEqual(result.status_code, 302)  # redirect
+            self.assertIn("redirect", result.data.decode())
 
     def test_was_not_logged_in(self):
         """Try to sign out a user that was not logged in."""
-        with app.test_request_context():
-            with app.test_client() as client:
+        with app.test_request_context(), app.test_client() as client:
                 # empty session before
-                self.assertNotIn("user", flask.session)
-                self.assertEqual(len(flask.session), 0)
-                result = client.get(
-                    "/v1/sign_out")
-                # empty session after
-                self.assertNotIn("user", flask.session)
-                self.assertEqual(len(flask.session), 0)
-                # correct redirect response
-                self.assertEqual(result.status_code, 302)  # redirect
-                self.assertIn("redirect", result.data.decode())
+            self.assertNotIn("user", flask.session)
+            self.assertEqual(len(flask.session), 0)
+            result = client.get(
+                "/v1/sign_out")
+            # empty session after
+            self.assertNotIn("user", flask.session)
+            self.assertEqual(len(flask.session), 0)
+            # correct redirect response
+            self.assertEqual(result.status_code, 302)  # redirect
+            self.assertIn("redirect", result.data.decode())
 
 
 if __name__ == '__main__':

@@ -26,12 +26,11 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 @app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
-    is_auth = has_edit_access(get_user())
     posts = get_posts()
     return render_template(
         'index.html',
         posts=posts,
-        auth=is_auth,
+        auth=has_edit_access(get_user()),
         app_config=app.config
     )
 
@@ -39,12 +38,11 @@ def index():
 @app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
-    is_auth = has_edit_access(get_user())
     events = get_events()
     return render_template(
         'events.html',
         events=events,
-        auth=is_auth,
+        auth=has_edit_access(get_user()),
         app_config=app.config
     )
 
@@ -211,7 +209,7 @@ def has_edit_access(user):
 
 
 def get_user():
-    """Retrieves the current user of the app."""
+    """Retrieves the current user of the app or None if not signed in."""
     if "user" in session:
         response = authenticate_with_users_service(
             session["user"]["gauth_token"])
@@ -242,6 +240,8 @@ config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
                                          + "authenticate")
+
+# set flask secret key used for session encryption
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 if __name__ == "__main__":

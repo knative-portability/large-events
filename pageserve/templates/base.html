@@ -47,7 +47,6 @@ limitations under the License.
                 xhr.open('POST', "authenticate");
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.onload = function () {
-                    console.log('Signed in as: ' + xhr.responseText);
                     // show the "Sign out" button
                     window.location.reload()
                 };
@@ -62,9 +61,8 @@ limitations under the License.
             function signOut() {
                 var auth2 = gapi.auth2.getAuthInstance();
                 auth2.signOut().then(function () {
-                    console.log('User signed out.');
+                    window.location.replace("/v1/sign_out");
                 });
-                window.location.replace("/v1/sign_out")
             }
         </script>
         <h4>Hi {{ session['user']['name'] }}!</h4>
