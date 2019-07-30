@@ -1,31 +1,8 @@
 # posts microservice - Large Events (Knative Proof of Portability)
 
-[![Build Status](https://travis-ci.com/knative-portability/large-events.svg?branch=master)](https://travis-ci.com/knative-portability/large-events)
-[![Coverage Status](https://coveralls.io/repos/github/knative-portability/large-events/badge.svg?branch=master)](https://coveralls.io/github/knative-portability/large-events?branch=master)
-
 Add, edit, and fetch posts list.
 
-## Introduction
-
-An app built as proof of portability for [Knative](https://knative.dev) that provides a platform for event organizers to share info during large events like concerts, parades, expos, etc. Key features of this app include:
-* Allow authorized event organizers to create and edit events
-* Handle uploading and serving multimedia posts made by attendees
-* Organize and filter multiple sub-events
-* Provide a clean front-end web UI for interaction with the service
-* Authenticate with OAuth 2.0
-
-This app is built as part of a proof of portability project for [Knative](https://knative.dev). It is meant to show the key features of Knative, to test the conformance across various cloud product implementations of Knative, and to document with functioning sample code how one might develop, build, and deploy with Knative. Key features of Knative this app demonstrates include:
-* Develop microservices independently that can be individually deployed, updated, and auto-scaled
-* Deploy containerized code with minimal configuration, allowing the developer to focus on features rather than infrastructure
-* Run serverless, stateful containers that enable pay-for-use billing
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-This microservice is written in [Python 3](https://www.python.org/) and should run on Python 3.6+.
+These instructions are specific to this microservice. For general instructions and other information, see [the master README.md](../README.md).
 
 ### Installing
 
@@ -101,42 +78,3 @@ You can also [manually deploy this project to a service like Cloud Run](https://
 gcloud builds submit --tag gcr.io/[PROJECT-ID]/posts
 gcloud beta run deploy --image gcr.io/[PROJECT-ID]/posts --platform managed
 ```
-
-## Built With
-
-### Development
-
-* [Python 3](https://www.python.org/) - Python programming language
-* [Flask](http://flask.pocoo.org/) - Python web service framework
-* [pymongo](https://api.mongodb.com/python/current/) - MongoDB Python client
-* [GitHub](https://github.com) - Development platform for open source
-* [Travis CI](https://travis-ci.com/) - Hosted continuous integration service
-* [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
-
-### Testing
-
-* [unittest](https://docs.python.org/3/library/unittest.html) - Python unit testing framework
-* [Coverage.py](https://coverage.readthedocs.io/en/v4.5.x/) - Python code coverage measurement tool
-* [Coveralls](http://coveralls.io) - Test coverage history and statistics service 
-
-### Services
-
-* [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Cloud NoSQL database
-* [Google Cloud Storage](https://cloud.google.com/storage/) - Unified object storage for developers and enterprises
-* [Google Cloud Build](https://cloud.google.com/cloud-build/) - Continuous build, test, deploy in the cloud
-* [Google Cloud Run](https://cloud.google.com/run/) - On top of Knative, run fully managed stateless containers
-
-## Contributing
-
-Please read [CONTRIBUTING.md](../CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Authors
-
-* **Gabriel Mukobi** - *Initial work* - [mukobi](https://github.com/mukobi)
-* **Carolyn Mei** - *Initial work* - [cmei4444](https://github.com/cmei4444)
-
-See also the list of [contributors](https://github.com/knative-portability/large-events/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](../LICENSE.md) file for details.
