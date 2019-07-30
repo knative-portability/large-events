@@ -68,7 +68,7 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
             self.assert_sessions_are_equal(
                 result_dict, VALID_SESSION)
             # user stored in session
-            self.assertEqual(len(flask.session), 3)
+            self.assertEqual(len(flask.session), len(VALID_SESSION))
             self.assert_sessions_are_equal(
                 flask.session, VALID_SESSION)
 
@@ -113,7 +113,7 @@ class TestSignOut(unittest.TestCase):
             flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
             # user in session before
             self.assertIn("user_id", flask.session)
-            self.assertEqual(len(flask.session), 3)
+            self.assertEqual(len(flask.session), len(VALID_SESSION))
             result = client.get(
                 "/v1/sign_out")
             # empty session after
