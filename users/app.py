@@ -38,10 +38,10 @@ VALID_GAUTH_TOKEN_ISSUERS = [
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
     """Finds whether the given user is authorized for edit access."""
-    user = request.form.get('user_id')
-    if user is None:
+    user_id = request.form.get('user_id')
+    if user_id is None:
         return "Error: You must supply a 'user_id' POST parameter!", 400
-    authorized = find_authorization_in_db(user, app.config["COLLECTION"])
+    authorized = find_authorization_in_db(user_id, app.config["COLLECTION"])
     return jsonify(edit_access=authorized)
 
 
