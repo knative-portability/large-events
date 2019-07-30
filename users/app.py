@@ -23,6 +23,7 @@ Features include
 import os
 from flask import Flask, jsonify, request, make_response
 import pymongo
+from werkzeug.exceptions import BadRequestKeyError
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
@@ -42,6 +43,26 @@ def get_authorization():
         return "Error: You must supply a 'user_id' POST parameter!", 400
     authorized = find_authorization_in_db(user, app.config["COLLECTION"])
     return jsonify(edit_access=authorized)
+
+
+@app.route('/v1/authorization/update', methods=['POST'])
+def update_authorization():
+    """Updates the given user's authorization if caller is authorized."""
+    # TODO(mukobi) test me!
+    try:
+        gauth_token = request.form['gauth_token']
+        target_user_id = request.form.get['user_id']
+        is_organizer = request.form.get['is_organizer']
+        user = get_user_from_gauth_token(gauth_token)
+        authorized = find_authorization_in_db(
+            user["user_id"], app.config["COLLECTION"])
+        if not authorized:
+            return "Not authorized to make this request.", 403
+        update_user_authorization_in_db(
+            target_user_id, is_organizer, app.config["COLLECTION"])
+        return jsonify(edit_access=is_organizer)
+    except (AttributeError, ValueError, KeyError, BadRequestKeyError) as error:
+        return f"Error: {error}", 400
 
 
 @app.route('/v1/authenticate', methods=['POST'])
