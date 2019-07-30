@@ -82,7 +82,7 @@ export FLASK_SECRET_KEY="some secure and unique byte-string"
 
 Use flask to run the microservice locally.
 
-```
+```sh
 FLASK_APP=app.py && flask run
 ```
 
@@ -90,7 +90,7 @@ FLASK_APP=app.py && flask run
 
 Testing again is handled on the microservice level. To test, ensure your working directory is the microservice's subfolder then use `unittest`.
 
-```
+```sh
 python3 -m unittest test.py
 ```
 
@@ -102,7 +102,7 @@ This project is set up for continuous deployment to Google Cloud Run (managed) v
 
 You can also [manually deploy this project to a service like Cloud Run](https://cloud.google.com/run/docs/quickstarts/build-and-deploy). For example, to deploy one of the microservices to the service [SERVICE] in the GCP project with ID [PROJECT-ID] run:
 
-```
+```sh
 gcloud builds submit --tag gcr.io/[PROJECT-ID]/[SERVICE]
 gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[SERVICE] --platform managed
 ```
