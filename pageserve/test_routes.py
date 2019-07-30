@@ -16,10 +16,12 @@
 # limitations under the License.
 
 import unittest
+from unittest.mock import patch, MagicMock
 import ast
 import requests_mock
+from flask_testing import TestCase
 import flask
-from app import app
+import app
 
 VALID_USER_IN_SESSION = {
     "user_id": "42",
@@ -27,6 +29,10 @@ VALID_USER_IN_SESSION = {
 ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
 ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
+
+EXAMPLE_USER = "app_user"
+EXAMPLE_POSTS = ['example', 'posts', 'list']
+EXAMPLE_EVENTS = ['example', 'events', 'list']
 
 
 class TestAuthenticateAndGetUser(unittest.TestCase):
@@ -44,14 +50,14 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
 
     def setUp(self):
         """Set up test client."""
-        app.config["TESTING"] = True  # propagate exceptions to test client
-        app.secret_key = "Dummy key used for testing the flask session"
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        app.app.secret_key = "Dummy key used for testing the flask session"
 
     @requests_mock.Mocker()
     def test_valid_authentication(self, requests_mocker):
         """GAuth token successfully authenticates."""
-        with app.test_request_context(), app.test_client() as client:
-            requests_mocker.post(app.config["USERS_ENDPOINT"] + "authenticate",
+        with app.app.test_request_context(), app.app.test_client() as client:
+            requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authenticate",
                                  json=VALID_USER_IN_SESSION,
                                  status_code=VALID_USER_AUTH_STATUS)
             result = client.post("/v1/authenticate", data={
@@ -68,8 +74,8 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
     @requests_mock.Mocker()
     def test_failed_authentication(self, requests_mocker):
         """GAuth token fails authentication."""
-        with app.test_request_context(), app.test_client() as client:
-            requests_mocker.post(app.config["USERS_ENDPOINT"] + "authenticate",
+        with app.app.test_request_context(), app.app.test_client() as client:
+            requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authenticate",
                                  text=ERROR_BAD_TOKEN_TEXT,
                                  status_code=ERROR_BAD_TOKEN_STATUS)
             result = client.post("/v1/authenticate", data={
@@ -82,7 +88,7 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
 
     def test_no_token_given(self):
         """Failed to provide a GAuth token to authenticate."""
-        with app.test_request_context(), app.test_client() as client:
+        with app.app.test_request_context(), app.app.test_client() as client:
             result = client.post("/v1/authenticate")
             self.assertEqual(result.status_code, 400)
             self.assertIn("Error", result.data.decode())
@@ -95,12 +101,12 @@ class TestSignOut(unittest.TestCase):
 
     def setUp(self):
         """Set up test client."""
-        app.config["TESTING"] = True  # propagate exceptions to test client
-        app.secret_key = "Dummy key used for testing the flask session"
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        app.app.secret_key = "Dummy key used for testing the flask session"
 
     def test_was_logged_in(self):
         """Sign out a user that was logged in (usual behaviour)."""
-        with app.test_request_context(), app.test_client() as client:
+        with app.app.test_request_context(), app.app.test_client() as client:
             flask.session["user"] = VALID_USER_IN_SESSION
             # user in session before
             self.assertIn("user", flask.session)
@@ -116,7 +122,7 @@ class TestSignOut(unittest.TestCase):
 
     def test_was_not_logged_in(self):
         """Try to sign out a user that was not logged in."""
-        with app.test_request_context(), app.test_client() as client:
+        with app.app.test_request_context(), app.app.test_client() as client:
                 # empty session before
             self.assertNotIn("user", flask.session)
             self.assertEqual(len(flask.session), 0)
@@ -128,6 +134,48 @@ class TestSignOut(unittest.TestCase):
             # correct redirect response
             self.assertEqual(result.status_code, 302)  # redirect
             self.assertIn("redirect", result.data.decode())
+
+
+class TestTemplateRoutes(TestCase):
+    """Tests all pageserve endpoints that return page templates."""
+
+    def create_app(self):
+        """Creates and returns a Flask instance.
+
+        Required by flask_testing to test templates."""
+        test_app = flask.Flask(__name__)
+        test_app.config['TESTING'] = True
+        return test_app
+
+    def setUp(self):
+        """Set up test client."""
+        self.client = app.app.test_client()
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_posts', MagicMock(return_value=EXAMPLE_POSTS))
+    def test_index(self):
+        """Checks index page is rendered correctly by GET /v1/."""
+        response = self.client.get('/v1/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('posts', EXAMPLE_POSTS)
+        self.assertContext('app_config', app.app.config)
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
+    def test_show_events(self):
+        """Checks sub-events page is rendered correctly by GET /v1/events."""
+        response = self.client.get('/v1/events')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('events.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('events', EXAMPLE_EVENTS)
+        self.assertContext('app_config', app.app.config)
 
 
 if __name__ == '__main__':

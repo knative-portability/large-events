@@ -244,5 +244,5 @@ app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
 # set flask secret key used for session encryption
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
-if __name__ == "__main__":
+if __name__ == "__main__":    # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
