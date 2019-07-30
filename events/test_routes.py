@@ -61,6 +61,7 @@ class TestUploadEventRoute(unittest.TestCase):
         self.assertEqual(self.coll.count_documents({}), 0)
 
     def test_db_not_defined(self):
+        """Test adding event when DB connection is undefined."""
         self.coll.insert_one = MagicMock(side_effect=DBNotConnectedError)
         response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
         self.assertEqual(response.status_code, 500)
@@ -103,6 +104,7 @@ class TestGetEventsRoute(unittest.TestCase):
         self.assertEqual(data['num_events'], 0)
 
     def test_db_not_defined(self):
+        """Test getting events when DB connection is undefined."""
         self.coll.find = MagicMock(side_effect=DBNotConnectedError)
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 500)
