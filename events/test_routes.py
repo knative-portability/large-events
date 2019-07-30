@@ -81,7 +81,8 @@ class TestUploadEventRoute(unittest.TestCase):
     def test_db_not_defined(self):
         """Test adding event when DB connection is undefined."""
         with environ(os.environ):
-            del os.environ["MONGODB_URI"]
+            if "MONGODB_URI" in os.environ:
+                del os.environ["MONGODB_URI"]
             app.config["COLLECTION"] = connect_to_mongodb()
             response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
             self.assertEqual(response.status_code, 500)
@@ -126,7 +127,8 @@ class TestGetEventsRoute(unittest.TestCase):
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
         with environ(os.environ):
-            del os.environ["MONGODB_URI"]
+            if "MONGODB_URI" in os.environ:
+                del os.environ["MONGODB_URI"]
             app.config["COLLECTION"] = connect_to_mongodb()
             response = self.client.get('/v1/')
             self.assertEqual(response.status_code, 500)
