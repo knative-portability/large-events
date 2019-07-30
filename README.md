@@ -80,10 +80,10 @@ export FLASK_SECRET_KEY="some secure and unique byte-string"
 
 ### Running the service
 
-Use flask to run the microservice locally.
+To locally run a microservice, execute `app.py` with Python.
 
 ```sh
-FLASK_APP=app.py && flask run
+python3 app.py
 ```
 
 ## Running the tests
