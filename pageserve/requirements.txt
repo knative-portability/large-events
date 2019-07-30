@@ -1,4 +1,4 @@
 flask
 requests
 Flask-Testing
-blinker
+blinker   # required for some Flask-Testing methods

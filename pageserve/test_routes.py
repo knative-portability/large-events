@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from flask import Flask
 from flask_testing import TestCase
 import app
@@ -24,7 +24,9 @@ EXAMPLE_POSTS = ['example', 'posts', 'list']
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
 
-class TestRoutes(TestCase):
+class TestTemplateRoutes(TestCase):
+    """Tests all pageserve endpoints that return page templates."""
+
     def create_app(self):
         """Creates and returns a Flask instance.
 
@@ -37,11 +39,11 @@ class TestRoutes(TestCase):
         """Set up test client."""
         self.client = app.app.test_client()
 
-    @patch('app.get_user', return_value=EXAMPLE_USER)
-    @patch('app.has_edit_access', return_value=True)
-    @patch('app.get_posts', return_value=EXAMPLE_POSTS)
-    def test_index(self, mock_posts, mock_access, mock_user):
-        """Check that index page is rendered correctly."""
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_posts', MagicMock(return_value=EXAMPLE_POSTS))
+    def test_index(self):
+        """Checks index page is rendered correctly by GET /v1/."""
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('index.html')
@@ -50,11 +52,11 @@ class TestRoutes(TestCase):
         self.assertContext('auth', True)
         self.assertContext('posts', EXAMPLE_POSTS)
 
-    @patch('app.get_user', return_value=EXAMPLE_USER)
-    @patch('app.has_edit_access', return_value=True)
-    @patch('app.get_events', return_value=EXAMPLE_EVENTS)
-    def test_show_events(self, mock_events, mock_access, mock_user):
-        """Check that sub-events page is rendered correctly."""
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
+    def test_show_events(self):
+        """Checks sub-events page is rendered correctly by GET /v1/events."""
         response = self.client.get('/v1/events')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('events.html')
