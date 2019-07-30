@@ -25,10 +25,10 @@ This project is organized into microservices. Although this repository contains 
 * Each subfolder has its own README.md with more specific information regarding building, testing, deployment, etc.
 
 There are 4 microservices in this project. They are:
-- __events__ - Add, edit, and fetch events list.
-- __pageserve__ - Serve web UI and act as an API gateway to other services.
-- __posts__ - Add, edit, and fetch posts list.
-- __users__ - Authenticate with Google Sign-In, edit and fetch authorization level of users.
+- [__events__](events) - Add, edit, and fetch events list.
+- [__pageserve__](pageserve) - Serve web UI and act as an API gateway to other services.
+- [__posts__](posts) - Add, edit, and fetch posts list.
+- [__users__](users) - Authenticate with Google Sign-In, edit and fetch authorization level of users.
 
 ## Getting Started
 
@@ -42,7 +42,7 @@ These microservices are written in [Python 3](https://www.python.org/) and shoul
 
 How to install and run each microservice for local development.
 
-Each microservice has slightly different dependencies and thus slightly different installation procedures. Generally, installation for each microserve is as follows, but each subfolder's README.md has an "Installing" section with more accurate instructions.
+Each microservice has slightly different dependencies and thus slightly different installation procedures. Generally, installation for each microservice is as follows, but each subfolder's README.md has an "Installing" section with more accurate instructions.
 
 Make sure your working directory is the microservice's subfolder. For example, for the "users" microservice:
 
