@@ -19,7 +19,7 @@ import unittest
 from unittest import mock
 import json
 import mongomock
-from app import app
+import app
 
 AUTHORIZED_USER = "authorized-user"
 NON_AUTHORIZED_USER = "non-authorized-user"
@@ -52,10 +52,10 @@ class TestGetAuthorization(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.config["COLLECTION"].insert_many(FAKE_USERS)
-        app.config["TESTING"] = True  # propagate exceptions to test client
-        self.client = app.test_client()
+        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.app.config["COLLECTION"].insert_many(FAKE_USERS)
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.app.test_client()
 
     def test_is_authorized(self):
         """Get authorization of authorized user."""
@@ -92,10 +92,10 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.config["COLLECTION"].insert_many(FAKE_USERS)
-        app.config["TESTING"] = True  # propagate exceptions to test client
-        self.client = app.test_client()
+        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.app.config["COLLECTION"].insert_many(FAKE_USERS)
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.app.test_client()
 
     def test_authorized_change_other(self):
         """Authorized user can change authorization of others."""
@@ -106,9 +106,9 @@ class TestAuthenticateUser(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.config["TESTING"] = True  # propagate exceptions to test client
-        self.client = app.test_client()
+        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.app.test_client()
         # Patch google.oauth2.id_token
         patcher = mock.patch('app.id_token')
         self.verify_oauth2_token = patcher.start().verify_oauth2_token
