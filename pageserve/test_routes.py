@@ -20,6 +20,20 @@ from flask_testing import TestCase
 import app
 
 EXAMPLE_USER = "app_user"
+
+VALID_POST = {'event_id': 1, 'text': 'hello', 'files': 'file.txt'}
+INVALID_POST = {'event_id': 1, 'files': 'file.txt'}
+
+VALID_EVENT = {
+    'event_name': 'valid_event',
+    'description': 'This event is formatted correctly!',
+    'author_id': 'admin',
+    'event_time': '7-30-2019'}
+INVALID_EVENT = {
+    'event_name': 'invalid_event_missing',
+    'description': 'This event is missing an author!',
+    'event_time': '7-30-2019'}
+
 EXAMPLE_POSTS = ['example', 'posts', 'list']
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
@@ -91,9 +105,13 @@ class TestAddEventRoute(unittest.TestCase):
 
     def test_add_valid_event(self):
         """Tests adding a valid event."""
+        response = self.client.post('/v1/add_event', data=VALID_EVENT)
+        self.assertEqual(response.status_code, 201)
 
     def test_add_valid_event(self):
         """Tests adding an invalid event."""
+        response = self.client.post('/v1/add_event', data=INVALID_EVENT)
+        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == '__main__':
