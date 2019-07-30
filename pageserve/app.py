@@ -53,7 +53,8 @@ def authenticate_and_get_user():
 
     Call the users service to verify user authentication token and
     upload user profile to users db.
-    Set user object in secure session cookies (session['user']).
+
+    On successful authentication, stores user info in the session.
 
     Request data:
         gauth_token: Google ID token to authenticate.
@@ -66,6 +67,12 @@ def authenticate_and_get_user():
     try:
         gauth_token = request.form["gauth_token"]
         response = authenticate_with_users_service(gauth_token)
+
+        if response.status_code == 201:
+            # authentication successful, store login in cookie
+            session["user"] = response.json()
+            # also store the valid login token
+            session["user"]["gauth_token"] = gauth_token
         return response.content, response.status_code
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
@@ -85,23 +92,15 @@ def sign_out():
 def authenticate_with_users_service(gauth_token):
     """Proxy the user service for authentication and return user object.
 
-    On successful authentication, stores user info in the session.
-
     Args:
         gauth_token (str): Google ID token to authenticate.
 
     Response:
         response: response from the users service
     """
-    response = requests.post(
+    return requests.post(
         app.config["USERS_ENDPOINT"] + "authenticate",
         data={"gauth_token": gauth_token})
-    if response.status_code == 201:
-        # authentication successful, store login in cookie
-        session["user"] = response.json()
-        # also store the valid login token
-        session["user"]["gauth_token"] = gauth_token
-    return response
 
 
 @app.route('/v1/add_post', methods=['POST'])
