@@ -1,10 +1,11 @@
 """Unit tests for events service HTTP routes."""
 
 import unittest
+from unittest.mock import patch, MagicMock
 import datetime
 from bson import json_util
 import mongomock
-from app import app
+from app import app, DBNotConnectedError
 
 EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
@@ -59,6 +60,13 @@ class TestUploadEventRoute(unittest.TestCase):
 
         self.assertEqual(self.coll.count_documents({}), 0)
 
+    def test_db_not_defined(self):
+        self.coll.insert_one = MagicMock(side_effect=DBNotConnectedError)
+        response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
+        self.assertEqual(response.status_code, 500)
+
+        self.assertEqual(self.coll.count_documents({}), 0)
+
 
 class TestGetEventsRoute(unittest.TestCase):
     """Test retrieve all events endpoint GET /v1/."""
@@ -93,3 +101,8 @@ class TestGetEventsRoute(unittest.TestCase):
 
         self.assertEqual(len(data['events']), 0)
         self.assertEqual(data['num_events'], 0)
+
+    def test_db_not_defined(self):
+        self.coll.find = MagicMock(side_effect=DBNotConnectedError)
+        response = self.client.get('/v1/')
+        self.assertEqual(response.status_code, 500)
