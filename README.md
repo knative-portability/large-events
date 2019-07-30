@@ -42,28 +42,40 @@ These microservices are written in [Python 3](https://www.python.org/) and shoul
 
 How to install and run each microservice for local development.
 
+Each microservice has slightly different dependencies and thus slightly different installation procedures. Generally, installation for each microserve is as follows, but each subfolder's README.md has an "Installing" section with more accurate instructions.
+
 Make sure your working directory is the microservice's subfolder. For example, for the "users" microservice:
 
-```
+```sh
 cd users
 ```
 
 Set up and activate a virtual environment.
 
-```
+```sh
 python3 -m venv venv && . venv/bin/activate
 ```
 
 Install the required python modules.
 
-```
+```sh
 pip3 install -r requirements.txt
 ```
 
 Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable (this step is not needed for the pageserve service).
 
-```
+```sh
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
+```
+
+Set any other environment variables needed by the service.
+
+```sh
+export USERS_ENDPOINT="https://endpoint.where-users-is-deployed.com/v1/"
+export EVENTS_ENDPOINT="https://endpoint.where-events-is-deployed.com/v1/"
+export GAUTH_CLIENT_ID="123-my-google-oauth-service-client-id-456"
+export FLASK_SECRET_KEY="some secure and unique byte-string"
+...
 ```
 
 ### Running the service
