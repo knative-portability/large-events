@@ -69,10 +69,10 @@ def authenticate_and_get_user():
         response = authenticate_with_users_service(gauth_token)
 
         if response.status_code == 201:
-            # authentication successful, store login in cookie
-            session["user"] = response.json()
-            # also store the valid login token
-            session["user"]["gauth_token"] = gauth_token
+            # authentication successful, store login in cookies
+            session["user_id"] = response.json()["user_id"]
+            session["name"] = response.json()["name"]
+            session["gauth_token"] = gauth_token
         return response.content, response.status_code
     except BadRequestKeyError as error:
         return f"Error: {error}.", 400
@@ -85,7 +85,7 @@ def sign_out():
     Removes the 'user' object from the session.
     Redirects to the index page.
     """
-    session.pop("user", None)
+    session.clear()
     return redirect(url_for("index"))
 
 
@@ -209,9 +209,9 @@ def has_edit_access(user):
 
 def get_user():
     """Retrieves the current user of the app or None if not signed in."""
-    if "user" in session:
+    if "gauth_token" in session:
         response = authenticate_with_users_service(
-            session["user"]["gauth_token"])
+            session["gauth_token"])
         if response.status_code == 201:
             return response.json()
     return None  # Not signed in

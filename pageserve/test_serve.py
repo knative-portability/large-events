@@ -16,10 +16,16 @@ limitations under the License.
 import unittest
 from unittest import mock
 import requests_mock
+import flask
 import app
 
 AUTHORIZED_RESPONSE_JSON = {"edit_access": True}
 UNAUTHORIZED_RESPONSE_JSON = {"edit_access": False}
+
+VALID_SESSION = {
+    "user_id": "abc123 pretend I am a user ID.",
+    "name": "Boaty McBoatface",
+    "gauth_token": "Pretend I am a valid GAuth token."}
 
 
 class TestServe(unittest.TestCase):
@@ -36,24 +42,24 @@ class TestServe(unittest.TestCase):
         This test mocks app.authenticate_with_users_service() to always
         return the response of an authenticated user that is authorized.
         """
-        mock_response = mock.MagicMock()
-        mock_response.status_code = 201
-        mock_response.json.return_value = {"is_organizer": True}
-        with mock.patch("app.authenticate_with_users_service",
-                        return_value=mock_response):
-            app.session = {"user": {
-                "user_id": "abc123 pretend I am a user ID.",
-                "name": "Boaty McBoatface",
-                "gauth_token": "Pretend I am a valid GAuth token."}}
-            result = app.get_user()
+        with app.app.test_request_context(), app.app.test_client():
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 201
+            mock_response.json.return_value = {"is_organizer": True}
+            with mock.patch("app.authenticate_with_users_service",
+                            return_value=mock_response):
+                flask.session["user_id"] = VALID_SESSION["user_id"]
+                flask.session["name"] = VALID_SESSION["name"]
+                flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+                result = app.get_user()
 
-            valid_response = result["is_organizer"] is True
-            self.assertTrue(valid_response)
+                valid_response = result["is_organizer"] is True
+                self.assertTrue(valid_response)
 
-            # now test no user in session
-            app.session.clear()
-            result = app.get_user()
-            self.assertIsNone(result)
+                # now test no user in session
+                flask.session.clear()
+                result = app.get_user()
+                self.assertIsNone(result)
 
     @requests_mock.Mocker()
     def test_edit_access(self, requests_mocker):

@@ -23,9 +23,10 @@ from flask_testing import TestCase
 import flask
 import app
 
-VALID_USER_IN_SESSION = {
+VALID_SESSION = {
     "user_id": "42",
-    "name": "Ford Prefect"}
+    "name": "Ford Prefect",
+    "gauth_token": "I am a pretend token"}
 ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
 ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
@@ -58,18 +59,18 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
         """GAuth token successfully authenticates."""
         with app.app.test_request_context(), app.app.test_client() as client:
             requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authenticate",
-                                 json=VALID_USER_IN_SESSION,
+                                 json=VALID_SESSION,
                                  status_code=VALID_USER_AUTH_STATUS)
             result = client.post("/v1/authenticate", data={
                 "gauth_token": "I don't matter because requests is mocked"})
             self.assertEqual(result.status_code, VALID_USER_AUTH_STATUS)
             result_dict = ast.literal_eval(result.data.decode())
             self.assert_sessions_are_equal(
-                result_dict, VALID_USER_IN_SESSION)
+                result_dict, VALID_SESSION)
             # user stored in session
-            self.assertEqual(len(flask.session), 1)
+            self.assertEqual(len(flask.session), 3)
             self.assert_sessions_are_equal(
-                flask.session["user"], VALID_USER_IN_SESSION)
+                flask.session, VALID_SESSION)
 
     @requests_mock.Mocker()
     def test_failed_authentication(self, requests_mocker):
@@ -84,7 +85,7 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
             self.assertEqual(result.data.decode(), ERROR_BAD_TOKEN_TEXT)
             # user not stored in session
             self.assertEqual(len(flask.session), 0)
-            self.assertNotIn("user", flask.session)
+            self.assertNotIn("user_id", flask.session)
 
     def test_no_token_given(self):
         """Failed to provide a GAuth token to authenticate."""
@@ -107,14 +108,16 @@ class TestSignOut(unittest.TestCase):
     def test_was_logged_in(self):
         """Sign out a user that was logged in (usual behaviour)."""
         with app.app.test_request_context(), app.app.test_client() as client:
-            flask.session["user"] = VALID_USER_IN_SESSION
+            flask.session["user_id"] = VALID_SESSION["user_id"]
+            flask.session["name"] = VALID_SESSION["name"]
+            flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
             # user in session before
-            self.assertIn("user", flask.session)
-            self.assertEqual(len(flask.session), 1)
+            self.assertIn("user_id", flask.session)
+            self.assertEqual(len(flask.session), 3)
             result = client.get(
                 "/v1/sign_out")
             # empty session after
-            self.assertNotIn("user", flask.session)
+            self.assertNotIn("user_id", flask.session)
             self.assertEqual(len(flask.session), 0)
             # correct redirect response
             self.assertEqual(result.status_code, 302)  # redirect
@@ -124,12 +127,12 @@ class TestSignOut(unittest.TestCase):
         """Try to sign out a user that was not logged in."""
         with app.app.test_request_context(), app.app.test_client() as client:
                 # empty session before
-            self.assertNotIn("user", flask.session)
+            self.assertNotIn("user_id", flask.session)
             self.assertEqual(len(flask.session), 0)
             result = client.get(
                 "/v1/sign_out")
             # empty session after
-            self.assertNotIn("user", flask.session)
+            self.assertNotIn("user_id", flask.session)
             self.assertEqual(len(flask.session), 0)
             # correct redirect response
             self.assertEqual(result.status_code, 302)  # redirect
