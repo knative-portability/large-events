@@ -3,9 +3,10 @@
 import unittest
 from unittest.mock import MagicMock
 import datetime
+from contextlib import contextmanager
 from bson import json_util
 import mongomock
-from app import app, DBNotConnectedError
+from app import app, os, connect_to_mongodb
 
 EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
 
@@ -35,6 +36,23 @@ VALID_DB_EVENT_WITH_ID = {
     'event_id': 'unique_event_id1'}
 
 
+@contextmanager
+def environ(env):
+    """Temporarily set environment variables inside the context manager and
+    fully restore previous environment afterwards
+    """
+    original_env = {key: os.getenv(key) for key in env}
+    os.environ.update(env)
+    try:
+        yield
+    finally:
+        for key, value in original_env.items():
+            if value is None:
+                del os.environ[key]
+            else:
+                os.environ[key] = value
+
+
 class TestUploadEventRoute(unittest.TestCase):
     """Test add events endpoint POST /v1/add."""
 
@@ -62,11 +80,13 @@ class TestUploadEventRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test adding event when DB connection is undefined."""
-        self.coll.insert_one = MagicMock(side_effect=DBNotConnectedError)
-        response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
-        self.assertEqual(response.status_code, 500)
+        with environ(os.environ):
+            del os.environ["MONGODB_URI"]
+            app.config["COLLECTION"] = connect_to_mongodb()
+            response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
+            self.assertEqual(response.status_code, 500)
 
-        self.assertEqual(self.coll.count_documents({}), 0)
+            self.assertEqual(self.coll.count_documents({}), 0)
 
 
 class TestGetEventsRoute(unittest.TestCase):
@@ -105,6 +125,8 @@ class TestGetEventsRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
-        self.coll.find = MagicMock(side_effect=DBNotConnectedError)
-        response = self.client.get('/v1/')
-        self.assertEqual(response.status_code, 500)
+        with environ(os.environ):
+            del os.environ["MONGODB_URI"]
+            app.config["COLLECTION"] = connect_to_mongodb()
+            response = self.client.get('/v1/')
+            self.assertEqual(response.status_code, 500)
