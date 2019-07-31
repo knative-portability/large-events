@@ -29,14 +29,17 @@ def index():
     is_auth = has_edit_access(get_user_info(user,
                                             app.config['USERS_ENDPOINT']
                                             + "authorization"))
-    posts = get_posts()
-    return render_template(
-        'index.html',
-        posts=posts,
-        auth=is_auth,
-        user=user,
-        app_config=app.config
-    )
+    try:
+        posts = get_posts()
+        return render_template(
+            'index.html',
+            posts=posts,
+            auth=is_auth,
+            user=user,
+            app_config=app.config
+        )
+    except RuntimeError:
+        return "Unable to get posts from posts service.", 500
 
 
 @app.route('/v1/events', methods=['GET'])
@@ -46,14 +49,17 @@ def show_events():
     is_auth = has_edit_access(get_user_info(user,
                                             app.config['USERS_ENDPOINT']
                                             + "authorization"))
-    events = get_events()
-    return render_template(
-        'events.html',
-        events=events,
-        auth=is_auth,
-        user=user,
-        app_config=app.config
-    )
+    try:
+        events = get_events()
+        return render_template(
+            'events.html',
+            events=events,
+            auth=is_auth,
+            user=user,
+            app_config=app.config
+        )
+    except RuntimeError:
+        return "Unable to get events from events service.", 500
 
 
 @app.route('/v1/add_post', methods=['POST'])
@@ -108,9 +114,7 @@ def get_posts():
     r = requests.get(url, params={})
     if r.status_code == 200:
         return parse_posts(r.json())
-    else:
-        # TODO(cmei4444): handle error in a way that doesn't break page display
-        return "Error in getting posts"
+    raise RuntimeError("Error in retrieving posts.")
 
 
 def parse_posts(posts_dict):
@@ -135,9 +139,7 @@ def get_events():
     r = requests.get(url, params={})
     if r.status_code == 200:
         return parse_events(r.json())
-    else:
-        # TODO(cmei4444): handle error in a way that doesn't break page display
-        return "Error in getting events"
+    raise RuntimeError("Error in retrieving events.")
 
 
 def parse_events(events_dict):
