@@ -207,6 +207,12 @@ class TestUpdateAuthorization(unittest.TestCase):
         self.assertFalse(app.find_authorization_in_db(
             target_user_id, app.app.config["COLLECTION"]))
 
+    def test_errror_missing_parameters(self):
+        """Invalid request missing parameters."""
+        result = self.client.post("/v1/authorization/update", data={})
+        self.assertIn("Error", result.data.decode())
+        self.assertEqual(result.status_code, 400)
+
 
 class TestAuthenticateUser(unittest.TestCase):
     """Test authenticate user endpoint POST /v1/authenticate."""
