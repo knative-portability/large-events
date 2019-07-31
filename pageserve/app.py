@@ -69,7 +69,9 @@ def add_post():
         All files to be uploaded (can be multiple)
 
     Response:
-        string response and response code returned by posts service
+        String response and response code returned by posts service:
+            201 if post added successfully
+            400 if post info is malformatted
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user())
@@ -90,7 +92,9 @@ def add_event():
         event_time: time of event
 
     Response:
-        string response and response code returned by events service
+        String response and response code returned by posts service:
+            201 if event added successfully
+            400 if event info is malformatted
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user())
