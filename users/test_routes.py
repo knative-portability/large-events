@@ -46,19 +46,24 @@ IDINFO_MISSING_NAME = {
     "sub": "I have an ID but no name"}
 DUMMY_GAUTH_REQUEST_DATA = {"gauth_token": "fake_token_0123"}
 
-UPDATER_ID = "authorized-self-id"
+AUTHORIZED_UPDATER_ID = "authorized-self-id"
 AUTHORIZED_UPDATER = {
-    "user_id": UPDATER_ID,
-    "name": UPDATER_ID,
+    "user_id": AUTHORIZED_UPDATER_ID,
+    "name": AUTHORIZED_UPDATER_ID,
     "is_organizer": True}
+NON_AUTHORIZED_UPDATER_ID = "non-authorized-self-id"
 NON_AUTHORIZED_UPDATER = {
-    "user_id": UPDATER_ID,
-    "name": UPDATER_ID,
+    "user_id": NON_AUTHORIZED_UPDATER_ID,
+    "name": NON_AUTHORIZED_UPDATER_ID,
     "is_organizer": False}
-IDINFO_UPDATER = {
+IDINFO_AUTHORIZED_UPDATER = {
     "iss": "accounts.google.com",
-    "sub": UPDATER_ID,
+    "sub": AUTHORIZED_UPDATER_ID,
     "name": "John Doe"}
+IDINFO_NON_AUTHORIZED_UPDATER = {
+    "iss": "accounts.google.com",
+    "sub": NON_AUTHORIZED_UPDATER_ID,
+    "name": "Draco Malfo"}
 
 
 class TestGetAuthorization(unittest.TestCase):
@@ -102,7 +107,7 @@ class TestGetAuthorization(unittest.TestCase):
 
 
 @mock.patch("app.get_user_from_gauth_token",
-            mock.Mock(return_value=IDINFO_UPDATER))
+            mock.Mock(return_value=IDINFO_AUTHORIZED_UPDATER))
 class TestUpdateAuthorization(unittest.TestCase):
     """Test update authorization endpoint POST /v1/authorization/update.
 
@@ -117,7 +122,9 @@ class TestUpdateAuthorization(unittest.TestCase):
         """Set up test client and seed mock DB for testing."""
         app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
         app.app.config["COLLECTION"].insert_many(FAKE_USERS)  # others
-        app.app.config["COLLECTION"].insert_one(AUTHORIZED_UPDATER)  # caller
+        # insert users that will call the change auth endpoint
+        app.app.config["COLLECTION"].insert_one(AUTHORIZED_UPDATER)
+        app.app.config["COLLECTION"].insert_one(NON_AUTHORIZED_UPDATER)
         app.app.config["TESTING"] = True  # propagate exceptions to test client
         self.client = app.app.test_client()
 
@@ -171,7 +178,7 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def test_authorized_change_self_true_to_false(self):
         """Authorized user can revoke authorization of self."""
-        target_user_id = UPDATER_ID
+        target_user_id = AUTHORIZED_UPDATER_ID
         self.assertTrue(app.find_authorization_in_db(
             target_user_id, app.app.config["COLLECTION"]))
         self.client.post("/v1/authorization/update", data={
@@ -183,13 +190,12 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def test_not_authorized_try_grant_self(self):
         """Not authorized, can't grant authorization to self."""
-        # make caller not authorized
-        app.app.config["COLLECTION"].update_one(
-            {"user_id": UPDATER_ID}, {"$set": NON_AUTHORIZED_UPDATER})  # caller
+        # caller not authorized
+        app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
         # can't give authorization to self
-        target_user_id = UPDATER_ID
+        target_user_id = NON_AUTHORIZED_UPDATER_ID
         result = self.client.post("/v1/authorization/update", data={
             "target_user_id": target_user_id,
             "is_organizer": True,
@@ -201,11 +207,10 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def test_not_authorized_try_revoke_other(self):
         """Not authorized, can't revoke authorization of other."""
-        # make caller not authorized
-        app.app.config["COLLECTION"].update_one(
-            {"user_id": UPDATER_ID}, {"$set": NON_AUTHORIZED_UPDATER})  # caller
+        # caller not authorized
+        app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
         # can't give authorization to other
         target_user_id = AUTHORIZED_USER_ID
         result = self.client.post("/v1/authorization/update", data={
@@ -219,11 +224,10 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def test_not_authorized_try_grant_other(self):
         """Not authorized, can't grant authorization to other."""
-        # make caller not authorized
-        app.app.config["COLLECTION"].update_one(
-            {"user_id": UPDATER_ID}, {"$set": NON_AUTHORIZED_UPDATER})  # caller
+        # caller not authorized
+        app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
         # can't give authorization to other
         target_user_id = NON_AUTHORIZED_USER_ID
         result = self.client.post("/v1/authorization/update", data={
