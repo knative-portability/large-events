@@ -32,14 +32,13 @@ limitations under the License.
 
 <h2>Past posts</h2>
 {% for post in posts %}
-<p>Posted by {{post.author}} at {{post.created_at}}</p>
+<p>Posted by {{post.author_id}} at {{post.created_at}}</p>
 
-{% if post.type == 'text' %}
+{% if post.text %}
 <p>{{post.text}}</p>
-{% elif post.type == 'image' %}
+{% endif %}
+{% if post.images %}
 <p>This is an image but we can't display it right now</p>
-{% else %}
-<p>This post type is unrecognized.</p>
 {% endif %}
 
 <hr>
