@@ -16,10 +16,28 @@ limitations under the License.
 import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask
+import requests_mock
 from flask_testing import TestCase
 import app
 
 EXAMPLE_USER = "app_user"
+
+VALID_POST_FORM = {
+    'event_id': 'valid_post_id',
+    'text': 'This event is valid.',
+    'file_1': 'fake_file_1.txt',
+    'file_2': 'fake_file_2.txt'}
+INVALID_POST_FORM = {
+    'event_id': 'invalid_post_id'}
+
+VALID_EVENT_FORM = {
+    'event_name': 'valid_event',
+    'description': 'This event is formatted correctly!',
+    'event_time': '7-30-2019'}
+INVALID_EVENT_FORM = {
+    'event_name': 'invalid_event_missing',
+    'description': 'This event is missing an time!'}
+
 EXAMPLE_POSTS = ['example', 'posts', 'list']
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
@@ -64,6 +82,76 @@ class TestTemplateRoutes(TestCase):
         self.assertContext('user', EXAMPLE_USER)
         self.assertContext('auth', True)
         self.assertContext('events', EXAMPLE_EVENTS)
+
+
+class TestAddPostRoute(unittest.TestCase):
+    """Tests adding posts at POST /v1/add_post."""
+
+    def setUp(self):
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'add'
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @requests_mock.Mocker()
+    def test_add_valid_post(self, mock_requests):
+        """Tests adding a valid post."""
+        mock_requests.post(app.app.config['POSTS_ENDPOINT'] + 'add',
+                           text="Example success message",
+                           status_code=201)
+
+        response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data.decode(), "Example success message")
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @requests_mock.Mocker()
+    def test_add_invalid_post(self, mock_requests):
+        """Tests adding an invalid post."""
+        mock_requests.post(app.app.config['POSTS_ENDPOINT'] + 'add',
+                           text="Example error message",
+                           status_code=400)
+
+        response = self.client.post('/v1/add_post', data=INVALID_POST_FORM)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.decode(), "Example error message")
+
+
+class TestAddEventRoute(unittest.TestCase):
+    """Tests adding events at POST /v1/add_event."""
+
+    def setUp(self):
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'add'
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @requests_mock.Mocker()
+    def test_add_valid_event(self, mock_requests):
+        """Tests adding a valid event."""
+        mock_requests.post(app.app.config['EVENTS_ENDPOINT'] + 'add',
+                           text="Example success message",
+                           status_code=201)
+
+        response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data.decode(), "Example success message")
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @requests_mock.Mocker()
+    def test_add_invalid_event(self, mock_requests):
+        """Tests adding an invalid event."""
+        mock_requests.post(app.app.config['EVENTS_ENDPOINT'] + 'add',
+                           text="Example error message",
+                           status_code=400)
+
+        response = self.client.post('/v1/add_event', data=INVALID_EVENT_FORM)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.decode(), "Example error message")
 
 
 if __name__ == '__main__':
