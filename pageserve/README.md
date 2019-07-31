@@ -33,6 +33,7 @@ Set any environment variables needed by the service. For the pageserve service, 
 ```sh
 export USERS_ENDPOINT="https://endpoint.where-users-is-deployed.com/v1/"
 export EVENTS_ENDPOINT="https://endpoint.where-events-is-deployed.com/v1/"
+export POSTS_ENDPOINT="https://endpoint.where-posts-is-deployed.com/v1/"
 export GAUTH_CLIENT_ID="123-my-google-oauth-service-client-id-456"
 export FLASK_SECRET_KEY="some secure and unique byte-string"
 ```
