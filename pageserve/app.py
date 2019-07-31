@@ -26,10 +26,9 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 @app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
-    posts = get_posts()
     return render_template(
         'index.html',
-        posts=posts,
+        posts=get_posts(),
         auth=has_edit_access(get_user()),
         app_config=app.config
     )
@@ -38,10 +37,9 @@ def index():
 @app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
-    events = get_events()
     return render_template(
         'events.html',
-        events=events,
+        events=get_events(),
         auth=has_edit_access(get_user()),
         app_config=app.config
     )
@@ -204,7 +202,7 @@ def has_edit_access(user):
         return False
     url = app.config["USERS_ENDPOINT"] + "authorization"
     response = requests.post(url, data={"user_id": user["user_id"]})
-    return bool(response.json()["edit_access"]) if user else False
+    return response.json()["edit_access"] is True
 
 
 def get_user():
