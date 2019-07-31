@@ -24,15 +24,13 @@ EXAMPLE_USER = "app_user"
 VALID_POST = {'event_id': 1, 'text': 'hello', 'files': 'file.txt'}
 INVALID_POST = {'event_id': 1, 'files': 'file.txt'}
 
-VALID_EVENT = {
+VALID_EVENT_FORM = {
     'event_name': 'valid_event',
     'description': 'This event is formatted correctly!',
-    'author_id': 'admin',
     'event_time': '7-30-2019'}
-INVALID_EVENT = {
+INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
-    'description': 'This event is missing an author!',
-    'event_time': '7-30-2019'}
+    'description': 'This event is missing an time!'}
 
 EXAMPLE_POSTS = ['example', 'posts', 'list']
 EXAMPLE_EVENTS = ['example', 'events', 'list']
@@ -100,20 +98,43 @@ class TestAddEventRoute(unittest.TestCase):
     """Tests adding events at POST /v1/add_event."""
 
     def setUp(self):
-        self.coll = mongomock.MongoClient().db.collection
-        app.config["COLLECTION"] = self.coll
-        app.config["TESTING"] = True
-        self.client = app.test_client()
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'add'
 
-    def test_add_valid_event(self):
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.requests')
+    def test_add_valid_event(self, mock_requests):
         """Tests adding a valid event."""
-        response = self.client.post('/v1/add_event', data=VALID_EVENT)
-        self.assertEqual(response.status_code, 201)
+        mock_response = MagicMock()
+        mock_response.status_code = 201
+        mock_response.content = "Example success message"
+        mock_requests.post.return_value = mock_response
 
-    def test_add_valid_event(self):
+        response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
+
+        expected_arg = dict(**VALID_EVENT_FORM, author_id=EXAMPLE_USER)
+        mock_requests.post.assert_called_with(self.expected_url,
+                                              data=expected_arg)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data.decode(), "Example success message")
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.requests')
+    def test_add_invalid_event(self, mock_requests):
         """Tests adding an invalid event."""
-        response = self.client.post('/v1/add_event', data=INVALID_EVENT)
+        mock_response = MagicMock()
+        mock_response.content = "Example error message"
+        mock_response.status_code = 400
+        mock_requests.post.return_value = mock_response
+
+        response = self.client.post('/v1/add_event', data=INVALID_EVENT_FORM)
+
+        expected_arg = dict(**INVALID_EVENT_FORM, author_id=EXAMPLE_USER)
+        mock_requests.post.assert_called_with(self.expected_url,
+                                              data=expected_arg)
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.decode(), "Example error message")
 
 
 if __name__ == '__main__':
