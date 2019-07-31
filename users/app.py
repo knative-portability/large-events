@@ -48,14 +48,13 @@ def get_authorization():
 @app.route('/v1/authorization/update', methods=['POST'])
 def update_authorization():
     """Updates the given user's authorization if caller is authorized."""
-    # TODO(mukobi) test me!
     try:
         gauth_token = request.form['gauth_token']
-        target_user_id = request.form.get['user_id']
-        is_organizer = request.form.get['is_organizer']
-        user = get_user_from_gauth_token(gauth_token)
+        target_user_id = request.form['target_user_id']
+        is_organizer = request.form['is_organizer'] == "True"  # str to bool
+        idinfo = get_user_from_gauth_token(gauth_token)
         authorized = find_authorization_in_db(
-            user["user_id"], app.config["COLLECTION"])
+            idinfo["sub"], app.config["COLLECTION"])
         if not authorized:
             return "Not authorized to make this request.", 403
         update_user_authorization_in_db(
@@ -174,9 +173,9 @@ def update_user_authorization_in_db(
     return result.upserted_id
 
 
-def find_authorization_in_db(username, users_collection):
+def find_authorization_in_db(user_id, users_collection):
     """Queries the db to find authorization of the given user."""
-    first_user = users_collection.find_one({"user_id": username})
+    first_user = users_collection.find_one({"user_id": user_id})
     if first_user is None:  # user not found
         return False
     authorized = first_user.get("is_organizer")
