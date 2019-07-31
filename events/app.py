@@ -97,7 +97,15 @@ def build_events_dict(events):
 @app.route('/v1/search', methods=['GET'])
 def search_event():
     """Search for the event with the given name in the DB."""
-    pass
+    try:
+        event_name = request.args['name']
+        events = app.config["COLLECTION"].find({'event_name': event_name})
+        events = [Event(**ev).dict for ev in events]
+        events_dict = build_events_dict(events)
+        # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
+        return json.loads(json_util.dumps(events_dict))
+    except DBNotConnectedError as e:
+        return "Events database was undefined.", 500
 
 
 @app.route('/v1/<event_id>', methods=['PUT'])
