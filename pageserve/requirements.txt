@@ -1,4 +1,5 @@
 flask
 requests
+requests-mock  # mock out requests module in testing
 Flask-Testing
 blinker   # required for some Flask-Testing methods
