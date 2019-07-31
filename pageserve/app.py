@@ -100,28 +100,29 @@ def add_event():
 
 def get_posts():
     """Gets all posts from posts service."""
-    # TODO: integrate with posts service to pull post info from database
-    posts = [{'post_id': '1',
-              'event_id': '0',
-              'type': 'text',
-              'author': 'admin',
-              'created_at': '7-9-2019',
-              'text': 'this will be a fun event!',
-              },
-             {'post_id': '2',
-              'event_id': '0',
-              'type': 'image',
-              'author': 'admin',
-              'created_at': '7-9-2019',
-              'text': 'abcdefghi',
-              }]
-    return parse_posts(posts)
+    url = app.config['POSTS_ENDPOINT']
+    r = requests.get(url, params={})
+    if r.status_code == 200:
+        return parse_posts(r.json())
+    else:
+        # TODO(cmei4444): handle error in a way that doesn't break page display
+        return "Error in getting posts"
 
 
-def parse_posts(posts):
-    # TODO(cmei4444): implement parsing on posts pulled from posts service in
-    # a format for web display
-    return posts
+def parse_posts(posts_dict):
+    """Parses response from posts service to be used in HTML templates.
+
+    Args:
+        events_dict: JSON returned by posts service, includes:
+            posts (list): list of posts
+            num_posts (int): number of posts returned
+
+    Returns:
+        list: parsed list of posts.
+    """
+    # TODO(cmei4444): implement parsing on posts - timestamps are formatted
+    # unreadably currently
+    return posts_dict['posts']
 
 
 def get_events():
