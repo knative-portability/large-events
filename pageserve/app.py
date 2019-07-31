@@ -180,7 +180,7 @@ def config_endpoints(endpoints):
             raise NameError("Endpoint {} not defined.".format(endpoint))
 
 
-config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT'])
+config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT', 'POSTS_ENDPOINT'])
 
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']

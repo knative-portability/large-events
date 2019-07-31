@@ -22,6 +22,7 @@ env:
   - TEST_DIR=pageserve
     USERS_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/
     EVENTS_ENDPOINT=https://events-l3zyoxchqa-uc.a.run.app/v1/
+    POSTS_ENDPOINT=https://posts-l3zyoxchqa-uc.a.run.app/v1/
   - TEST_DIR=users
   - TEST_DIR=events
     USERS_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/
