@@ -75,7 +75,7 @@ def add_post():
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user())
-    r = requests.post(url, data=form_data)
+    r = requests.post(url, data=form_data, files=request.files)
     return r.content, r.status_code
 
 

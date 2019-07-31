@@ -34,11 +34,15 @@ limitations under the License.
 {% for post in posts %}
 <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
 
+<p>For event {{ post.event_id }}</p>
+
 {% if post.text %}
 <p>{{post.text}}</p>
 {% endif %}
-{% if post.images %}
-<p>This is an image but we can't display it right now</p>
+{% if post.files %}
+  {% for file in post.files %}
+  <img src="{{ file }}">
+  {% endfor %}
 {% endif %}
 
 <hr>
@@ -46,7 +50,6 @@ limitations under the License.
 {% endfor %}
 
 <h2>Create New Post</h2>
-<!-- TODO: add correct endpoint and make sure fields are correct-->
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
     <div> <!-- TODO(cmei4444): implement event picker -->
         <label for="event_id">Event ID:</label>
