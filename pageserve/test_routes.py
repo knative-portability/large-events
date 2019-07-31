@@ -21,8 +21,13 @@ import app
 
 EXAMPLE_USER = "app_user"
 
-VALID_POST = {'event_id': 1, 'text': 'hello', 'files': 'file.txt'}
-INVALID_POST = {'event_id': 1, 'files': 'file.txt'}
+VALID_POST_FORM = {
+    'event_id': 'valid_post_id',
+    'text': 'This event is valid.',
+    'file_1': 'fake_file_1.txt',
+    'file_2': 'fake_file_2.txt'}
+INVALID_POST_FORM = {
+    'event_id': 'invalid_post_id'}
 
 VALID_EVENT_FORM = {
     'event_name': 'valid_event',
@@ -82,16 +87,43 @@ class TestAddPostRoute(unittest.TestCase):
     """Tests adding posts at POST /v1/add_post."""
 
     def setUp(self):
-        self.coll = mongomock.MongoClient().db.collection
-        app.config["COLLECTION"] = self.coll
-        app.config["TESTING"] = True
-        self.client = app.test_client()
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'add'
 
-    def test_add_valid_post(self):
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.requests')
+    def test_add_valid_post(self, mock_requests):
         """Tests adding a valid post."""
+        mock_response = MagicMock()
+        mock_response.status_code = 201
+        mock_response.content = "Example success message"
+        mock_requests.post.return_value = mock_response
 
-    def test_add_valid_post(self):
+        response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
+
+        expected_arg = dict(**VALID_POST_FORM, author_id=EXAMPLE_USER)
+        mock_requests.post.assert_called_with(self.expected_url,
+                                              data=expected_arg)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data.decode(), "Example success message")
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.requests')
+    def test_add_invalid_post(self, mock_requests):
         """Tests adding an invalid post."""
+        mock_response = MagicMock()
+        mock_response.content = "Example error message"
+        mock_response.status_code = 400
+        mock_requests.post.return_value = mock_response
+
+        response = self.client.post('/v1/add_post', data=INVALID_POST_FORM)
+
+        expected_arg = dict(**INVALID_POST_FORM, author_id=EXAMPLE_USER)
+        mock_requests.post.assert_called_with(self.expected_url,
+                                              data=expected_arg)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data.decode(), "Example error message")
 
 
 class TestAddEventRoute(unittest.TestCase):
