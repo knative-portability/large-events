@@ -70,6 +70,7 @@ class TestGetPosts(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_posts_success(self, mock_requests):
+        """Test that posts are retrieved successfully."""
         mock_requests.get(
             self.url, text=json.dumps(self.posts_dict), status_code=200)
         posts = app.get_posts()
@@ -77,9 +78,10 @@ class TestGetPosts(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_posts_fail(self, mock_requests):
+        """Test that error is raised when posts cannot be retrieved."""
         mock_requests.get(self.url, text="Error message.", status_code=500)
         with self.assertRaises(RuntimeError):
-            posts = app.get_posts()
+            app.get_posts()
 
 
 class TestGetEvents(unittest.TestCase):
@@ -91,6 +93,7 @@ class TestGetEvents(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_events_success(self, mock_requests):
+        """Test that events are returned successfully."""
         mock_requests.get(
             self.url, text=json.dumps(self.events_dict), status_code=200)
         posts = app.get_events()
@@ -98,9 +101,10 @@ class TestGetEvents(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_events_fail(self, mock_requests):
+        """Test error is raised when events cannot be retrieved."""
         mock_requests.get(self.url, text="Error message.", status_code=500)
         with self.assertRaises(RuntimeError):
-            posts = app.get_events()
+            app.get_events()
 
 
 if __name__ == '__main__':
