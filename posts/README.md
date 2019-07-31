@@ -28,13 +28,13 @@ Install the required python modules.
 pip3 install -r requirements.txt
 ```
 
-Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable.
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environment variable.
 
 ```sh
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
 ```
 
-Specific to the posts service, you need to [set up a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/quickstart-console) and connect it to your posts service deployment, then provide the app with its bucket name via an environmental variable.
+Specific to the posts service, you need to [set up a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/quickstart-console) and connect it to your posts service deployment, then provide the app with its bucket name via an environment variable.
 ```sh
 export GCLOUD_STORAGE_BUCKET_NAME="the-name-of-your-storage-bucket"
 ```

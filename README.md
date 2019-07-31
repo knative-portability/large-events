@@ -21,7 +21,7 @@ This app is built as part of a proof of portability project for [Knative](https:
 This project is organized into microservices. Although this repository contains a few top level files such as this README.md, each direct subfolder of this project is its own independent microservice. This means a few things: 
 * Each microservice subfolder is meant to be built and deployed independently from each other
 * The microservices interact with each other in deployment through HTTP requests
-    * You will need to supply environmental variable to the microservices specifying each others' endpoints
+* You will need to supply environment variable to the microservices specifying each others' endpoints
 * Each subfolder has its own README.md with more specific information regarding building, testing, deployment, etc.
 
 There are 4 microservices in this project. They are:
@@ -62,7 +62,7 @@ Install the required python modules.
 pip3 install -r requirements.txt
 ```
 
-Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environmental variable (this step is not needed for the pageserve service).
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environment variable (this step is not needed for the pageserve service).
 
 ```sh
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
