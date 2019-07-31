@@ -15,6 +15,7 @@ limitations under the License.
 
 import unittest
 from unittest.mock import patch
+import requests_mock
 import app
 
 
@@ -57,6 +58,27 @@ class TestServe(unittest.TestCase):
         mock_os.environ.__contains__.return_value = False
         with self.assertRaises(NameError):
             app.config_endpoints(['url3'])
+
+
+class TestGetPosts(unittest.TestCase):
+    """Test getting posts."""
+
+    def setUp(self):
+        pass
+
+    def test_get_posts(self):
+        pass
+
+
+class TestGetEvents(unittest.TestCase):
+    """Test getting events."""
+
+    def setUp(self):
+        pass
+
+    @patch(app.requests)
+    def test_get_posts(self):
+        pass
 
 
 if __name__ == '__main__':
