@@ -4,6 +4,7 @@ import app
 
 
 EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+EXAMPLE_TIME_STRING = EXAMPLE_TIME.isoformat(" ", "seconds")
 
 
 class TestEventsClass(unittest.TestCase):
@@ -78,6 +79,15 @@ class TestEventsClass(unittest.TestCase):
         event = app.Event(**test_info_time)
         event_diff = app.Event(**test_info_diff)
         self.assertNotEqual(event, event_diff)
+
+    def test_events_time_string(self):
+        test_info_str_time = self.test_info.copy()
+        test_info_str_time['created_at'] = EXAMPLE_TIME_STRING
+        self.test_info['created_at'] = EXAMPLE_TIME_STRING
+        self.assertEqual(self.test_info, test_info_str_time)
+
+        self.test_info['created_at'] = EXAMPLE_TIME_STRING + " different str"
+        self.assertNotEqual(self.test_info, test_info_str_time)
 
 
 if __name__ == '__main__':

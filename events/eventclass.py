@@ -1,3 +1,4 @@
+import datetime
 from collections import namedtuple
 
 EVENT_ATTRIBUTES = [
@@ -15,10 +16,17 @@ def equal_times(time_1, time_2):
     Datetime objects are rounded to the nearest millisecond before comparison.
     Used for comparing Event objects, since MongoDB truncates times to the
     nearest millisecond.
+
+    Strings representing times are directly compared for equality.
     """
-    time_1 = time_1.replace(microsecond=(time_1.microsecond // 1000) * 1000)
-    time_2 = time_2.replace(microsecond=(time_2.microsecond // 1000) * 1000)
-    return time_1 == time_2
+    if type(time_1) is type(time_2):
+        if isinstance(time_1, datetime.datetime):
+            time_1 = time_1.replace(
+                microsecond=(time_1.microsecond // 1000) * 1000)
+            time_2 = time_2.replace(
+                microsecond=(time_2.microsecond // 1000) * 1000)
+        return time_1 == time_2
+    return False
 
 
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):

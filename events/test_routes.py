@@ -8,7 +8,8 @@ from bson import json_util
 import mongomock
 from app import app, os, connect_to_mongodb
 
-EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+EXAMPLE_TIME = datetime.datetime(
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(" ", "seconds")
 
 VALID_REQUEST_INFO = {
     'event_name': 'valid_event',
