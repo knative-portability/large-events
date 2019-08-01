@@ -32,14 +32,17 @@ limitations under the License.
 
 <h2>Past posts</h2>
 {% for post in posts %}
-<p>Posted by {{post.author}} at {{post.created_at}}</p>
+<p>Posted by {{post.author_id}} at {{post.created_at}}</p>
 
-{% if post.type == 'text' %}
+<p>For event {{ post.event_id }}</p>
+
+{% if post.text %}
 <p>{{post.text}}</p>
-{% elif post.type == 'image' %}
-<p>This is an image but we can't display it right now</p>
-{% else %}
-<p>This post type is unrecognized.</p>
+{% endif %}
+{% if post.files %}
+  {% for file in post.files %}
+  <img src="{{ file }}">
+  {% endfor %}
 {% endif %}
 
 <hr>
@@ -47,7 +50,6 @@ limitations under the License.
 {% endfor %}
 
 <h2>Create New Post</h2>
-<!-- TODO: add correct endpoint and make sure fields are correct-->
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
     <div> <!-- TODO(cmei4444): implement event picker -->
         <label for="event_id">Event ID:</label>
