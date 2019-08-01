@@ -33,12 +33,12 @@ before_script:
 script:
   # run coverage on files testing the app module
   - coverage run --branch --omit */virtualenv/* -m unittest discover
-  - cp .coverage* ../
+  - cp .coverage ../
 
 after_success:
   - cd ..
   - coverage report -m
-  - coveralls
+  - coveralls --data_file .coverage
 
 notifications:
   webhooks: https://coveralls.io/webhook
