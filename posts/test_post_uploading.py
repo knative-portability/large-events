@@ -147,7 +147,7 @@ class TestGenerateTimestamp(unittest.TestCase):
         mock_datetime.datetime.utcnow.return_value = test_time
         with mock.patch("app.datetime", mock_datetime):
             self.assertEqual(app.generate_timestamp(),
-                             test_time.isoformat(" ", "seconds"))
+                             test_time.isoformat(sep=" ", timespec="seconds"))
 
 
 if __name__ == '__main__':

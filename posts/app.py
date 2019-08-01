@@ -169,7 +169,7 @@ def generate_timestamp():
     Returns:
         datetime: the current time.
     """
-    return datetime.datetime.utcnow().isoformat(" ", "seconds")
+    return datetime.datetime.utcnow().isoformat(sep=" ", timespec="seconds")
 
 
 def upload_file_to_cloud(file):
