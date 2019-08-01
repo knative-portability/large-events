@@ -186,6 +186,14 @@ class TestTemplateRoutes(TestCase):
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
     @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_posts', MagicMock(side_effect=RuntimeError))
+    def test_index_posts_fail(self):
+        """Checks GET /v1/ response when posts cannot be retrieved."""
+        response = self.client.get('/v1/')
+        self.assertEqual(response.status_code, 500)
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
     @patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
     def test_show_events(self):
         """Checks sub-events page is rendered correctly by GET /v1/events."""
@@ -196,6 +204,14 @@ class TestTemplateRoutes(TestCase):
         self.assertContext('auth', True)
         self.assertContext('events', EXAMPLE_EVENTS)
         self.assertContext('app_config', app.app.config)
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_events', MagicMock(side_effect=RuntimeError))
+    def test_index_events_fail(self):
+        """Checks GET /v1/events response when events cannot be retrieved."""
+        response = self.client.get('/v1/events')
+        self.assertEqual(response.status_code, 500)
 
 
 class TestAddPostRoute(unittest.TestCase):
