@@ -59,7 +59,11 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         return True
 
     def get_dict(self):
-        """Returns event info in dict form."""
+        """Returns event info in dict form.
+
+        Usually used to insert event info into the dictionary, so this converts
+        the field event_id into _id to correspond with the MongoDB _id field.
+        """
         info = self._asdict()
         if info['event_id']:    # only create _id field if event_id is not None
             info['_id'] = info['event_id']
