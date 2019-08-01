@@ -99,11 +99,14 @@ def search_event():
     """Search for the event with the given name in the DB."""
     try:
         event_name = request.args['name']
-        events = app.config["COLLECTION"].find({'event_name': event_name})
+        events = app.config["COLLECTION"].find({'name': event_name})
+
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
         # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
+    except BadRequestKeyError:      # missing event attributes
+        return "Event name was entered incorrectly.", 400
     except DBNotConnectedError as e:
         return "Events database was undefined.", 500
 
