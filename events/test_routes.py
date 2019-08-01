@@ -9,7 +9,7 @@ import mongomock
 from app import app, os, connect_to_mongodb
 
 EXAMPLE_TIME = datetime.datetime(
-    2019, 6, 11, 10, 33, 1, 100000).isoformat(" ", "seconds")
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
 
 VALID_REQUEST_INFO = {
     'event_name': 'valid_event',
