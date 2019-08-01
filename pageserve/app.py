@@ -30,16 +30,15 @@ def index():
                                             app.config['USERS_ENDPOINT']
                                             + "authorization"))
     try:
-        posts = get_posts()
         return render_template(
             'index.html',
-            posts=posts,
+            posts=get_posts(),
             auth=is_auth,
             user=user,
             app_config=app.config
         )
-    except RuntimeError:
-        return "Unable to get posts from posts service.", 500
+    except RuntimeError as error:
+        return str(error), 500
 
 
 @app.route('/v1/events', methods=['GET'])
@@ -50,16 +49,15 @@ def show_events():
                                             app.config['USERS_ENDPOINT']
                                             + "authorization"))
     try:
-        events = get_events()
         return render_template(
             'events.html',
-            events=events,
+            events=get_events(),
             auth=is_auth,
             user=user,
             app_config=app.config
         )
-    except RuntimeError:
-        return "Unable to get events from events service.", 500
+    except RuntimeError as error:
+        return str(error), 500
 
 
 @app.route('/v1/add_post', methods=['POST'])
