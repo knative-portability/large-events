@@ -26,14 +26,14 @@ VALID_DB_EVENT = {
     'author': 'admin',
     'event_time': EXAMPLE_TIME,
     'created_at': EXAMPLE_TIME,
-    'event_id': 'unique_event_id0'}
+    '_id': 'unique_event_id0'}
 VALID_DB_EVENT_WITH_ID = {
     'name': 'test_event',
     'description': 'This event is formatted correctly too!',
     'author': 'admin',
     'event_time': EXAMPLE_TIME,
     'created_at': EXAMPLE_TIME,
-    'event_id': 'unique_event_id1'}
+    '_id': 'unique_event_id1'}
 
 
 @contextmanager

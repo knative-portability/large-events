@@ -60,6 +60,10 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
 
     def get_dict(self):
         """Returns event info in dict form."""
-        return self._asdict()
+        info = self._asdict()
+        if info['event_id']:    # only create _id field if event_id is not None
+            info['_id'] = info['event_id']
+            del info['event_id']
+        return dict(info)
 
     dict = property(get_dict)

@@ -18,16 +18,16 @@ class TestEventsClass(unittest.TestCase):
 
     def test_construct_event(self):
         event = app.Event(**self.test_info)
-        self.test_info['event_id'] = None
-        self.assertEqual(event.dict, self.test_info)
+        result_dict = dict(event_id=None, **self.test_info)
+        self.assertEqual(event.dict, result_dict)
 
         event_with_id = app.Event(**self.test_info_with_id)
-        self.assertEqual(event_with_id.dict, self.test_info_with_id)
+        result_dict = dict(_id=1, **self.test_info)
+        self.assertEqual(event_with_id.dict, result_dict)
 
         event_with_db_id = app.Event(**self.test_info_with_db_id)
-        self.test_info_with_db_id['event_id'] = 2
-        del self.test_info_with_db_id['_id']
-        self.assertEqual(event_with_db_id.dict, self.test_info_with_db_id)
+        result_dict = dict(_id=2, **self.test_info)
+        self.assertEqual(event_with_db_id.dict, result_dict)
 
     def test_constuct_event_error(self):
         info_missing_name = self.test_info.copy()
