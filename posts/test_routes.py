@@ -246,5 +246,70 @@ class TestGetPostByEventIDRoute(unittest.TestCase):
         self.assertEqual(data["posts"], expected_posts)
 
 
+class TestDeletePostByPostIDRoute(unittest.TestCase):
+    """Test delete post by post ID endpoint DELETE /v1/<post_id>."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        self.mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        app.config["COLLECTION"].insert_many(self.mock_posts)
+        app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_delete_one(self):
+        """Delete a single post."""
+        post_id = self.mock_posts[0]["_id"]
+        author_id = self.mock_posts[0]["author_id"]
+        result = self.client.delete(
+            f"/v1/{str(post_id)}", data={"author_id": author_id})
+        self.assertEqual(result.status_code, 204)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}),
+                         len(self.mock_posts) - 1)
+
+    def test_delete_all(self):
+        """Delete all posts."""
+        for post in self.mock_posts:
+            post_id = post["_id"]
+            author_id = post["author_id"]
+            result = self.client.delete(
+                f"/v1/{str(post_id)}", data={"author_id": author_id})
+            self.assertEqual(result.status_code, 204)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}), 0)
+
+    def test_not_existing_post_id(self):
+        """Can't find post by ID, don't delete."""
+        post_id = "C001""1C3D""C0FFEE""D0000000DE"   # invalid
+        author_id = self.mock_posts[0]["author_id"]  # valid
+        result = self.client.delete(
+            f"/v1/{str(post_id)}", data={"author_id": author_id})
+        self.assertEqual(result.status_code, 404)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}),
+                         len(self.mock_posts))
+
+    def test_not_existing_author_id(self):
+        """Wrong author_id, don't delete."""
+        post_id = self.mock_posts[0]["_id"]                   # valid
+        author_id = "I don't think, therefore I'm not."  # invalid
+        result = self.client.delete(
+            f"/v1/{str(post_id)}", data={"author_id": author_id})
+        self.assertEqual(result.status_code, 404)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}),
+                         len(self.mock_posts))
+
+    def test_mismatched_author_id(self):
+        """Wrong author_id, don't delete."""
+        post_id = self.mock_posts[0]["_id"]          # valid
+        author_id = self.mock_posts[1]["author_id"]  # valid, but doesn't match
+        result = self.client.delete(
+            f"/v1/{str(post_id)}", data={"author_id": author_id})
+        self.assertEqual(result.status_code, 404)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}),
+                         len(self.mock_posts))
+
+
 if __name__ == '__main__':
     unittest.main()
