@@ -20,21 +20,18 @@ INVALID_REQUEST_INFO_MISSING_ATTRIBUTE = {
     'description': 'This event is missing an author!',
     'event_time': EXAMPLE_TIME}
 
-UNIQUE_EVENT_ID = 'unique_event_id'
 VALID_DB_EVENT = {
     'name': 'valid_event',
     'description': 'This event is formatted correctly!',
     'author': 'admin',
     'event_time': EXAMPLE_TIME,
-    'created_at': EXAMPLE_TIME,
-    '_id': UNIQUE_EVENT_ID}
+    'created_at': EXAMPLE_TIME}
 VALID_DB_EVENT_WITH_ID = {
     'name': 'test_event',
     'description': 'This event is formatted correctly too!',
     'author': 'admin',
     'event_time': EXAMPLE_TIME,
-    'created_at': EXAMPLE_TIME,
-    '_id': 'different_event_id'}
+    'created_at': EXAMPLE_TIME}
 
 
 @contextmanager
@@ -152,17 +149,19 @@ class TestGetEventByID(unittest.TestCase):
 
     def test_search_existing_event(self):
         "Search for an event that exists in the DB."
-        response = self.client.put('/v1/' + UNIQUE_EVENT_ID)
+        id_to_search = VALID_DB_EVENT['_id']
+        response = self.client.put(f'/v1/{id_to_search}')
         self.assertEqual(response.status_code, 200)
         data = json_util.loads(response.data)
 
-        self.assertEqual(data['events'][0]['_id'], UNIQUE_EVENT_ID)
+        self.assertEqual(data['events'][0]['_id'], id_to_search)
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
     def test_search_nonexisting_event(self):
         "Search for an event that doesn't exist in the DB."
-        response = self.client.put('/v1/' + "nonexistent_event_id")
+        nonexistent_event_id = "123456789123456789123456"
+        response = self.client.put('/v1/' + nonexistent_event_id)
         self.assertEqual(response.status_code, 200)
         data = json_util.loads(response.data)
 
@@ -171,11 +170,12 @@ class TestGetEventByID(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
+        id_to_search = VALID_DB_EVENT['_id']
         with environ(os.environ):
             if "MONGODB_URI" in os.environ:
                 del os.environ["MONGODB_URI"]
             app.config["COLLECTION"] = connect_to_mongodb()
-            response = self.client.put('/v1/' + UNIQUE_EVENT_ID)
+            response = self.client.put(f'/v1/{id_to_search}')
             self.assertEqual(response.status_code, 500)
 
 
