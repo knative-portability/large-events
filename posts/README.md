@@ -39,6 +39,11 @@ Specific to the posts service, you need to [set up a Google Cloud Storage bucket
 export GCLOUD_STORAGE_BUCKET_NAME="the-name-of-your-storage-bucket"
 ```
 
+Also, in order to access the bucket you need to [create a Google Cloud Service Account](https://cloud.google.com/docs/authentication/getting-started), download the application credentials json file, move the credentials file into the posts directory, and set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to point to it.
+```sh
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/google_application_credentials.json"
+```
+
 ### Running, Testing, and Deploying
 
 The procedures for running, testing, and deploying a microservice are the same for all of the microservices. See [the master README.md](../README.md).
