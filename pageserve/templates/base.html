@@ -18,12 +18,20 @@ limitations under the License.
 
 <head>
     <title>{% block title %}{% endblock title %} - Large Events</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 
 <body>
+    <div class="topnav">
+        <a class="{% block home_tab %}{% endblock %}" href='/v1/'>Home</a>
+        <a class="{% block events_tab %}{% endblock %}" href='/v1/events'>Events</a>
+    </div>
+
+    <div style="padding: 0px 15px">
     <header>
         {% block header %}{% endblock header %}
     </header>
@@ -56,6 +64,7 @@ limitations under the License.
     {% endif %}
     {% endblock login_buttons %}
     {% block content %}{% endblock content %}
+    </div>
 </body>
 
 </html>
