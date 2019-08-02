@@ -33,8 +33,8 @@ limitations under the License.
 <h2>Past posts</h2>
 {% for post in posts %}
 <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-
-<p>For event {{ post.event_id }}</p>
+<!-- TODO(cmei4444) - link to event info -->
+<p>For event with ID {{ post.event_id }}</p>
 
 {% if post.text %}
 <p>{{post.text}}</p>
