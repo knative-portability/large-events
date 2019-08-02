@@ -51,9 +51,13 @@ limitations under the License.
 
 <h2>Create New Post</h2>
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
-    <div> <!-- TODO(cmei4444): implement event picker -->
+    <div>
         <label for="event_id">Event ID:</label>
-        <input type="text" id="event_id" name="event_id">
+        <select id="event_id" name="event_id">
+            {% for id in event_id_list %}
+            <option value="{{ id }}">{{ id }}</option>
+            {% endfor %}
+        </select>
     </div>
     <div>
         <label for="text">Text:</label>

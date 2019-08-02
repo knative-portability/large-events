@@ -35,6 +35,7 @@ def index():
             posts=get_posts(),
             auth=is_auth,
             user=user,
+            event_id_list=get_event_id_list(get_events()),
             app_config=app.config
         )
     except RuntimeError as error:
@@ -172,6 +173,14 @@ def get_user():
     """Retrieves the current user of the app."""
     # TODO: get user info using OAuth
     return "Voldemort"
+
+
+def get_event_id_list(events_list):
+    """Retrieves events and returns list of ids and names."""
+    id_list = []
+    for event in events_list:
+        id_list.append(event['event_id']['$oid'])
+    return id_list
 
 
 def config_endpoints(endpoints):
