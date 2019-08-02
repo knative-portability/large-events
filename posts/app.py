@@ -83,7 +83,7 @@ def get_delete_post_by_id(post_id):
     if request.method == "DELETE":
         try:
             author_id = request.form["author_id"]
-            return delete_post(post_id, author_id)
+            return delete_post(post_id, author_id, app.config["COLLECTION"])
         except BadRequestKeyError:
             return "Error: request missing `author_id`.", 400
     return "Method not allowed", 405
@@ -97,9 +97,12 @@ def get_all_posts_for_event(event_id):
     return serialize_posts_to_json(post_list)
 
 
-def delete_post(post_id, author_id):
+def delete_post(post_id, author_id, collection):
     """Deletes the post matching post_id and author_id if it exists."""
-    return "Nothing deleted", 404
+    result = collection.delete_one(
+        {"post_id": post_id, "author_id": author_id})
+    return (("Document deleted.", 204) if result.deleted_count
+            else ("Document not found.", 404))
 
 
 def find_posts_in_db(collection, post_id=None, event_id=None):
