@@ -31,6 +31,7 @@ def index():
             'index.html',
             posts=get_posts(),
             auth=has_edit_access(get_user()),
+            events=get_events(),
             app_config=app.config
         )
     except RuntimeError as error:
