@@ -6,6 +6,7 @@ import app
 EXAMPLE_TIME_STRING = datetime.datetime(
     2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
 
+
 class TestEventsClass(unittest.TestCase):
     def setUp(self):
         self.test_info = {'name': 'test_event',

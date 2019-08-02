@@ -1,7 +1,6 @@
 """Unit tests for events service HTTP routes."""
 
 import unittest
-from unittest.mock import MagicMock
 import datetime
 from contextlib import contextmanager
 from bson import json_util
