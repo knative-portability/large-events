@@ -1,38 +1,38 @@
 """Unit tests for events service HTTP routes."""
 
 import unittest
-from unittest.mock import MagicMock
 import datetime
 from contextlib import contextmanager
 from bson import json_util
 import mongomock
 from app import app, os, connect_to_mongodb
 
-EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+EXAMPLE_TIME_STRING = datetime.datetime(
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
 
 VALID_REQUEST_INFO = {
     'event_name': 'valid_event',
     'description': 'This event is formatted correctly!',
     'author_id': 'admin',
-    'event_time': EXAMPLE_TIME}
+    'event_time': EXAMPLE_TIME_STRING}
 INVALID_REQUEST_INFO_MISSING_ATTRIBUTE = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing an author!',
-    'event_time': EXAMPLE_TIME}
+    'event_time': EXAMPLE_TIME_STRING}
 
 VALID_DB_EVENT = {
     'name': 'valid_event',
     'description': 'This event is formatted correctly!',
     'author': 'admin',
-    'event_time': EXAMPLE_TIME,
-    'created_at': EXAMPLE_TIME,
+    'event_time': EXAMPLE_TIME_STRING,
+    'created_at': EXAMPLE_TIME_STRING,
     'event_id': 'unique_event_id0'}
 VALID_DB_EVENT_WITH_ID = {
     'name': 'test_event',
     'description': 'This event is formatted correctly too!',
     'author': 'admin',
-    'event_time': EXAMPLE_TIME,
-    'created_at': EXAMPLE_TIME,
+    'event_time': EXAMPLE_TIME_STRING,
+    'created_at': EXAMPLE_TIME_STRING,
     'event_id': 'unique_event_id1'}
 
 

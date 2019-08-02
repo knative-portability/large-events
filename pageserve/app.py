@@ -15,9 +15,10 @@ limitations under the License.
 """
 
 import os
-import requests
+from flask import Flask, render_template, request, url_for, session, redirect
+from werkzeug.exceptions import BadRequestKeyError  # WSGI library for Flask
 
-from flask import Flask, render_template, request, Response
+import requests
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
@@ -25,17 +26,11 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 @app.route('/v1/', methods=['GET'])
 def index():
     """Displays home page with all past posts."""
-    user = get_user()
-    is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']
-                                            + "authorization"))
     try:
         return render_template(
             'index.html',
             posts=get_posts(),
-            auth=is_auth,
-            user=user,
-            event_id_list=get_event_id_list(get_events()),
+            auth=has_edit_access(get_user()),
             app_config=app.config
         )
     except RuntimeError as error:
@@ -45,20 +40,71 @@ def index():
 @app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
-    user = get_user()
-    is_auth = has_edit_access(get_user_info(user,
-                                            app.config['USERS_ENDPOINT']
-                                            + "authorization"))
     try:
         return render_template(
             'events.html',
             events=get_events(),
-            auth=is_auth,
-            user=user,
+            auth=has_edit_access(get_user()),
             app_config=app.config
         )
     except RuntimeError as error:
         return str(error), 500
+
+
+@app.route('/v1/authenticate', methods=['POST'])
+def authenticate_and_get_user():
+    """Proxy for user authentication service.
+
+    Call the users service to verify user authentication token and
+    upload user profile to users db.
+
+    On successful authentication, stores user info in the session.
+
+    Request data:
+        gauth_token: Google ID token to authenticate.
+
+    Response:
+        Response:
+            201: user object from the db if authentication was successful.
+            400: error message if authentication was not successful.
+    """
+    try:
+        gauth_token = request.form["gauth_token"]
+        response = authenticate_with_users_service(gauth_token)
+
+        if response.status_code == 201:
+            # authentication successful, store login in cookies
+            session["user_id"] = response.json()["user_id"]
+            session["name"] = response.json()["name"]
+            session["gauth_token"] = gauth_token
+        return response.content, response.status_code
+    except BadRequestKeyError as error:
+        return f"Error: {error}.", 400
+
+
+@app.route('/v1/sign_out', methods=['GET'])
+def sign_out():
+    """Sign the user out.
+
+    Removes the 'user' object from the session.
+    Redirects to the index page.
+    """
+    session.clear()
+    return redirect(url_for("index"))
+
+
+def authenticate_with_users_service(gauth_token):
+    """Proxy the user service for authentication and return user object.
+
+    Args:
+        gauth_token (str): Google ID token to authenticate.
+
+    Response:
+        response: response from the users service
+    """
+    return requests.post(
+        app.config["USERS_ENDPOINT"] + "authenticate",
+        data={"gauth_token": gauth_token})
 
 
 @app.route('/v1/add_post', methods=['POST'])
@@ -157,22 +203,29 @@ def parse_events(events_dict):
     return events_dict['events']
 
 
-def get_user_info(user, url):
-    """Gets info about the current user from the users service."""
-    r = requests.post(url, data={'user_id': user})
-    response = r.json()
-    return response
-
-
-def has_edit_access(user_data):
+def has_edit_access(user):
     """Determines if the user with the given info has edit access."""
-    return user_data['edit_access']
+    if user is None:
+        return False
+    url = app.config["USERS_ENDPOINT"] + "authorization"
+    response = requests.post(url, data={"user_id": user["user_id"]})
+    return response.json()["edit_access"] is True
 
 
 def get_user():
-    """Retrieves the current user of the app."""
-    # TODO: get user info using OAuth
-    return "Voldemort"
+    """Retrieves the current user of the app or None if not signed in."""
+    if "gauth_token" in session:
+        response = authenticate_with_users_service(
+            session["gauth_token"])
+        if response.status_code == 201:
+            return response.json()
+    return None  # Not signed in
+
+
+# set GAuth callback to the route defined by the authenticate() function
+with app.test_request_context():
+    app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for(
+        "authenticate_and_get_user")
 
 
 def get_event_id_list(events_list):
@@ -199,6 +252,9 @@ config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT', 'POSTS_ENDPOINT'])
 app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
 app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
                                          + "authenticate")
+
+# set flask secret key used for session encryption
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 if __name__ == "__main__":    # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
