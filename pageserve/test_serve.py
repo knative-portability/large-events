@@ -145,9 +145,5 @@ class TestGetEvents(unittest.TestCase):
             app.get_events()
 
 
-class TestIDList(unittest.Testcase):
-    """Test creation of ID list."""
-
-
 if __name__ == '__main__':
     unittest.main()

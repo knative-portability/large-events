@@ -55,6 +55,7 @@ limitations under the License.
         <label for="event_id">Event ID:</label>
         <select id="event_id" name="event_id">
             {% for event in events %}
+            <!-- TODO (cmei4444) - update field names once other changes are pushed -->
             <option value="{{ event.event_id['$oid'] }}">{{ event.event_id['$oid'] }} - {{ event.name }}</option>
             {% endfor %}
         </select>

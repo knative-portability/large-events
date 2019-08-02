@@ -229,14 +229,6 @@ with app.test_request_context():
         "authenticate_and_get_user")
 
 
-def get_event_id_list(events_list):
-    """Retrieves events and returns list of ids and names."""
-    id_list = []
-    for event in events_list:
-        id_list.append(event['event_id']['$oid'])
-    return id_list
-
-
 def config_endpoints(endpoints):
     """Sets given list of endpoints globally from environment variables.
 
