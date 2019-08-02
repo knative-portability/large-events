@@ -1,4 +1,3 @@
-import datetime
 from collections import namedtuple
 
 EVENT_ATTRIBUTES = [
@@ -8,19 +7,6 @@ EVENT_ATTRIBUTES = [
     'author',
     'created_at',
     'event_time']
-
-
-def equal_times(time_1, time_2):
-    """Determines if two times are equal.
-
-    Datetime objects are rounded to the nearest millisecond before comparison.
-    Used for comparing Event objects, since MongoDB truncates times to the
-    nearest millisecond.
-
-    Strings representing times are directly compared for equality.
-    """
-    if type(time_1) is type(time_2):
-        return time_1 == time_2
 
 
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
@@ -53,9 +39,6 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         for att in EVENT_ATTRIBUTES:
             if att == 'event_id':
                 continue
-            if att in ('event_time', 'created_at'):
-                if not equal_times(getattr(self, att), getattr(other, att)):
-                    return False
             elif getattr(self, att) != getattr(other, att):
                 return False
         return True
