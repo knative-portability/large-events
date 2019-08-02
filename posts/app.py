@@ -76,7 +76,6 @@ def get_delete_post_by_id(post_id):
     deployed as an internal service accessible by only the other microservices.
     """
     if request.method == "GET":
-        # serialize otherwise nonserializable ObjectIDs
         post_list = find_posts_in_db(
             app.config["COLLECTION"], post_id=ObjectId(post_id))
         return serialize_posts_to_json(post_list)
@@ -100,7 +99,7 @@ def get_all_posts_for_event(event_id):
 def delete_post(post_id, author_id, collection):
     """Deletes the post matching post_id and author_id if it exists."""
     result = collection.delete_one(
-        {"post_id": post_id, "author_id": author_id})
+        {"_id": ObjectId(post_id), "author_id": author_id})
     return (("Document deleted.", 204) if result.deleted_count
             else ("Document not found.", 404))
 
