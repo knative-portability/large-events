@@ -20,13 +20,13 @@ def equal_times(time_1, time_2):
     Strings representing times are directly compared for equality.
     """
     if type(time_1) is type(time_2):
-        if isinstance(time_1, datetime.datetime):
-            time_1 = time_1.replace(
-                microsecond=(time_1.microsecond // 1000) * 1000)
-            time_2 = time_2.replace(
-                microsecond=(time_2.microsecond // 1000) * 1000)
+        # if isinstance(time_1, datetime.datetime):
+        #     time_1 = time_1.replace(
+        #         microsecond=(time_1.microsecond // 1000) * 1000)
+        #     time_2 = time_2.replace(
+        #         microsecond=(time_2.microsecond // 1000) * 1000)
         return time_1 == time_2
-    return False
+    # return False
 
 
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
