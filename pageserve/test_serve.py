@@ -13,37 +13,77 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import unittest
-from unittest.mock import patch
+from unittest import mock
+import requests_mock
+import flask
 import app
+
+AUTHORIZED_RESPONSE_JSON = {"edit_access": True}
+UNAUTHORIZED_RESPONSE_JSON = {"edit_access": False}
+
+VALID_SESSION = {
+    "user_id": "abc123 pretend I am a user ID.",
+    "name": "Boaty McBoatface",
+    "gauth_token": "Pretend I am a valid GAuth token."}
 
 
 class TestServe(unittest.TestCase):
-    @patch('app.requests')
-    def test_auth_json(self, mock_requests):
+    """Test helper functions in pageserve app."""
+
+    def setUp(self):
+        """Create secret key for test session."""
+        app.app.secret_key = "Secret test key!"
+
+    def test_get_user(self):
         """Checks if users service returns a correctly formatted object.
 
-        A dictionary with a boolean 'edit_access' field should be received.
+        Expects a user dictionary with a boolean 'is_organizer' field.
+        This test mocks app.authenticate_with_users_service() to always
+        return the response of an authenticated user that is authorized.
         """
-        mock_response = unittest.mock.MagicMock()
-        mock_requests.post.return_value = mock_response
-        mock_response.json.return_value = {"edit_access": True}
+        with app.app.test_request_context(), app.app.test_client():
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 201
+            mock_response.json.return_value = {"is_organizer": True}
+            with mock.patch("app.authenticate_with_users_service",
+                            return_value=mock_response):
+                flask.session["user_id"] = VALID_SESSION["user_id"]
+                flask.session["name"] = VALID_SESSION["name"]
+                flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+                result = app.get_user()
 
-        response = app.get_user_info('example_user', 'example_url')
+                valid_response = result["is_organizer"] is True
+                self.assertTrue(valid_response)
 
-        mock_requests.post.assert_called_with(
-            'example_url', data={'user_id': 'example_user'})
-        valid_response = response['edit_access'] is True
-        self.assertTrue(valid_response)
+                # now test no user in session
+                flask.session.clear()
+                result = app.get_user()
+                self.assertIsNone(result)
 
-    def test_edit_access(self):
-        """Tests if edit access is correctly retrieved from a user dict."""
-        has_access = {'edit_access': True}
-        no_access = {'edit_access': False}
-        self.assertTrue(app.has_edit_access(has_access))
-        self.assertFalse(app.has_edit_access(no_access))
+    @requests_mock.Mocker()
+    def test_edit_access(self, requests_mocker):
+        """Tests if authorization is correctly retrieved from users service.
 
-    @patch('app.os')
+        This test mocks away requests to the users service which is normally
+        called by app.has_edit_access.
+        """
+        # is authorized
+        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+                             json=AUTHORIZED_RESPONSE_JSON)
+        self.assertTrue(app.has_edit_access(
+            {"user_id": "Pretend I am authorized."}))
+        # not authorized
+        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+                             json=UNAUTHORIZED_RESPONSE_JSON)
+        self.assertFalse(app.has_edit_access(
+            {"user_id": "Pretend I am NOT authorized."}))
+        # No user sent give no authorization. This might happens when a user
+        # is logged out so app.get_user() returns None.
+        self.assertFalse(app.has_edit_access(None))
+
+    @mock.patch('app.os')
     def test_config_endpoints(self, mock_os):
         """Test retrieval of endpoint env vars when defined or not defined."""
         existing_endpoint = 'this endpoint exists!'
@@ -57,6 +97,52 @@ class TestServe(unittest.TestCase):
         mock_os.environ.__contains__.return_value = False
         with self.assertRaises(NameError):
             app.config_endpoints(['url3'])
+
+
+class TestGetPosts(unittest.TestCase):
+    """Test app.get_posts function with mock call to posts service."""
+
+    def setUp(self):
+        self.url = app.app.config["POSTS_ENDPOINT"]
+        self.posts_dict = {"posts": ["these", "are", "fake", "posts"]}
+
+    @requests_mock.Mocker()
+    def test_get_posts_success(self, mock_requests):
+        """Test that posts are retrieved successfully."""
+        mock_requests.get(
+            self.url, text=json.dumps(self.posts_dict), status_code=200)
+        posts = app.get_posts()
+        self.assertTrue(posts, self.posts_dict)
+
+    @requests_mock.Mocker()
+    def test_get_posts_fail(self, mock_requests):
+        """Test that error is raised when posts cannot be retrieved."""
+        mock_requests.get(self.url, text="Error message.", status_code=500)
+        with self.assertRaises(RuntimeError):
+            app.get_posts()
+
+
+class TestGetEvents(unittest.TestCase):
+    """Test app.get_events function with mock call to events service."""
+
+    def setUp(self):
+        self.url = app.app.config["EVENTS_ENDPOINT"]
+        self.events_dict = {"events": ["these", "are", "fake", "events"]}
+
+    @requests_mock.Mocker()
+    def test_get_events_success(self, mock_requests):
+        """Test that events are returned successfully."""
+        mock_requests.get(
+            self.url, text=json.dumps(self.events_dict), status_code=200)
+        posts = app.get_events()
+        self.assertTrue(posts, self.events_dict)
+
+    @requests_mock.Mocker()
+    def test_get_events_fail(self, mock_requests):
+        """Test error is raised when events cannot be retrieved."""
+        mock_requests.get(self.url, text="Error message.", status_code=500)
+        with self.assertRaises(RuntimeError):
+            app.get_events()
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@
 import os
 import uuid
 import json
+import datetime
 import pymongo
 from bson import json_util, ObjectId
 from flask import Flask, request
@@ -162,14 +163,13 @@ def upload_new_post_to_db(post, collection):
     return collection.insert_one(post).inserted_id
 
 
-def generate_timestamp() -> str:
+def generate_timestamp():
     """Generate timestamp of the current time for placement in db.
 
     Returns:
-        str: string representation of the current time.
+        datetime: the current time.
     """
-    # TODO use general timestamp generation function from events
-    return "2017-10-06T00:00:00+00:00"
+    return datetime.datetime.utcnow().isoformat(sep=" ", timespec="seconds")
 
 
 def upload_file_to_cloud(file):

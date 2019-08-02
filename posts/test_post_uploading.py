@@ -17,6 +17,7 @@
 
 import unittest
 from unittest import mock
+import datetime
 import collections
 import mongomock
 import app
@@ -134,6 +135,19 @@ class TestPostUploading(unittest.TestCase):
                 INVALD_POST_TOO_MANY_ATTRS, self.mock_collection)
         # no posts were uploaded
         self.assertIsNone(self.mock_collection.find_one({}))
+
+
+class TestGenerateTimestamp(unittest.TestCase):
+    """Test app.generate_timestamp()."""
+
+    def test_happy_case(self):
+        """Happy case of normal timestamp generation."""
+        test_time = datetime.datetime(1999, 12, 15, 3, 23, 3, 318274)
+        mock_datetime = mock.MagicMock()
+        mock_datetime.datetime.utcnow.return_value = test_time
+        with mock.patch("app.datetime", mock_datetime):
+            self.assertEqual(app.generate_timestamp(),
+                             test_time.isoformat(sep=" ", timespec="seconds"))
 
 
 if __name__ == '__main__':

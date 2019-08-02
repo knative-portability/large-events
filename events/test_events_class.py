@@ -3,7 +3,8 @@ import datetime
 import app
 
 
-EXAMPLE_TIME = datetime.datetime(2019, 6, 11, 10, 33, 1, 100000)
+EXAMPLE_TIME_STRING = datetime.datetime(
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
 
 
 class TestEventsClass(unittest.TestCase):
@@ -11,8 +12,8 @@ class TestEventsClass(unittest.TestCase):
         self.test_info = {'name': 'test_event',
                           'description': 'testing!',
                           'author': 'admin',
-                          'event_time': EXAMPLE_TIME,
-                          'created_at': EXAMPLE_TIME}
+                          'event_time': EXAMPLE_TIME_STRING,
+                          'created_at': EXAMPLE_TIME_STRING}
         self.test_info_with_id = dict(event_id=1, **self.test_info)
         self.test_info_with_db_id = dict(event_id=1, _id=2, **self.test_info)
 
@@ -55,29 +56,17 @@ class TestEventsClass(unittest.TestCase):
         event_diff = app.Event(**test_info_diff)
         self.assertNotEqual(event, event_diff)
 
-    def test_events_equal_time_rounding(self):
-        test_info_time = self.test_info.copy()
-        test_info_time['created_at'] = datetime.datetime(
-            2017, 8, 28, 10, 33, 1, 100000)
-        test_info_unrounded = self.test_info.copy()
-        test_info_unrounded['created_at'] = datetime.datetime(
-            2017, 8, 28, 10, 33, 1, 100435)
+    def test_events_equal_times(self):
+        test_info_str_time = self.test_info.copy()
+        test_info_str_time['created_at'] = EXAMPLE_TIME_STRING
+        self.test_info['created_at'] = EXAMPLE_TIME_STRING
+        self.assertEqual(self.test_info, test_info_str_time)
 
-        event_rounded = app.Event(**test_info_time)
-        event_unrounded = app.Event(**test_info_unrounded)
-        self.assertEqual(event_rounded, event_unrounded)
-
-    def test_events_unequal_time(self):
-        test_info_time = self.test_info.copy()
-        test_info_time['created_at'] = datetime.datetime(
-            2017, 8, 28, 10, 33, 1, 100000)
-        test_info_diff = self.test_info.copy()
-        test_info_diff['created_at'] = datetime.datetime(
-            2017, 8, 28, 10, 33, 1, 0)
-
-        event = app.Event(**test_info_time)
-        event_diff = app.Event(**test_info_diff)
-        self.assertNotEqual(event, event_diff)
+    def test_events_unequal_times(self):
+        test_info_str_time = self.test_info.copy()
+        test_info_str_time['created_at'] = EXAMPLE_TIME_STRING
+        self.test_info['created_at'] = EXAMPLE_TIME_STRING + " different str"
+        self.assertNotEqual(self.test_info, test_info_str_time)
 
 
 if __name__ == '__main__':
