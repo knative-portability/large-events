@@ -310,6 +310,15 @@ class TestDeletePostByPostIDRoute(unittest.TestCase):
         self.assertEqual(app.config["COLLECTION"].count_documents({}),
                          len(self.mock_posts))
 
+    def test_no_author_id(self):
+        """No author_id, don't delete."""
+        post_id = self.mock_posts[0]["_id"]          # valid
+        result = self.client.delete(
+            f"/v1/{str(post_id)}")
+        self.assertEqual(result.status_code, 400)
+        self.assertEqual(app.config["COLLECTION"].count_documents({}),
+                         len(self.mock_posts))
+
 
 if __name__ == '__main__':
     unittest.main()
