@@ -15,16 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+{% block events_tab %}active{% endblock %}
+
 {% block header %}
 <h1>{% block title %}Sub-Events{% endblock title %}</h1>
 {% endblock header %}
 
 {% block content %}
-{% if auth %}
-<p>user has edit authorization</p>
-{% else %}
-<p>user does not have edit authorization</p>
-{% endif %}
 
 <hr>
 {% for event in events %}

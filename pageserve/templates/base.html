@@ -77,6 +77,18 @@ limitations under the License.
     </div>
     {% endif %}
     {% endblock login_buttons %}
+
+    <div style="padding: 0px 15px">
+    <header>
+        {% block header %}{% endblock header %}
+    </header>
+    {% block auth_notice %}
+      {% if auth %}
+        <p>You have edit authorization!</p>
+      {% else %}
+        <p>You do not have edit authorization.</p>
+      {% endif %}
+    {% endblock auth_notice %}
     {% block content %}{% endblock content %}
     </div>
 </body>
