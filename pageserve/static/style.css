@@ -5,7 +5,7 @@
 }
 
 /* Style the links inside the navigation bar */
-.topnav a {
+.topnav .navtab {
   float: left;
   color: #f2f2f2;
   text-align: center;
@@ -15,18 +15,34 @@
 }
 
 /* Change the color of links on hover */
-.topnav a:hover {
+.topnav .navbtn:hover {
   background-color: #ddd;
   color: black;
 }
 
 /* Add a color to the active/current link */
-.topnav a.active {
+.topnav .navbtn.active {
   background-color: #4CAF50;
   color: white;
+}
+
+#user_nav {
+  float: right;
+}
+
+#sign_out_button {
+  border-left: 1px solid white;
+}
+
+#sign_in_button {
+  padding: 4% 8px;    /* TODO: vertically center sign-in button */
 }
 
 body {
   margin: 0px;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+img {
+  width: 80%;
 }
