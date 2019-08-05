@@ -86,7 +86,7 @@ class TestPostDeletion(unittest.TestCase):
 
     def test_not_existing_post_id(self):
         """Can't find post by ID, don't delete."""
-        post_id = "C001""1C3D""C0FFEE""D0000000DE"   # invalid
+        post_id = "C0011C3DC0FFEED0000000DE"   # invalid
         author_id = FAKE_POSTS[0]["author_id"]  # valid
         _, status_code = app.delete_post(
             post_id, author_id, self.collection)

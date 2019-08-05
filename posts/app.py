@@ -75,13 +75,13 @@ def get_post_by_id(post_id):
     return serialize_posts_to_json(post_list)
 
 
-@app.route('/v1/<post_id>/delete', methods=['DELETE'])
+@app.route('/v1/<post_id>', methods=['DELETE'])
 def delete_post_by_id(post_id):
     """Delete the post with the specified ID.
 
     On deletion, only deletes posts matching post_id and with an author_id
     matching the request parameter's author ID. Assumes that the passed in
-    author_id is authenticated and nonmalicies. I.e. this should only be
+    author_id is authenticated and non-malicious. I.e. this should only be
     deployed as an internal service accessible by only the other microservices.
     """
     try:
