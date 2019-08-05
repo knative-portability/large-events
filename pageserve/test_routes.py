@@ -52,7 +52,13 @@ INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing an time!'}
 
-EXAMPLE_POSTS = ['example', 'posts', 'list']
+EXAMPLE_POSTS = [
+    {'_id': {'$oid': '123abc'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 1.'},
+    {'_id': {'$oid': '456def'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 2.'}]
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
 
