@@ -66,26 +66,29 @@ def get_all_posts():
     return serialize_posts_to_json(post_list)
 
 
-@app.route('/v1/<post_id>', methods=['GET', 'DELETE'])
-def get_delete_post_by_id(post_id):
-    """Get or delete the post with the specified ID.
+@app.route('/v1/<post_id>', methods=['GET'])
+def get_post_by_id(post_id):
+    """Get the post with the specified ID.
+    """
+    post_list = find_posts_in_db(
+        app.config["COLLECTION"], post_id=ObjectId(post_id))
+    return serialize_posts_to_json(post_list)
+
+
+@app.route('/v1/<post_id>/delete', methods=['DELETE'])
+def delete_post_by_id(post_id):
+    """Delete the post with the specified ID.
 
     On deletion, only deletes posts matching post_id and with an author_id
     matching the request parameter's author ID. Assumes that the passed in
     author_id is authenticated and nonmalicies. I.e. this should only be
     deployed as an internal service accessible by only the other microservices.
     """
-    if request.method == "GET":
-        post_list = find_posts_in_db(
-            app.config["COLLECTION"], post_id=ObjectId(post_id))
-        return serialize_posts_to_json(post_list)
-    if request.method == "DELETE":
-        try:
-            author_id = request.form["author_id"]
-            return delete_post(post_id, author_id, app.config["COLLECTION"])
-        except BadRequestKeyError:
-            return "Error: request missing `author_id`.", 400
-    return "Method not allowed", 405
+    try:
+        author_id = request.form["author_id"]
+        return delete_post(post_id, author_id, app.config["COLLECTION"])
+    except BadRequestKeyError:
+        return "Error: request missing `author_id`.", 400
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
