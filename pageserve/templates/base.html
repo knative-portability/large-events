@@ -51,7 +51,7 @@ limitations under the License.
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 console.log("Found token");
                 xhr.onload = function () {
-                    if (xhr.status === 200) {
+                    if (xhr.status === 201) {
                         // backend authentication successful
                         console.log("Sign in successful, reloading");
                         // show the "Sign out" button
