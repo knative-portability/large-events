@@ -65,7 +65,7 @@ limitations under the License.
 {% endfor %}
 {% endif %}
 
-{% post.author_id == session["user_id"] %}
+{% if post.author_id == session["user_id"] %}
 <a href='#' onClick="{{'deletePost(\'' + post._id['$oid'] + '\');'}}">Delete</a>
 {% endif %}
 
