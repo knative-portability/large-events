@@ -31,7 +31,6 @@ ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
 ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
 
-EXAMPLE_USER = "app_user"
 EXAMPLE_USER_OBJECT = {
     "user_id": "app_user",
     "name": "app_user"}
