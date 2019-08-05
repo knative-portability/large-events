@@ -1,18 +1,21 @@
+"""Main flask app for pageserve service.
+
+Serve web UI and act as an API gateway to other services.
 """
-Copyright 2019 The Knative Authors
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 from flask import Flask, render_template, request, url_for, session, redirect
@@ -97,7 +100,7 @@ def authenticate_with_users_service(gauth_token):
     """Proxy the user service for authentication and return user object.
 
     Args:
-        gauth_token (str): Google ID token to authenticate.
+        gauth_token(str): Google ID token to authenticate.
 
     Response:
         response: response from the users service
@@ -117,7 +120,7 @@ def add_post():
     Received form data should be multipart/form-data and contain:
         event_id: id of the event to post to
         text: text content of post
-        All files to be uploaded (can be multiple)
+        All files to be uploaded(can be multiple)
 
     Response:
         String response and response code returned by posts service:
@@ -167,8 +170,8 @@ def parse_posts(posts_dict):
 
     Args:
         events_dict: JSON returned by posts service, includes:
-            posts (list): list of posts
-            num_posts (int): number of posts returned
+            posts(list): list of posts
+            num_posts(int): number of posts returned
 
     Returns:
         list: parsed list of posts.
@@ -192,8 +195,8 @@ def parse_events(events_dict):
 
     Args:
         events_dict: JSON returned by events service, includes:
-            events (list): list of events
-            num_events (int): number of events returned
+            events(list): list of events
+            num_events(int): number of events returned
 
     Returns:
         list: parsed list of events.

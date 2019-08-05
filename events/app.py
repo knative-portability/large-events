@@ -1,3 +1,22 @@
+"""Main flask app for events service.
+
+Add, edit, and fetch events list.
+"""
+
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import datetime
 import json
@@ -16,7 +35,6 @@ def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
         events = app.config["COLLECTION"].find({})
-        events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
         # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
@@ -27,7 +45,16 @@ def get_all_events():
 @app.route('/v1/search', methods=['GET'])
 def search_event():
     """Search for the event with the given name in the DB."""
-    pass
+    try:
+        event_name = request.args['name']
+        events = app.config["COLLECTION"].find({'name': event_name})
+        events_dict = build_events_dict(events)
+        # handles MongoDB objects (e.g. ObjectID) that aren't JSON serializable
+        return json.loads(json_util.dumps(events_dict))
+    except BadRequestKeyError:      # missing event attributes
+        return "Event name was entered incorrectly.", 400
+    except DBNotConnectedError as e:
+        return "Events database was undefined.", 500
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -78,12 +105,12 @@ def build_event_info(info, time):
     return {**info, 'created_at': time}
 
 
-def build_events_dict(events):
+def build_events_dict(events_cursor):
     """Builds a dict in the correct format for returning through a GET request.
 
     Takes in a mongoDB cursor from querying the DB.
     """
-    events_list = list(events)
+    events_list = [Event(**ev).dict for ev in events_cursor]
     num_events = len(events_list)
     return {'events': events_list, 'num_events': num_events}
 
