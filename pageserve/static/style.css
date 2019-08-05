@@ -34,30 +34,36 @@
 }
 
 #sign_in_button {
-  padding: 0px 8px;
+  padding: 0 8px;
 }
 
 .content_box {
   background-color: 	#ffffff;
   border: 1px hidden gray;
-  border-radius: 3px;
-  padding: 10px;
-  margin: 15px 0px;
-  box-shadow: 0px 0px 8px #cccccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 0 8px #cccccc;
 }
 
-.form_divider {
-
+hr.form_divider {
+  border-top: 5px double #8c8b8b;
 }
 
-.form {
-
-}
-
-input[type=text], textarea {
+input[type=text], select, textarea {
+  background-color: white;
   width: 100%;
   padding: 12px 12px;
   margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=datetime-local] {
+  padding: 12px 12px;
+  margin: 8px;
   display: inline-block;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -83,7 +89,11 @@ textarea {
 
 .form button:hover {
   background-color: #45a149;
-  box-shadow: 0px 0px 5px #cccccc;
+  box-shadow: 0 0 5px #cccccc;
+}
+
+.page_content {
+  margin: 0 15%;
 }
 
 body {
