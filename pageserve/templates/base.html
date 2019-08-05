@@ -36,19 +36,30 @@ limitations under the License.
         {% block header %}{% endblock header %}
     </header>
     {% block login_buttons %}
-    {% if not session['user'] %}
+    {% if not session['gauth_token'] %}
     <div id="sign_in_button">
         <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
         <script>
+            console.log("script loaded");
+
             function onSignIn(googleUser) {
+                console.log("onSignIn");
                 // Secure Google ID token to send to backend for verification.
                 var id_token = googleUser.getAuthResponse().id_token;
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', "authenticate");
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                console.log("Found token");
                 xhr.onload = function () {
-                    // show the "Sign out" button
-                    window.location.reload()
+                    if (xhr.status === 200) {
+                        // backend authentication successful
+                        console.log("Sign in successful, reloading");
+                        // show the "Sign out" button
+                        window.location.reload();
+                    } else {
+                        // unsuccessful, sign out Google auth
+                        signOut();
+                    }
                 };
                 xhr.send('gauth_token=' + id_token);
             }
@@ -57,17 +68,17 @@ limitations under the License.
     {% else %}
     <div id="sign_out_button">
         <a href="#" onclick="signOut();">Sign out</a>
-        <script>
-            function signOut() {
-                var auth2 = gapi.auth2.getAuthInstance();
-                auth2.signOut().then(function () {
-                    window.location.replace("/v1/sign_out");
-                });
-            }
-        </script>
-        <h4>Hi {{ session['user']['name'] }}!</h4>
+        <h4>Hi {{ session['name'] }}!</h4>
     </div>
     {% endif %}
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                window.location.replace("/v1/sign_out");
+            });
+        }
+    </script>
     {% endblock login_buttons %}
     {% block content %}{% endblock content %}
 </body>
