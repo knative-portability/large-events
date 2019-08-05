@@ -53,7 +53,8 @@ def add_event():
         }
         # TODO(cmei4444): Athenticate user and verify that user has event
         # editing access
-        current_time = datetime.datetime.now()
+        current_time = datetime.datetime.utcnow().isoformat(sep=" ",
+                                                            timespec="seconds")
         info = build_event_info(info, current_time)
         event = Event(**info)
         app.config["COLLECTION"].insert_one(event.dict)
