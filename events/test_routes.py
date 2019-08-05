@@ -198,5 +198,52 @@ class TestSearchEventsRoute(unittest.TestCase):
             self.assertEqual(response.status_code, 500)
 
 
+class TestGetEventByID(unittest.TestCase):
+    """Test searching for an event by name at endpoint GET /v1/."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB."""
+        self.coll = mongomock.MongoClient().db.collection
+        app.config["COLLECTION"] = self.coll
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+        self.fake_events = [
+            VALID_DB_EVENT,
+            VALID_DB_EVENT_WITH_ID
+        ]
+        self.coll.insert_many(self.fake_events)
+
+    def test_search_existing_event(self):
+        "Search for an event that exists in the DB."
+        id_to_search = VALID_DB_EVENT['_id']
+        response = self.client.put(f'/v1/{id_to_search}')
+        self.assertEqual(response.status_code, 200)
+        data = json_util.loads(response.data)
+
+        self.assertEqual(data['events'][0]['_id'], id_to_search)
+        self.assertEqual(len(data['events']), 1)
+        self.assertEqual(data['num_events'], 1)
+
+    def test_search_nonexisting_event(self):
+        "Search for an event that doesn't exist in the DB."
+        nonexistent_event_id = "123456789123456789123456"
+        response = self.client.put('/v1/' + nonexistent_event_id)
+        self.assertEqual(response.status_code, 200)
+        data = json_util.loads(response.data)
+
+        self.assertEqual(len(data['events']), 0)
+        self.assertEqual(data['num_events'], 0)
+
+    def test_db_not_defined(self):
+        """Test getting events when DB connection is undefined."""
+        id_to_search = VALID_DB_EVENT['_id']
+        with environ(os.environ):
+            if "MONGODB_URI" in os.environ:
+                del os.environ["MONGODB_URI"]
+            app.config["COLLECTION"] = connect_to_mongodb()
+            response = self.client.put(f'/v1/{id_to_search}')
+            self.assertEqual(response.status_code, 500)
+
+
 if __name__ == '__main__':
     unittest.main()
