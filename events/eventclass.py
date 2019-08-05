@@ -9,18 +9,6 @@ EVENT_ATTRIBUTES = [
     'event_time']
 
 
-def equal_times(time_1, time_2):
-    """Determines if two times are equal.
-
-    Datetime objects are rounded to the nearest millisecond before comparison.
-    Used for comparing Event objects, since MongoDB truncates times to the
-    nearest millisecond.
-    """
-    time_1 = time_1.replace(microsecond=(time_1.microsecond // 1000) * 1000)
-    time_2 = time_2.replace(microsecond=(time_2.microsecond // 1000) * 1000)
-    return time_1 == time_2
-
-
 class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
     """Class for representing events.
 
@@ -51,9 +39,6 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         for att in EVENT_ATTRIBUTES:
             if att == 'event_id':
                 continue
-            if att in ('event_time', 'created_at'):
-                if not equal_times(getattr(self, att), getattr(other, att)):
-                    return False
             elif getattr(self, att) != getattr(other, att):
                 return False
         return True

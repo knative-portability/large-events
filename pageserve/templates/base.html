@@ -20,7 +20,15 @@ limitations under the License.
     <title>{% block title %}{% endblock title %} - Large Events</title>
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+    <script>
+        // initialize gapi.auth2 to make sign out button work
+        function onLoad() {
+            gapi.load('auth2', function () {
+                gapi.auth2.init();
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -28,31 +36,37 @@ limitations under the License.
         {% block header %}{% endblock header %}
     </header>
     {% block login_buttons %}
-    {% if not signed_in %}
-    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-    <script>
-        function onSignIn(googleUser) {
-            // Secure Google ID token to send to backend for verification
-            var id_token = googleUser.getAuthResponse().id_token;
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', "{{ app_config['GAUTH_CALLBACK_ENDPOINT'] }}");
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function () {
-                console.log('Signed in as: ' + xhr.responseText);
-            };
-            xhr.send('gauth_token=' + id_token);
-        }
-    </script>
+    {% if not session['user'] %}
+    <div id="sign_in_button">
+        <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+        <script>
+            function onSignIn(googleUser) {
+                // Secure Google ID token to send to backend for verification.
+                var id_token = googleUser.getAuthResponse().id_token;
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', "authenticate");
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function () {
+                    // show the "Sign out" button
+                    window.location.reload()
+                };
+                xhr.send('gauth_token=' + id_token);
+            }
+        </script>
+    </div>
     {% else %}
-    <a href="#" onclick="signOut();">Sign out</a>
-    <script>
-        function signOut() {
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
-                console.log('User signed out.');
-            });
-        }
-    </script>
+    <div id="sign_out_button">
+        <a href="#" onclick="signOut();">Sign out</a>
+        <script>
+            function signOut() {
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.signOut().then(function () {
+                    window.location.replace("/v1/sign_out");
+                });
+            }
+        </script>
+        <h4>Hi {{ session['user']['name'] }}!</h4>
+    </div>
     {% endif %}
     {% endblock login_buttons %}
     {% block content %}{% endblock content %}
