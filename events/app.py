@@ -33,7 +33,7 @@ def search_event():
 
         events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
-        # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
+        # handles MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
     except BadRequestKeyError:      # missing event attributes
         return "Event name was entered incorrectly.", 400
