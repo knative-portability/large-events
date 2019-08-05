@@ -32,18 +32,19 @@ limitations under the License.
     </div>
 {% endfor %}
 
+<hr class="form-divider">
+
+<div class="content_box form">
 <h2>Create New Event</h2>
 <!-- TODO: add correct endpoint -->
 <form action="/v1/add_event" method="post">
     <div>
         <label for="name">Event Name:</label>
-        <input type="text" id="name" name="event_name">
+        <input type="text" id="name" name="event_name" placeholder="Give your event a name.">
     </div>
     <div>
         <label for="description">Description:</label>
-        <textarea type="text" rows = "5" cols = "60" id="description" name="description">
-          Enter details here.
-        </textarea>
+        <textarea type="text" rows = "5" cols = "60" id="description" name="description" placeholder="Enter details here."></textarea>
     </div>
     <div>
         <label for="event_time">Event Time:</label>
@@ -53,5 +54,6 @@ limitations under the License.
         <button type="submit">Add event</button>
     </div>
 </form>
+</div>
 
 {% endblock content%}

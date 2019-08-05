@@ -41,6 +41,9 @@ limitations under the License.
   </div>
 {% endfor %}
 
+<hr class="form_divider">
+
+<div class="content_box form">
 <h2>Create New Post</h2>
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
     <div> <!-- TODO(cmei4444): implement event picker -->
@@ -49,9 +52,7 @@ limitations under the License.
     </div>
     <div>
         <label for="text">Text:</label>
-        <textarea type="text" rows = "5" cols = "60" id="text" name="text">
-          Enter your post here.
-        </textarea>
+        <textarea type="text" rows = "5" cols = "60" id="text" name="text" placeholder="Enter your post here."></textarea>
     </div>
     <div>
         <label for="images">Images:</label>
@@ -61,5 +62,6 @@ limitations under the License.
         <button type="submit">Post</button>
     </div>
 </form>
+</div>
 
 {% endblock content%}

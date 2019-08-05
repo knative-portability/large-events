@@ -43,6 +43,46 @@
   border-radius: 3px;
   padding: 10px;
   margin: 15px 0px;
+  box-shadow: 0px 0px 8px #cccccc;
+}
+
+.form_divider {
+
+}
+
+.form {
+
+}
+
+input[type=text], textarea {
+  width: 100%;
+  padding: 12px 12px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: none;
+}
+
+.form button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  margin: 8px 2px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.form button:hover {
+  background-color: #45a149;
   box-shadow: 0px 0px 5px #cccccc;
 }
 
