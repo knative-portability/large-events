@@ -32,6 +32,9 @@ ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
 
 EXAMPLE_USER = "app_user"
+EXAMPLE_USER_OBJECT = {
+    "user_id": "app_user",
+    "name": "app_user"}
 
 VALID_POST_FORM = {
     'event_id': 'valid_post_id',
@@ -284,5 +287,45 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.data.decode(), "Example error message")
 
 
-if __name__ == '__main__':
+class TestDeletePostRoute(unittest.TestCase):
+    """Tests delete posts at DELETE /v1/delete_post/<post_id>."""
+
+    def setUp(self):
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_valid_delete(self, mock_requests):
+        """Happy case, authenticated and authorized to delete post."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Example success message", status_code=204)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 204)
+
+    def test_invalid_not_authenticated(self):
+        """Not authenticated, i.e. get_user() returns None."""
+        post_id = "abc123"
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Error", response.data.decode())
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_invalid_fails_on_posts_service(self, mock_requests):
+        """Posts doesn't like the requests, e.g. author_id doesn't match."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Document not found.", status_code=404)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 404)
+
+
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()

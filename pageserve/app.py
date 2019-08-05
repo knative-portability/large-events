@@ -45,10 +45,11 @@ def delete_post(post_id):
     """Authenticates and proxies a request to users service to delete a post."""
     try:
         my_user_id = get_user()["user_id"]
-        return requests.delete(app.config["POSTS_ENDPOINT"] + post_id,
-                               data={"author_id": my_user_id})
-    except AttributeError:
-        return "Not signed in", 401
+        response = requests.delete(app.config["POSTS_ENDPOINT"] + post_id,
+                                   data={"author_id": my_user_id})
+        return response.text, response.status_code
+    except TypeError:
+        return "Error: Not signed in", 401
 
 
 @app.route('/v1/events', methods=['GET'])
