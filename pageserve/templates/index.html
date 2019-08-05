@@ -14,6 +14,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+{% block head_extra %}
+<script>
+    // function to allow for deleting a post by ID
+    function deletePost(post_id) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', "delete_post/" + post_id);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 204) {
+                // post successfully deleted, refresh UI
+                window.location.reload();
+            } else {
+                // deletion unsuccessful
+                console.log(`Error: unable to delete post with id ${post_id}`);
+            }
+        };
+        xhr.send();
+    }
+</script>
+{% endblock head_extra %}
 
 {% block header %}
 <h1>{% block title %}Event Main Page{% endblock title %}</h1>
@@ -40,9 +60,13 @@ limitations under the License.
 <p>{{post.text}}</p>
 {% endif %}
 {% if post.files %}
-  {% for file in post.files %}
-  <img src="{{ file }}">
-  {% endfor %}
+{% for file in post.files %}
+<img src="{{ file }}">
+{% endfor %}
+{% endif %}
+
+{% if post.author_id == session["user_id"] %}
+<a onClick='{{ "deletePost(" + string(post["_id"]) + ");"}}'>Delete</a>
 {% endif %}
 
 <hr>
@@ -51,13 +75,14 @@ limitations under the License.
 
 <h2>Create New Post</h2>
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
-    <div> <!-- TODO(cmei4444): implement event picker -->
+    <div>
+        <!-- TODO(cmei4444): implement event picker -->
         <label for="event_id">Event ID:</label>
         <input type="text" id="event_id" name="event_id">
     </div>
     <div>
         <label for="text">Text:</label>
-        <textarea type="text" rows = "5" cols = "60" id="text" name="text">
+        <textarea type="text" rows="5" cols="60" id="text" name="text">
           Enter your post here.
         </textarea>
     </div>
