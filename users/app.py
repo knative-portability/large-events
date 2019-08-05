@@ -1,4 +1,4 @@
-"""Main flask app for users service
+"""Main flask app for users service.
 
 Features include
     - adding/updating users in the users db
