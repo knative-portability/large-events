@@ -10,21 +10,11 @@ How to install and run this microservice for local development.
 
 Each microservice has slightly different dependencies and thus slightly different installation procedures. These instructions are specific to the users microservice, but each other subfolder's README.md has an "Installing" section with more accurate instructions.
 
-Make sure your working directory is this microservice's subfolder.
+Install into a virtualenv:
 
 ```sh
-cd users
-```
-
-Set up and activate a virtual environment.
-
-```sh
+cd events
 python3 -m venv venv && . venv/bin/activate
-```
-
-Install the required python modules.
-
-```sh
 pip3 install -r requirements.txt
 ```
 
@@ -34,7 +24,7 @@ Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/c
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
 ```
 
-Set any other environment variables needed by the service. For the users service, you need to set the following:
+Set up [Google Sign-In for Websites](https://developers.google.com/identity/sign-in/web/sign-in) by creating a client ID. The users microservice needs to know the Google OAuth client ID you created. Make sure you use the same sign in client for the users and pageserve microservices.
 
 ```sh
 export GAUTH_CLIENT_ID="123-my-google-oauth-service-client-id-456"

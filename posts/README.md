@@ -10,21 +10,11 @@ How to install and run this microservice for local development.
 
 Each microservice has slightly different dependencies and thus slightly different installation procedures. These instructions are specific to the posts microservice, but each other subfolder's README.md has an "Installing" section with more accurate instructions.
 
-Make sure your working directory is this microservice's subfolder.
+Install into a virtualenv:
 
 ```sh
-cd posts
-```
-
-Set up and activate a virtual environment.
-
-```sh
+cd events
 python3 -m venv venv && . venv/bin/activate
-```
-
-Install the required python modules.
-
-```sh
 pip3 install -r requirements.txt
 ```
 
@@ -34,7 +24,7 @@ Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/c
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
 ```
 
-Specific to the posts service, you need to [set up a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/quickstart-console) and connect it to your posts service deployment, then provide the app with its bucket name via an environment variable.
+Specific to the posts microservice, you need to [set up a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/quickstart-console) and connect it to your posts microservice deployment, then provide the app with its bucket name via an environment variable.
 ```sh
 export GCLOUD_STORAGE_BUCKET_NAME="the-name-of-your-storage-bucket"
 ```

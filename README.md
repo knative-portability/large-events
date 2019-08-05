@@ -26,7 +26,7 @@ This project is organized into microservices. Although this repository contains 
 
 There are 4 microservices in this project. They are:
 - [__events__](events) - Add, edit, and fetch events list.
-- [__pageserve__](pageserve) - Serve web UI and act as an API gateway to other services.
+- [__pageserve__](pageserve) - Serve web UI and act as an API gateway to other microservices.
 - [__posts__](posts) - Add, edit, and fetch posts list.
 - [__users__](users) - Authenticate with Google Sign-In, edit and fetch authorization level of users.
 
@@ -44,31 +44,21 @@ How to install and run each microservice for local development.
 
 Each microservice has slightly different dependencies and thus slightly different installation procedures. Generally, installation for each microservice is as follows, but each subfolder's README.md has an "Installing" section with more accurate instructions.
 
-Make sure your working directory is the microservice's subfolder. For example, for the "users" microservice:
+Install into a virtualenv:
 
 ```sh
-cd users
-```
-
-Set up and activate a virtual environment.
-
-```sh
+cd events
 python3 -m venv venv && . venv/bin/activate
-```
-
-Install the required python modules.
-
-```sh
 pip3 install -r requirements.txt
 ```
 
-Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environment variable (this step is not needed for the pageserve service).
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environment variable (this step is not needed for the pageserve microservice).
 
 ```sh
 export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
 ```
 
-Set any other environment variables needed by the service.
+Set any other environment variables needed by the microservice.
 
 ```sh
 export USERS_ENDPOINT="https://endpoint.where-users-is-deployed.com/v1/"
