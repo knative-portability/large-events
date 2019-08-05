@@ -37,7 +37,17 @@
   padding: 0px 8px;
 }
 
+.user_post {
+  background-color: 	#ffffff;
+  border: 1px hidden gray;
+  border-radius: 3px;
+  padding: 10px;
+  margin: 15px 0px;
+  box-shadow: 0px 0px 5px #cccccc;
+}
+
 body {
+  background-color: #f7f7f7;
   margin: 0px;
   font-family: Helvetica, sans-serif, Arial;
 }

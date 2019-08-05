@@ -23,23 +23,22 @@ limitations under the License.
 
 {% block content %}
 
-<h2>Past posts</h2>
+<h2>Past Posts</h2>
 {% for post in posts %}
-<p>Posted by {{post.author_id}} at {{post.created_at}}</p>
+  <div class="user_post">
+    <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
 
-<p>For event {{ post.event_id }}</p>
+    <p>For event {{ post.event_id }}</p>
 
-{% if post.text %}
-<p>{{post.text}}</p>
-{% endif %}
-{% if post.files %}
-  {% for file in post.files %}
-  <img src="{{ file }}">
-  {% endfor %}
-{% endif %}
-
-<hr>
-
+    {% if post.text %}
+    <p>{{post.text}}</p>
+    {% endif %}
+    {% if post.files %}
+      {% for file in post.files %}
+      <img src="{{ file }}">
+      {% endfor %}
+    {% endif %}
+  </div>
 {% endfor %}
 
 <h2>Create New Post</h2>
