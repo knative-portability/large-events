@@ -1,86 +1,39 @@
-# large-events/posts
+# posts microservice - Large Events (Knative Proof of Portability)
 
-Posts service as part of large-events project for Knative proof of portability.
-* Serve stored media/posts
-* Upload new posts to the database
+Add, edit, and fetch posts list.
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-python 3+
-```
+These instructions are specific to this microservice. For general instructions and other information, see [the master README.md](../README.md).
 
 ### Installing
 
-How to install and run this service for local development
+How to install and run this microservice for local development.
 
-Make sure your working directory is this folder
+Each microservice has slightly different dependencies and thus slightly different installation procedures. These instructions are specific to the posts microservice, but each other subfolder's README.md has an "Installing" section with more accurate instructions.
 
-```
-cd posts
-```
+Install into a virtualenv:
 
-Set up and activate a virtual environment
-
-```
+```sh
+cd events
 python3 -m venv venv && . venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
-Install required python modules
+Provision a MongoDB instance (e.g. via [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)), then provide the app with its endpoint via an environment variable.
 
-```
-pip3 install requirements.txt
-```
-
-### Running the service
-
-Use flask to run the service locally
-
-```
-FLASK_APP=app.py && flask run
+```sh
+export MONGODB_URI="mongodb+srv://[username]:[password]@[cluster-address]"
 ```
 
-## Running the tests
-
-```
-python3 -m unittest -v test.py
-```
-
-## Deployment
-
-This project is set up for continuous deployment to Google Cloud Run (managed) via [Cloud Build](https://cloud.google.com/run/docs/continuous-deployment), and it will automatically be built and deployed on pushes to the master branch of [this repo](https://github.com/knative-portability/large-events).
-
-You can also manually deploy this service to Cloud Run. For example:
-
-```
-gcloud builds submit --tag gcr.io/knative-portability-2019/posts && \
-gcloud beta run deploy --image gcr.io/knative-portability-2019/posts --platform managed
+Specific to the posts microservice, you need to [set up a Google Cloud Storage bucket](https://cloud.google.com/storage/docs/quickstart-console) and connect it to your posts microservice deployment, then provide the app with its bucket name via an environment variable.
+```sh
+export GCLOUD_STORAGE_BUCKET_NAME="the-name-of-your-storage-bucket"
 ```
 
-## Built With
+Also, in order to access the bucket you need to [create a Google Cloud Service Account](https://cloud.google.com/docs/authentication/getting-started), download the application credentials json file, move the credentials file into the posts directory, and set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to point to it.
+```sh
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/google_application_credentials.json"
+```
 
-* [Flask](http://flask.pocoo.org/) - Python web service framework
-* [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Cloud NoSQL database
+### Running, Testing, and Deploying
 
-## Contributing
-
-<!--
-TODO(mukobi) add contributing to the main repo and link to it
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
--->
-
-## Authors
-
-* **Gabriel Mukobi** - *Initial work* - [mukobi](https://github.com/mukobi)
-
-See also the list of [contributors](https://github.com/knative-portability/large-events/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](../LICENSE.md) file for details.
+The procedures for running, testing, and deploying a microservice are the same for all of the microservices. See [the master README.md](../README.md).

@@ -1,3 +1,3 @@
 # Contribution guidelines
 
-So you want to hack on Knative proof of portability? Yay! Please refer to Knative's overall [contribution guidelines](https://www.knative.dev/contributing/) to find out how you can help.
+So you want to hack on Knative Proof of Portability? Yay! Please refer to Knative's overall [contribution guidelines](https://www.knative.dev/contributing/) to find out how you can help.
