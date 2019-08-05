@@ -17,7 +17,8 @@ cd events
 python3 -m venv venv && . venv/bin/activate
 pip3 install -r requirements.txt
 ```
-Set up [Google Sign-In for Websites](https://developers.google.com/identity/sign-in/web/sign-in) by creating a client ID. The users microservice needs to know the Google OAuth client ID you created. Make sure you use the same sign in client for the users and pageserve microservices.
+
+Set up [Google Sign-In for Websites](https://developers.google.com/identity/sign-in/web/sign-in) by creating a client ID. The pageserve microservice needs to know the Google OAuth client ID you created. Make sure you use the same sign-in client for the users and pageserve microservices.
 
 ```sh
 export GAUTH_CLIENT_ID="123-my-google-oauth-service-client-id-456"
