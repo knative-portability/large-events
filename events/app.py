@@ -16,7 +16,6 @@ def get_all_events():
     """Return a list of all events currently in the DB."""
     try:
         events = app.config["COLLECTION"].find({})
-        events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
         # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
@@ -30,8 +29,6 @@ def search_event():
     try:
         event_name = request.args['name']
         events = app.config["COLLECTION"].find({'name': event_name})
-
-        events = [Event(**ev).dict for ev in events]
         events_dict = build_events_dict(events)
         # handles MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
@@ -82,12 +79,12 @@ def build_event_info(info, time):
     return {**info, 'created_at': time}
 
 
-def build_events_dict(events):
+def build_events_dict(events_cursor):
     """Builds a dict in the correct format for returning through a GET request.
 
     Takes in a mongoDB cursor from querying the DB.
     """
-    events_list = list(events)
+    events_list = [Event(**ev).dict for ev in events_cursor]
     num_events = len(events_list)
     return {'events': events_list, 'num_events': num_events}
 
