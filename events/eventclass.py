@@ -1,3 +1,19 @@
+"""Class to represent events."""
+
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from collections import namedtuple
 
 EVENT_ATTRIBUTES = [
@@ -44,7 +60,15 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         return True
 
     def get_dict(self):
-        """Returns event info in dict form."""
-        return self._asdict()
+        """Returns event info in dict form.
+
+        Usually used to insert event info into the dictionary, so this converts
+        the field event_id into _id to correspond with the MongoDB _id field.
+        """
+        info = self._asdict()
+        if info['event_id']:    # only create _id field if event_id is not None
+            info['_id'] = info['event_id']
+            del info['event_id']
+        return info
 
     dict = property(get_dict)

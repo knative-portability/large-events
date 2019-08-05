@@ -1,8 +1,27 @@
+"""Main flask app for events service.
+
+Add, edit, and fetch events list.
+"""
+
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import datetime
 import json
 import pymongo
-from bson import json_util
+from bson import json_util, ObjectId
 
 from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
@@ -71,7 +90,14 @@ def edit_event(event_id):
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
     """Retrieve one event by event_id."""
-    pass
+    try:
+        events = app.config["COLLECTION"].find({'_id': ObjectId(event_id)})
+        events = [Event(**ev).dict for ev in events]
+        events_dict = build_events_dict(events)
+        # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
+        return json.loads(json_util.dumps(events_dict))
+    except DBNotConnectedError as e:
+        return "Events database was undefined.", 500
 
 
 def build_event_info(info, time):
