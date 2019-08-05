@@ -23,13 +23,13 @@ limitations under the License.
 
 {% block content %}
 
-<hr>
 {% for event in events %}
-<p>Event name: {{event.name}}</p>
-<p>Event time: {{event.event_time}}</p>
-<p>Event description: {{event.description}}</p>
-<p>Created by {{event.author}} at {{event.created_at}}</p>
-<hr>
+    <div class="content_box">
+        <p>Event name: {{event.name}}</p>
+        <p>Event time: {{event.event_time}}</p>
+        <p>Event description: {{event.description}}</p>
+        <p>Created by {{event.author}} at {{event.created_at}}</p>
+    </div>
 {% endfor %}
 
 <h2>Create New Event</h2>
