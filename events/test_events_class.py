@@ -20,7 +20,7 @@ import app
 
 
 EXAMPLE_TIME_STRING = datetime.datetime(
-    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=' ', timespec='seconds')
 
 
 class TestEventsClass(unittest.TestCase):
@@ -81,7 +81,7 @@ class TestEventsClass(unittest.TestCase):
     def test_events_unequal_times(self):
         test_info_str_time = self.test_info.copy()
         test_info_str_time['created_at'] = EXAMPLE_TIME_STRING
-        self.test_info['created_at'] = EXAMPLE_TIME_STRING + " different str"
+        self.test_info['created_at'] = EXAMPLE_TIME_STRING + ' different str'
         self.assertNotEqual(self.test_info, test_info_str_time)
 
 

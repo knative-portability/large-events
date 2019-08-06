@@ -19,9 +19,9 @@ import unittest
 import mongomock
 import app
 
-USER_ID = "valid-user-id"
-USER_NAME = "Valid User Name"
-ADDITIONAL_INFORMATION = "I'm not found in other documents"
+USER_ID = 'valid-user-id'
+USER_NAME = 'Valid User Name'
+ADDITIONAL_INFORMATION = 'I am not found in other documents'
 
 
 class TestUserUpsertion(unittest.TestCase):
@@ -39,18 +39,18 @@ class TestUserUpsertion(unittest.TestCase):
         the ObjectID returned from app.upsert_user_in_db.
         """
         user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME
+            'user_id': USER_ID,
+            'name': USER_NAME
         }
         upserted_id = app.upsert_user_in_db(
             user_to_insert, self.mock_collection)
         self.assertIsNotNone(upserted_id)
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        found_user = self.mock_collection.find_one({'user_id': USER_ID})
         # original user attributes matches found user attributes
-        self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
-        self.assertEqual(user_to_insert["name"], found_user["name"])
+        self.assertEqual(user_to_insert['user_id'], found_user['user_id'])
+        self.assertEqual(user_to_insert['name'], found_user['name'])
         # authorization false by default
-        self.assertFalse(found_user["is_organizer"])
+        self.assertFalse(found_user['is_organizer'])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)
@@ -63,25 +63,25 @@ class TestUserUpsertion(unittest.TestCase):
         the ObjectID returned from app.upsert_user_in_db.
         """
         user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME
+            'user_id': USER_ID,
+            'name': USER_NAME
         }
         # add a user
         self.assertIsNotNone(app.upsert_user_in_db(
             user_to_insert, self.mock_collection))
         # give that user organizer authorization
         self.mock_collection.update(
-            {"user_id": USER_ID}, {"$set": {"is_organizer": True}})
+            {'user_id': USER_ID}, {'$set': {'is_organizer': True}})
         # update the user
-        user_to_insert["name"] += "...look I changed my name!"
+        user_to_insert['name'] += '...look I changed my name!'
         self.assertIsNone(app.upsert_user_in_db(
             user_to_insert, self.mock_collection))  # None on update
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        found_user = self.mock_collection.find_one({'user_id': USER_ID})
         # original user attributes matches found user attributes
-        self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
-        self.assertEqual(user_to_insert["name"], found_user["name"])
+        self.assertEqual(user_to_insert['user_id'], found_user['user_id'])
+        self.assertEqual(user_to_insert['name'], found_user['name'])
         # update didn't override authorization field
-        self.assertTrue(found_user["is_organizer"])
+        self.assertTrue(found_user['is_organizer'])
 
     def test_malformatted_user_not_inserted(self):
         """A malformatted user_object should not be inserted.
@@ -95,12 +95,12 @@ class TestUserUpsertion(unittest.TestCase):
         # missing name
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"user_id": USER_ID},
+                {'user_id': USER_ID},
                 self.mock_collection)
         # missing user_id
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"name": USER_NAME},
+                {'name': USER_NAME},
                 self.mock_collection)
         # missing both
         with self.assertRaises(AttributeError):
@@ -108,8 +108,8 @@ class TestUserUpsertion(unittest.TestCase):
         # too much info
         with self.assertRaises(AttributeError):
             app.upsert_user_in_db(
-                {"user_id": USER_ID, "name": USER_NAME,
-                 "additional_info": ADDITIONAL_INFORMATION},
+                {'user_id': USER_ID, 'name': USER_NAME,
+                 'additional_info': ADDITIONAL_INFORMATION},
                 self.mock_collection)
         # no users should have been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 0)
@@ -117,8 +117,8 @@ class TestUserUpsertion(unittest.TestCase):
     def test_multiple_upserts_is_one_insert(self):
         """Upserting the same user multiple times should insert once."""
         user_to_insert = {
-            "user_id": USER_ID,
-            "name": USER_NAME
+            'user_id': USER_ID,
+            'name': USER_NAME
         }
         upserted_id = None
         # upsert many times
@@ -127,12 +127,12 @@ class TestUserUpsertion(unittest.TestCase):
                 user_to_insert, self.mock_collection)
         # only 1 user has been inserted
         self.assertEqual(self.mock_collection.count_documents({}), 1)
-        found_user = self.mock_collection.find_one({"user_id": USER_ID})
+        found_user = self.mock_collection.find_one({'user_id': USER_ID})
         # original user attributes matches found user attributes
-        self.assertEqual(user_to_insert["user_id"], found_user["user_id"])
-        self.assertEqual(user_to_insert["name"], found_user["name"])
+        self.assertEqual(user_to_insert['user_id'], found_user['user_id'])
+        self.assertEqual(user_to_insert['name'], found_user['name'])
         # authorization false by default
-        self.assertFalse(found_user["is_organizer"])
+        self.assertFalse(found_user['is_organizer'])
         # user returned from app.upsert_user_in_db matches found user exactly
         returned_user = self.mock_collection.find_one(upserted_id)
         self.assertEqual(returned_user, found_user)

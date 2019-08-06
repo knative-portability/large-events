@@ -21,49 +21,49 @@ import json
 import mongomock
 import app
 
-AUTHORIZED_USER_ID = "authorized-user"
-NON_AUTHORIZED_USER_ID = "non-authorized-user"
-MALFORMATTED_IN_DB_USER = "this-user-has-no-'is_organizer'_db_field"
-MISSING_USER = "not-a-user-in-the-database"
+AUTHORIZED_USER_ID = 'authorized-user'
+NON_AUTHORIZED_USER_ID = 'non-authorized-user'
+MALFORMATTED_IN_DB_USER = 'this-user-has-no-"is_organizer"_db_field'
+MISSING_USER = 'not-a-user-in-the-database'
 
 FAKE_USERS = [
-    {"user_id": AUTHORIZED_USER_ID,
-     "name": AUTHORIZED_USER_ID,
-     "is_organizer": True},
-    {"user_id": NON_AUTHORIZED_USER_ID,
-     "name": NON_AUTHORIZED_USER_ID,
-     "is_organizer": False},
-    {"user_id": MALFORMATTED_IN_DB_USER}]
+    {'user_id': AUTHORIZED_USER_ID,
+     'name': AUTHORIZED_USER_ID,
+     'is_organizer': True},
+    {'user_id': NON_AUTHORIZED_USER_ID,
+     'name': NON_AUTHORIZED_USER_ID,
+     'is_organizer': False},
+    {'user_id': MALFORMATTED_IN_DB_USER}]
 
 IDINFO_VALID = {
-    "iss": "accounts.google.com",
-    "sub": AUTHORIZED_USER_ID,
-    "name": "John Doe"}
+    'iss': 'accounts.google.com',
+    'sub': AUTHORIZED_USER_ID,
+    'name': 'John Doe'}
 IDINFO_INVALID_ISSUER = {
-    "iss": "malicious.site.net"}
+    'iss': 'malicious.site.net'}
 IDINFO_MISSING_NAME = {
-    "iss": "accounts.google.com",
-    "sub": "I have an ID but no name"}
-DUMMY_GAUTH_REQUEST_DATA = {"gauth_token": "fake_token_0123"}
+    'iss': 'accounts.google.com',
+    'sub': 'I have an ID but no name'}
+DUMMY_GAUTH_REQUEST_DATA = {'gauth_token': 'fake_token_0123'}
 
-AUTHORIZED_UPDATER_ID = "authorized-self-id"
+AUTHORIZED_UPDATER_ID = 'authorized-self-id'
 AUTHORIZED_UPDATER = {
-    "user_id": AUTHORIZED_UPDATER_ID,
-    "name": AUTHORIZED_UPDATER_ID,
-    "is_organizer": True}
-NON_AUTHORIZED_UPDATER_ID = "non-authorized-self-id"
+    'user_id': AUTHORIZED_UPDATER_ID,
+    'name': AUTHORIZED_UPDATER_ID,
+    'is_organizer': True}
+NON_AUTHORIZED_UPDATER_ID = 'non-authorized-self-id'
 NON_AUTHORIZED_UPDATER = {
-    "user_id": NON_AUTHORIZED_UPDATER_ID,
-    "name": NON_AUTHORIZED_UPDATER_ID,
-    "is_organizer": False}
+    'user_id': NON_AUTHORIZED_UPDATER_ID,
+    'name': NON_AUTHORIZED_UPDATER_ID,
+    'is_organizer': False}
 IDINFO_AUTHORIZED_UPDATER = {
-    "iss": "accounts.google.com",
-    "sub": AUTHORIZED_UPDATER_ID,
-    "name": "John Doe"}
+    'iss': 'accounts.google.com',
+    'sub': AUTHORIZED_UPDATER_ID,
+    'name': 'John Doe'}
 IDINFO_NON_AUTHORIZED_UPDATER = {
-    "iss": "accounts.google.com",
-    "sub": NON_AUTHORIZED_UPDATER_ID,
-    "name": "Draco Malfo"}
+    'iss': 'accounts.google.com',
+    'sub': NON_AUTHORIZED_UPDATER_ID,
+    'name': 'Draco Malfo'}
 
 
 class TestGetAuthorization(unittest.TestCase):
@@ -71,42 +71,42 @@ class TestGetAuthorization(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.app.config["COLLECTION"].insert_many(FAKE_USERS)
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        app.app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        app.app.config['COLLECTION'].insert_many(FAKE_USERS)
+        app.app.config['TESTING'] = True  # propagate exceptions to test client
         self.client = app.app.test_client()
 
     def test_is_authorized(self):
         """Get authorization of authorized user."""
         result = self.client.post(
-            "/v1/authorization", data={"user_id": AUTHORIZED_USER_ID})
+            '/v1/authorization', data={'user_id': AUTHORIZED_USER_ID})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {"edit_access": True})
+        self.assertEqual(response_body, {'edit_access': True})
 
     def test_not_authorized(self):
         """Get authorization of non-authorized user."""
         result = self.client.post(
-            "/v1/authorization", data={"user_id": NON_AUTHORIZED_USER_ID})
+            '/v1/authorization', data={'user_id': NON_AUTHORIZED_USER_ID})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {"edit_access": False})
+        self.assertEqual(response_body, {'edit_access': False})
 
     def test_malformatted_in_db(self):
         """Get authorization of user that is malformatted in the db."""
         result = self.client.post(
-            "/v1/authorization", data={"user_id": MALFORMATTED_IN_DB_USER})
+            '/v1/authorization', data={'user_id': MALFORMATTED_IN_DB_USER})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {"edit_access": False})
+        self.assertEqual(response_body, {'edit_access': False})
 
     def test_missing_param(self):
         """Try to get authorization but don't supply user_id."""
-        result = self.client.post("/v1/authorization")
+        result = self.client.post('/v1/authorization')
         self.assertEqual(result.status_code, 400)
 
 
-@mock.patch("app.get_user_from_gauth_token",
+@mock.patch('app.get_user_from_gauth_token',
             mock.Mock(return_value=IDINFO_AUTHORIZED_UPDATER))
 class TestUpdateAuthorization(unittest.TestCase):
     """Test update authorization endpoint POST /v1/authorization/update.
@@ -120,129 +120,129 @@ class TestUpdateAuthorization(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.app.config["COLLECTION"].insert_many(FAKE_USERS)  # others
+        app.app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        app.app.config['COLLECTION'].insert_many(FAKE_USERS)  # others
         # insert users that will call the change auth endpoint
-        app.app.config["COLLECTION"].insert_one(AUTHORIZED_UPDATER)
-        app.app.config["COLLECTION"].insert_one(NON_AUTHORIZED_UPDATER)
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        app.app.config['COLLECTION'].insert_one(AUTHORIZED_UPDATER)
+        app.app.config['COLLECTION'].insert_one(NON_AUTHORIZED_UPDATER)
+        app.app.config['TESTING'] = True  # propagate exceptions to test client
         self.client = app.app.test_client()
 
     def test_authorized_change_other_true_to_false(self):
         """Authorized user can revoke authorization to other."""
         target_user_id = AUTHORIZED_USER_ID
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
-        self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": False,
+            target_user_id, app.app.config['COLLECTION']))
+        self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': False,
             **DUMMY_GAUTH_REQUEST_DATA})
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_authorized_change_other_false_to_true(self):
         """Authorized user can give authorization to other."""
         target_user_id = NON_AUTHORIZED_USER_ID
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
-        self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": True,
+            target_user_id, app.app.config['COLLECTION']))
+        self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': True,
             **DUMMY_GAUTH_REQUEST_DATA})
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_authorized_change_other_true_to_true(self):
         """Authorized user can trivially keep on authorization of other."""
         target_user_id = AUTHORIZED_USER_ID
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
-        self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": True,
+            target_user_id, app.app.config['COLLECTION']))
+        self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': True,
             **DUMMY_GAUTH_REQUEST_DATA})
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_authorized_change_other_false_to_false(self):
         """Authorized user can trivially keep off authorization of other."""
         target_user_id = NON_AUTHORIZED_USER_ID
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
-        self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": False,
+            target_user_id, app.app.config['COLLECTION']))
+        self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': False,
             **DUMMY_GAUTH_REQUEST_DATA})
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_authorized_change_self_true_to_false(self):
         """Authorized user can revoke authorization of self."""
         target_user_id = AUTHORIZED_UPDATER_ID
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
-        self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": False,
+            target_user_id, app.app.config['COLLECTION']))
+        self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': False,
             **DUMMY_GAUTH_REQUEST_DATA})
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_not_authorized_try_grant_self(self):
         """Not authorized, can't grant authorization to self."""
         # caller not authorized
         app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config['COLLECTION']))
         # can't give authorization to self
         target_user_id = NON_AUTHORIZED_UPDATER_ID
-        result = self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": True,
+        result = self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': True,
             **DUMMY_GAUTH_REQUEST_DATA})
-        self.assertIn("Not authorized", result.data.decode())
+        self.assertIn('Not authorized', result.data.decode())
         self.assertEqual(result.status_code, 403)
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_not_authorized_try_revoke_other(self):
         """Not authorized, can't revoke authorization of other."""
         # caller not authorized
         app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config['COLLECTION']))
         # can't give authorization to other
         target_user_id = AUTHORIZED_USER_ID
-        result = self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": False,
+        result = self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': False,
             **DUMMY_GAUTH_REQUEST_DATA})
-        self.assertIn("Not authorized", result.data.decode())
+        self.assertIn('Not authorized', result.data.decode())
         self.assertEqual(result.status_code, 403)
         self.assertTrue(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_not_authorized_try_grant_other(self):
         """Not authorized, can't grant authorization to other."""
         # caller not authorized
         app.get_user_from_gauth_token.return_value = IDINFO_NON_AUTHORIZED_UPDATER
         self.assertFalse(app.find_authorization_in_db(
-            NON_AUTHORIZED_UPDATER_ID, app.app.config["COLLECTION"]))
+            NON_AUTHORIZED_UPDATER_ID, app.app.config['COLLECTION']))
         # can't give authorization to other
         target_user_id = NON_AUTHORIZED_USER_ID
-        result = self.client.post("/v1/authorization/update", data={
-            "target_user_id": target_user_id,
-            "is_organizer": True,
+        result = self.client.post('/v1/authorization/update', data={
+            'target_user_id': target_user_id,
+            'is_organizer': True,
             **DUMMY_GAUTH_REQUEST_DATA})
-        self.assertIn("Not authorized", result.data.decode())
+        self.assertIn('Not authorized', result.data.decode())
         self.assertEqual(result.status_code, 403)
         self.assertFalse(app.find_authorization_in_db(
-            target_user_id, app.app.config["COLLECTION"]))
+            target_user_id, app.app.config['COLLECTION']))
 
     def test_errror_missing_parameters(self):
         """Invalid request missing parameters."""
-        result = self.client.post("/v1/authorization/update", data={})
-        self.assertIn("Error", result.data.decode())
+        result = self.client.post('/v1/authorization/update', data={})
+        self.assertIn('Error', result.data.decode())
         self.assertEqual(result.status_code, 400)
 
 
@@ -251,8 +251,8 @@ class TestAuthenticateUser(unittest.TestCase):
 
     def setUp(self):
         """Set up test client and seed mock DB for testing."""
-        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        app.app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        app.app.config['TESTING'] = True  # propagate exceptions to test client
         self.client = app.app.test_client()
         # Patch google.oauth2.id_token
         patcher = mock.patch('app.id_token')
@@ -273,7 +273,7 @@ class TestAuthenticateUser(unittest.TestCase):
         """Simulate extracting a valid token."""
         self.verify_oauth2_token.return_value = IDINFO_VALID
         result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+            '/v1/authenticate', data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = json.loads(result.data)
         self.assert_equal_idinfos(response_body, IDINFO_VALID)
         self.assertEqual(result.status_code, 201)
@@ -282,26 +282,26 @@ class TestAuthenticateUser(unittest.TestCase):
         """User object missing name, perhaps from lack of permissions."""
         self.verify_oauth2_token.return_value = IDINFO_MISSING_NAME
         result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+            '/v1/authenticate', data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = result.data.decode()
-        self.assertIn("Error", response_body)
+        self.assertIn('Error', response_body)
         self.assertEqual(result.status_code, 400)
 
     def test_no_authentication_token(self):
         """No token provided."""
         result = self.client.post(
-            "/v1/authenticate")
+            '/v1/authenticate')
         response_body = result.data.decode()
-        self.assertIn("Error", response_body)
+        self.assertIn('Error', response_body)
         self.assertEqual(result.status_code, 400)
 
     def test_bad_issuer(self):
         """Bad token issuer(not Google Accounts)."""
         self.verify_oauth2_token.return_value = IDINFO_INVALID_ISSUER
         result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+            '/v1/authenticate', data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = result.data.decode()
-        self.assertIn("Error", response_body)
+        self.assertIn('Error', response_body)
         self.assertEqual(result.status_code, 400)
 
     def test_authentication_failed(self):
@@ -311,11 +311,11 @@ class TestAuthenticateUser(unittest.TestCase):
         client ID does not match that of the server, or the token is
         otherwise invalid.
         """
-        self.verify_oauth2_token.side_effect = ValueError("Bad token.")
+        self.verify_oauth2_token.side_effect = ValueError('Bad token.')
         result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+            '/v1/authenticate', data=DUMMY_GAUTH_REQUEST_DATA)
         response_body = result.data.decode()
-        self.assertIn("Error", response_body)
+        self.assertIn('Error', response_body)
         self.assertEqual(result.status_code, 400)
 
 

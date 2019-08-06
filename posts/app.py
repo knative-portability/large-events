@@ -30,7 +30,7 @@ from google.cloud import storage
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-REQUIRED_ATTRIBUTES = {"event_id", "author_id", "text", "files"}
+REQUIRED_ATTRIBUTES = {'event_id', 'author_id', 'text', 'files'}
 
 
 @app.route('/v1/add', methods=['POST'])
@@ -46,23 +46,23 @@ def upload_new_post():
     """
     try:
         post = {
-            "event_id": request.form["event_id"],
-            "author_id": request.form["author_id"],
-            "text":  request.form["text"],
-            "files": [file for file in request.files.values()]
+            'event_id': request.form['event_id'],
+            'author_id': request.form['author_id'],
+            'text':  request.form['text'],
+            'files': [file for file in request.files.values()]
         }
-        return str(upload_new_post_to_db(post, app.config["COLLECTION"])), 201
+        return str(upload_new_post_to_db(post, app.config['COLLECTION'])), 201
     except BadRequestKeyError:
-        return f"Invalid request. Required data: {REQUIRED_ATTRIBUTES}.", 400
+        return f'Invalid request. Required data: {REQUIRED_ATTRIBUTES}.', 400
     except ValueError:
-        return "Post must contain text and/or files.", 400
+        return 'Post must contain text and/or files.', 400
 
 
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
     """Get all posts for the whole event."""
     # serialize otherwise nonserializable ObjectIDs
-    post_list = find_posts_in_db(app.config["COLLECTION"])
+    post_list = find_posts_in_db(app.config['COLLECTION'])
     return serialize_posts_to_json(post_list)
 
 
@@ -71,7 +71,7 @@ def get_post_by_id(post_id):
     """Get the post with the specified ID.
     """
     post_list = find_posts_in_db(
-        app.config["COLLECTION"], post_id=ObjectId(post_id))
+        app.config['COLLECTION'], post_id=ObjectId(post_id))
     return serialize_posts_to_json(post_list)
 
 
@@ -85,26 +85,26 @@ def delete_post_by_id(post_id):
     deployed as an internal service accessible by only the other microservices.
     """
     try:
-        author_id = request.form["author_id"]
-        return delete_post(post_id, author_id, app.config["COLLECTION"])
+        author_id = request.form['author_id']
+        return delete_post(post_id, author_id, app.config['COLLECTION'])
     except BadRequestKeyError:
-        return "Error: request missing `author_id`.", 400
+        return 'Error: request missing `author_id`.', 400
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
 def get_all_posts_for_event(event_id):
     """Get all posts matching the event with the specified ID."""
     # serialize otherwise nonserializable ObjectIDs
-    post_list = find_posts_in_db(app.config["COLLECTION"], event_id=event_id)
+    post_list = find_posts_in_db(app.config['COLLECTION'], event_id=event_id)
     return serialize_posts_to_json(post_list)
 
 
 def delete_post(post_id, author_id, collection):
     """Deletes the post matching post_id and author_id if it exists."""
     result = collection.delete_one(
-        {"_id": ObjectId(post_id), "author_id": author_id})
-    return (("Document deleted.", 204) if result.deleted_count
-            else ("Document not found.", 404))
+        {'_id': ObjectId(post_id), 'author_id': author_id})
+    return (('Document deleted.', 204) if result.deleted_count
+            else ('Document not found.', 404))
 
 
 def find_posts_in_db(collection, post_id=None, event_id=None):
@@ -125,9 +125,9 @@ def find_posts_in_db(collection, post_id=None, event_id=None):
     """
     query = {}
     if post_id is not None:
-        query = {"_id": post_id}
+        query = {'_id': post_id}
     elif event_id is not None:
-        query = {"event_id": event_id}
+        query = {'event_id': event_id}
     cursor = collection.find(query)
     list_of_posts = []
     for post in cursor:
@@ -145,12 +145,12 @@ def serialize_posts_to_json(post_list):
         post_list (list): List of post objects to serialize
 
     Returns:
-        dict: json-like wrapper around the list of posts in a "posts" key
-            and the number of posts in a "num_posts" key.
+        dict: json-like wrapper around the list of posts in a 'posts' key
+            and the number of posts in a 'num_posts' key.
     """
     return json.loads(json_util.dumps(
-        {"posts": post_list,
-         "num_posts": len(post_list)}))
+        {'posts': post_list,
+         'num_posts': len(post_list)}))
 
 
 def upload_new_post_to_db(post, collection):
@@ -176,14 +176,14 @@ def upload_new_post_to_db(post, collection):
         AttributeError: `post` has not enough or too many attributes.
     """
     if post.keys() != REQUIRED_ATTRIBUTES:
-        raise AttributeError(f"Post must have exactly the "
-                             "attributes {required_attributes}")
-    if not post["text"] and not post["files"]:
-        raise ValueError("One of text or files must not be empty.")
+        raise AttributeError(f'Post must have exactly the '
+                             'attributes {required_attributes}')
+    if not post['text'] and not post['files']:
+        raise ValueError('One of text or files must not be empty.')
     # post is valid, add on timestamp, upload files, insert into db
-    post["created_at"] = generate_timestamp()
-    post["files"] = [
-        upload_file_to_cloud(file) for file in post["files"]]
+    post['created_at'] = generate_timestamp()
+    post['files'] = [
+        upload_file_to_cloud(file) for file in post['files']]
     return collection.insert_one(post).inserted_id
 
 
@@ -193,7 +193,7 @@ def generate_timestamp():
     Returns:
         datetime: the current time.
     """
-    return datetime.datetime.utcnow().isoformat(sep=" ", timespec="seconds")
+    return datetime.datetime.utcnow().isoformat(sep=' ', timespec='seconds')
 
 
 def upload_file_to_cloud(file):
@@ -202,7 +202,7 @@ def upload_file_to_cloud(file):
     Returns:
         str: Public URL of the file in the cloud.
     """
-    filename = str(uuid.uuid4()) + "-" + file.filename
+    filename = str(uuid.uuid4()) + '-' + file.filename
     blob = CLOUD_STORAGE_BUCKET.blob(filename)
     blob.upload_from_file(file)
     return blob.public_url
@@ -219,9 +219,9 @@ def connect_to_cloud_storage():  # pragma: no cover
 
         def __getattribute__(self, _):
             raise StorageNotConnectedError(
-                "Not able to find GCLOUD_STORAGE_BUCKET_NAME environment variable")
+                'Not able to find GCLOUD_STORAGE_BUCKET_NAME environment variable')
 
-    bucket_name = os.environ.get("GCLOUD_STORAGE_BUCKET_NAME")
+    bucket_name = os.environ.get('GCLOUD_STORAGE_BUCKET_NAME')
     if bucket_name is None:
         return Thrower()  # not able to find storage config var
     storage_client = storage.Client()
@@ -242,16 +242,16 @@ def connect_to_mongodb():  # pragma: no cover
 
         def __getattribute__(self, _):
             raise DBNotConnectedError(
-                "Not able to find MONGODB_URI environment variable")
+                'Not able to find MONGODB_URI environment variable')
 
-    mongodb_uri = os.environ.get("MONGODB_URI")
+    mongodb_uri = os.environ.get('MONGODB_URI')
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).posts_db.posts_collection
 
 
-app.config["COLLECTION"] = connect_to_mongodb()
+app.config['COLLECTION'] = connect_to_mongodb()
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
