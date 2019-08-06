@@ -15,16 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+{% block events_tab_active %}active{% endblock %}
+
 {% block header %}
 <h1>{% block title %}Sub-Events{% endblock title %}</h1>
 {% endblock header %}
 
 {% block content %}
-{% if auth %}
-<p>user has edit authorization</p>
-{% else %}
-<p>user does not have edit authorization</p>
-{% endif %}
 
 <hr>
 {% for event in events %}
@@ -34,8 +31,6 @@ limitations under the License.
 <p>Created by {{event.author}} at {{event.created_at}}</p>
 <hr>
 {% endfor %}
-
-<a href='/v1/'>See all posts</a>
 
 <h2>Create New Event</h2>
 <!-- TODO: add correct endpoint -->
