@@ -136,13 +136,15 @@ def add_post():
         All files to be uploaded(can be multiple)
 
     Response:
-        String response and response code returned by posts service:
-            201 if post added successfully
-            400 if post info is malformatted
+        Redirect to index if 201 response from posts service.
+        Error message and status 400 otherwise.
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data, files=request.files)
+    if r.status_code == 201:
+        # upload successful, redirect to index
+        return redirect(url_for("index"))
     return r.content, r.status_code
 
 
@@ -159,13 +161,15 @@ def add_event():
         event_time: time of event
 
     Response:
-        String response and response code returned by posts service:
-            201 if event added successfully
-            400 if event info is malformatted
+        Redirect to index if 201 response from events service.
+        Error message and status 400 otherwise.
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data)
+    if r.status_code == 201:
+        # upload successful, redirect to index
+        return redirect(url_for("index"))
     return r.content, r.status_code
 
 

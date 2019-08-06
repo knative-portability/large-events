@@ -240,8 +240,7 @@ class TestAddPostRoute(unittest.TestCase):
 
         response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        self.assertEqual(response.status_code, 302)  # redirect to index
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
@@ -275,8 +274,7 @@ class TestAddEventRoute(unittest.TestCase):
 
         response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        self.assertEqual(response.status_code, 302)  # redirect to index
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
