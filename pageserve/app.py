@@ -141,7 +141,7 @@ def add_post():
             400 if post info is malformatted
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data, files=request.files)
     return r.content, r.status_code
 
@@ -164,7 +164,7 @@ def add_event():
             400 if event info is malformatted
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data)
     return r.content, r.status_code
 
