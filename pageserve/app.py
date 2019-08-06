@@ -163,10 +163,16 @@ def add_event():
             201 if event added successfully
             400 if event info is malformatted
     """
-    url = app.config['EVENTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
-    r = requests.post(url, data=form_data)
-    return r.content, r.status_code
+    try:
+        user = get_user()
+        url = app.config['EVENTS_ENDPOINT'] + 'add'
+        form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
+        # get rid of 'T' separator in event_time
+        form_data['event_time'] = form_data['event_time'].replace('T', ' ')
+        r = requests.post(url, data=form_data)
+        return r.content, r.status_code
+    except KeyError as error:
+        return f'Error: {error}', 400
 
 
 def get_posts():

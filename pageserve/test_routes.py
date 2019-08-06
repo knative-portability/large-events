@@ -49,7 +49,7 @@ VALID_EVENT_FORM = {
     'event_time': '7-30-2019'}
 INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
-    'description': 'This event is missing an time!'}
+    'description': 'This event is missing a time!'}
 
 EXAMPLE_POSTS = [
     {'_id': {'$oid': '123abc'},
@@ -289,7 +289,7 @@ class TestAddEventRoute(unittest.TestCase):
         response = self.client.post('/v1/add_event', data=INVALID_EVENT_FORM)
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data.decode(), "Example error message")
+        self.assertIn("Error", response.data.decode())
 
 
 class TestDeletePostRoute(unittest.TestCase):
