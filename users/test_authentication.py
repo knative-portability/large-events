@@ -20,9 +20,9 @@ from unittest import mock
 import app
 
 IDINFO_VALID = {
-    "iss": "accounts.google.com"}
+    'iss': 'accounts.google.com'}
 IDINFO_INVALID_ISSUER = {
-    "iss": "malicious.site.net"}
+    'iss': 'malicious.site.net'}
 
 
 class TestGetUserFromGAuthToken(unittest.TestCase):
@@ -59,7 +59,7 @@ class TestGetUserFromGAuthToken(unittest.TestCase):
         client ID does not match that of the server, or the token is
         otherwise invalid.
         """
-        self.verify_oauth2_token.side_effect = ValueError("Bad token.")
+        self.verify_oauth2_token.side_effect = ValueError('Bad token.')
         with self.assertRaises(ValueError):
             app.get_user_from_gauth_token(None)
 

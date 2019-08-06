@@ -25,7 +25,7 @@ EVENT_ATTRIBUTES = [
     'event_time']
 
 
-class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
+class Event(namedtuple('EventTuple', EVENT_ATTRIBUTES)):
     """Class for representing events.
 
     Used to ensure event info is in the correct format when constructing or
@@ -38,7 +38,7 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         Raises a ValueError if any attributes are missing or if extra
         attributes are included.
         """
-        if "event_id" not in info:
+        if 'event_id' not in info:
             info['event_id'] = None
         if '_id' in info:       # found DB-generated ID, override given one
             info['event_id'] = info['_id']
@@ -46,7 +46,7 @@ class Event(namedtuple("EventTuple", EVENT_ATTRIBUTES)):
         try:
             return super(Event, cls).__new__(cls, **info)
         except TypeError:
-            raise ValueError("Event info was formatted incorrectly.")
+            raise ValueError('Event info was formatted incorrectly.')
 
     def __eq__(self, other):
         """Determines if two events have the same info, excluding event_id."""
