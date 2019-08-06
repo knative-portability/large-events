@@ -41,6 +41,18 @@ def index():
         return str(error), 500
 
 
+@app.route('/v1/delete_post/<post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    """Authenticates and proxies a request to users service to delete a post."""
+    try:
+        my_user_id = get_user()["user_id"]
+        response = requests.delete(app.config["POSTS_ENDPOINT"] + post_id,
+                                   data={"author_id": my_user_id})
+        return response.text, response.status_code
+    except TypeError:
+        return "Error: Not signed in", 401
+
+
 @app.route('/v1/events', methods=['GET'])
 def show_events():
     """Displays page with all sub-events."""
@@ -129,7 +141,7 @@ def add_post():
             400 if post info is malformatted
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data, files=request.files)
     return r.content, r.status_code
 
@@ -152,7 +164,7 @@ def add_event():
             400 if event info is malformatted
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user())
+    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
     r = requests.post(url, data=form_data)
     return r.content, r.status_code
 

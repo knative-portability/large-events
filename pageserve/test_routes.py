@@ -31,7 +31,9 @@ ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
 ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
 
-EXAMPLE_USER = "app_user"
+EXAMPLE_USER_OBJECT = {
+    "user_id": "app_user",
+    "name": "app_user"}
 
 VALID_POST_FORM = {
     'event_id': 'valid_post_id',
@@ -49,7 +51,13 @@ INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing an time!'}
 
-EXAMPLE_POSTS = ['example', 'posts', 'list']
+EXAMPLE_POSTS = [
+    {'_id': {'$oid': '123abc'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 1.'},
+    {'_id': {'$oid': '456def'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 2.'}]
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
 
@@ -171,7 +179,7 @@ class TestTemplateRoutes(TestCase):
         """Set up test client."""
         self.client = app.app.test_client()
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @patch('app.get_posts', MagicMock(return_value=EXAMPLE_POSTS))
     def test_index(self):
@@ -184,7 +192,7 @@ class TestTemplateRoutes(TestCase):
         self.assertContext('posts', EXAMPLE_POSTS)
         self.assertContext('app_config', app.app.config)
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @patch('app.get_posts', MagicMock(side_effect=RuntimeError))
     def test_index_posts_fail(self):
@@ -192,7 +200,7 @@ class TestTemplateRoutes(TestCase):
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 500)
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
     def test_show_events(self):
@@ -205,7 +213,7 @@ class TestTemplateRoutes(TestCase):
         self.assertContext('events', EXAMPLE_EVENTS)
         self.assertContext('app_config', app.app.config)
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @patch('app.get_events', MagicMock(side_effect=RuntimeError))
     def test_index_events_fail(self):
@@ -222,7 +230,7 @@ class TestAddPostRoute(unittest.TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'add'
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_valid_post(self, mock_requests):
         """Tests adding a valid post."""
@@ -235,7 +243,7 @@ class TestAddPostRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data.decode(), "Example success message")
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_invalid_post(self, mock_requests):
         """Tests adding an invalid post."""
@@ -257,7 +265,7 @@ class TestAddEventRoute(unittest.TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'add'
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_valid_event(self, mock_requests):
         """Tests adding a valid event."""
@@ -270,7 +278,7 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data.decode(), "Example success message")
 
-    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER))
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_invalid_event(self, mock_requests):
         """Tests adding an invalid event."""
@@ -284,5 +292,45 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.data.decode(), "Example error message")
 
 
-if __name__ == '__main__':
+class TestDeletePostRoute(unittest.TestCase):
+    """Tests delete posts at DELETE /v1/delete_post/<post_id>."""
+
+    def setUp(self):
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_valid_delete(self, mock_requests):
+        """Happy case, authenticated and authorized to delete post."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Example success message", status_code=204)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 204)
+
+    def test_invalid_not_authenticated(self):
+        """Not authenticated, i.e. get_user() returns None."""
+        post_id = "abc123"
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Error", response.data.decode())
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_invalid_fails_on_posts_service(self, mock_requests):
+        """Posts doesn't like the requests, e.g. author_id doesn't match."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Document not found.", status_code=404)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 404)
+
+
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()
