@@ -165,6 +165,8 @@ def add_event():
     """
     try:
         user = get_user()
+        if not user["is_organizer"]:
+            return "Error: not authorized to add events.", 403
         url = app.config['EVENTS_ENDPOINT'] + 'add'
         form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
         # get rid of 'T' separator in event_time
