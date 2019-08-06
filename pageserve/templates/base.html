@@ -69,6 +69,7 @@ limitations under the License.
             {% else %}
             <div class="navtab">Hi {{ session["name"] }}!</div>
             <a href="#" onclick="signOut();" id="sign_out_button" class="navtab navbtn">Sign out</a>
+            {% endif %}
             <script>
                 function signOut() {
                     var auth2 = gapi.auth2.getAuthInstance();
@@ -77,7 +78,6 @@ limitations under the License.
                     });
                 }
             </script>
-            {% endif %}
             {% endblock login_buttons %}
         </div>
     </div>
