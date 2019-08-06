@@ -9,7 +9,6 @@
 
 /* Style the links inside the navigation bar */
 .topnav .navtab {
-  float: left;
   color: #f2f2f2;
   text-align: center;
   padding: 14px 16px;
@@ -27,6 +26,47 @@
 .topnav .navbtn.active {
   background-color: #4CAF50;
   color: white;
+}
+
+#nav_left {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.search_box {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.search_box input[type=text] {
+  padding: 8px;
+  margin-left: 20px;
+  font-size: 16px;
+  border: none;
+  width: 40%;
+}
+
+@media screen and (max-width: 900px) {
+  .search_box input[type=text]:focus {
+    width: 80%;
+  }
+}
+
+.search_box button {
+  background: #ddd;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.search_box button:hover {
+  background: #ccc;
+}
+
+
+#user_nav {
+  display: flex;
 }
 
 #sign_out_button {
@@ -50,7 +90,7 @@ hr.form_divider {
   border-top: 5px double #8c8b8b;
 }
 
-input[type=text], select, textarea {
+.form input[type=text], select, textarea {
   background-color: white;
   width: 100%;
   padding: 12px 12px;
@@ -61,7 +101,7 @@ input[type=text], select, textarea {
   box-sizing: border-box;
 }
 
-input[type=datetime-local] {
+.form input[type=datetime-local] {
   padding: 12px 12px;
   margin: 8px;
   display: inline-block;
@@ -70,7 +110,7 @@ input[type=datetime-local] {
   box-sizing: border-box;
 }
 
-textarea {
+.form textarea {
   resize: none;
 }
 

@@ -19,6 +19,7 @@ limitations under the License.
 <head>
     <title>{% block title %}{% endblock title %} - Large Events</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
@@ -39,10 +40,14 @@ limitations under the License.
         <div id="nav_left">
             <a class="{% block home_tab_active %}{% endblock %} navtab navbtn" href='/v1/'>Home</a>
             <a class="{% block events_tab_active %}{% endblock %} navtab navbtn" href='/v1/events'>Events</a>
+            <form class="search_box" action="/v1/search_event" method="post">
+                <input type="text" placeholder="Search events by name.." name="event_name">
+                <button type="submit"><i class="material-icons">search</i></button>
+            </form>
         </div>
         <div id="user_nav">
             {% block login_buttons %}
-            {% if not session['gauth_token'] %}
+            {% if not True %}
             <div id="sign_in_button">
                 <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
                 <script>
