@@ -17,6 +17,7 @@
 import json
 import unittest
 from unittest import mock
+import requests
 import requests_mock
 import flask
 import app
@@ -62,6 +63,14 @@ class TestServe(unittest.TestCase):
                 flask.session.clear()
                 result = app.get_user()
                 self.assertIsNone(result)
+
+    def test_get_user_connection_error(self):
+        """Can't connect to users service, requests raises, return None."""
+        with app.app.test_request_context(), app.app.test_client(), \
+                mock.patch('app.requests.post',
+                           side_effect=requests.exceptions.ConnectionError):
+            flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+            self.assertIsNone(app.get_user())
 
     @requests_mock.Mocker()
     def test_edit_access(self, requests_mocker):

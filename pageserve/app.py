@@ -94,7 +94,7 @@ def authenticate_and_get_user():
             session['name'] = response.json()['name']
             session['gauth_token'] = gauth_token
         return response.content, response.status_code
-    except BadRequestKeyError as error:
+    except (BadRequestKeyError, requests.exceptions.ConnectionError) as error:
         return f'Error: {error}.', 400
 
 
@@ -242,12 +242,15 @@ def has_edit_access(user):
 
 def get_user():
     """Retrieves the current user of the app or None if not signed in."""
-    if 'gauth_token' in session:
-        response = authenticate_with_users_service(
-            session['gauth_token'])
-        if response.status_code == 201:
-            return response.json()
-    return None  # Not signed in
+    try:
+        if 'gauth_token' in session:
+            response = authenticate_with_users_service(
+                session['gauth_token'])
+            if response.status_code == 201:
+                return response.json()
+        return None  # Not signed in
+    except requests.exceptions.ConnectionError:
+        return None  # Can't connect to users service
 
 
 # set GAuth callback to the route defined by the authenticate() function
