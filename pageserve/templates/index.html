@@ -15,26 +15,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+{% block home_tab_active %}active{% endblock %}
+
 {% block header %}
 <h1>{% block title %}Event Main Page{% endblock title %}</h1>
 {% endblock header %}
 
 {% block content %}
-<h2>test user auth</h2>
-
-{% if auth %}
-<p>user has edit authorization</p>
-{% else %}
-<p>user does not have edit authorization</p>
-{% endif %}
-
-<a href='/v1/events'>See sub-events</a>
 
 <h2>Past posts</h2>
 {% for post in posts %}
 <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-
-<p>For event {{ post.event_id }}</p>
+<!-- TODO(cmei4444) - link to event info -->
+<p>For event with ID {{ post.event_id }}</p>
 
 {% if post.text %}
 <p>{{post.text}}</p>
@@ -51,9 +44,14 @@ limitations under the License.
 
 <h2>Create New Post</h2>
 <form action="/v1/add_post" method="post" enctype="multipart/form-data">
-    <div> <!-- TODO(cmei4444): implement event picker -->
+    <div>
         <label for="event_id">Event ID:</label>
-        <input type="text" id="event_id" name="event_id">
+        <select id="event_id" name="event_id">
+            {% for event in events %}
+            <!-- TODO (cmei4444) - update field names once other changes are pushed -->
+            <option value="{{ event.event_id['$oid'] }}">{{ event.event_id['$oid'] }} - {{ event.name }}</option>
+            {% endfor %}
+        </select>
     </div>
     <div>
         <label for="text">Text:</label>

@@ -18,6 +18,8 @@ limitations under the License.
 
 <head>
     <title>{% block title %}{% endblock title %} - Large Events</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="{{ app_config['GAUTH_CLIENT_ID'] }}">
     <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
@@ -32,50 +34,66 @@ limitations under the License.
 </head>
 
 <body>
+    <div class="topnav">
+        <div id="nav_left">
+            <a class="{% block home_tab_active %}{% endblock %} navtab navbtn" href='/v1/'>Home</a>
+            <a class="{% block events_tab_active %}{% endblock %} navtab navbtn" href='/v1/events'>Events</a>
+        </div>
+        <div id="user_nav">
+            {% block login_buttons %}
+            {% if not session['gauth_token'] %}
+            <div id="sign_in_button">
+                <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+                <script>
+                    function onSignIn(googleUser) {
+                        // Secure Google ID token to send to backend for verification.
+                        var id_token = googleUser.getAuthResponse().id_token;
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', "authenticate");
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.onload = function () {
+                            if (xhr.status === 201) {
+                                // backend authentication successful
+                                // reload to show the "Sign out" button
+                                window.location.reload();
+                            } else {
+                                // unsuccessful, sign out Google auth
+                                signOut();
+                            }
+                        };
+                        xhr.send('gauth_token=' + id_token);
+                    }
+                </script>
+            </div>
+            {% else %}
+            <div class='navtab'>Hi {{ session['name'] }}!</div>
+            <a href="#" onclick="signOut();" id="sign_out_button" class='navtab navbtn'>Sign out</a>
+            <script>
+                function signOut() {
+                    var auth2 = gapi.auth2.getAuthInstance();
+                    auth2.signOut().then(function () {
+                        window.location.replace("/v1/sign_out");
+                    });
+                }
+            </script>
+            {% endif %}
+            {% endblock login_buttons %}
+        </div>
+    </div>
+
+    <div style="padding: 0px 15px">
     <header>
         {% block header %}{% endblock header %}
     </header>
-    {% block login_buttons %}
-    {% if not session['gauth_token'] %}
-    <div id="sign_in_button">
-        <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-        <script>
-            function onSignIn(googleUser) {
-                // Secure Google ID token to send to backend for verification.
-                var id_token = googleUser.getAuthResponse().id_token;
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', "authenticate");
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onload = function () {
-                    if (xhr.status === 201) {
-                        // backend authentication successful
-                        // reload to show the "Sign out" button
-                        window.location.reload();
-                    } else {
-                        // unsuccessful, sign out Google auth
-                        signOut();
-                    }
-                };
-                xhr.send('gauth_token=' + id_token);
-            }
-        </script>
-    </div>
-    {% else %}
-    <div id="sign_out_button">
-        <a href="#" onclick="signOut();">Sign out</a>
-        <h4>Hi {{ session['name'] }}!</h4>
-    </div>
-    {% endif %}
-    <script>
-        function signOut() {
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
-                window.location.replace("/v1/sign_out");
-            });
-        }
-    </script>
-    {% endblock login_buttons %}
+    {% block auth_notice %}
+      {% if auth %}
+        <p>You have edit authorization!</p>
+      {% else %}
+        <p>You do not have edit authorization.</p>
+      {% endif %}
+    {% endblock auth_notice %}
     {% block content %}{% endblock content %}
+    </div>
 </body>
 
 </html>
