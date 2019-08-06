@@ -14,6 +14,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+{% block head_extra %}
+<script>
+    // function to allow for deleting a post by ID
+    function deletePost(post_id) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', "delete_post/" + post_id);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 204) {
+                // post successfully deleted, refresh UI
+                window.location.reload();
+            } else {
+                // deletion unsuccessful
+                console.log(`Error: unable to delete post with id ${post_id}`);
+            }
+        };
+        xhr.send();
+    }
+</script>
+{% endblock head_extra %}
 
 {% block home_tab_active %}active{% endblock %}
 
@@ -36,6 +56,10 @@ limitations under the License.
             {% for file in post.files %}
                 <img src="{{ file }}">
             {% endfor %}
+        {% endif %}
+
+        {% if post.author_id == session["user_id"] %}
+            <a href='#' onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
         {% endif %}
 
         <hr>

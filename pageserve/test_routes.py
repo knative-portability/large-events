@@ -51,7 +51,13 @@ INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing an time!'}
 
-EXAMPLE_POSTS = ['example', 'posts', 'list']
+EXAMPLE_POSTS = [
+    {'_id': {'$oid': '123abc'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 1.'},
+    {'_id': {'$oid': '456def'},
+     'event_id': 'valid_post_id',
+     'text': 'example post 2.'}]
 EXAMPLE_EVENTS = ['example', 'events', 'list']
 
 
@@ -286,5 +292,45 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.data.decode(), "Example error message")
 
 
-if __name__ == '__main__':
+class TestDeletePostRoute(unittest.TestCase):
+    """Tests delete posts at DELETE /v1/delete_post/<post_id>."""
+
+    def setUp(self):
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_valid_delete(self, mock_requests):
+        """Happy case, authenticated and authorized to delete post."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Example success message", status_code=204)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 204)
+
+    def test_invalid_not_authenticated(self):
+        """Not authenticated, i.e. get_user() returns None."""
+        post_id = "abc123"
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Error", response.data.decode())
+
+    @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
+    @requests_mock.Mocker()
+    def test_invalid_fails_on_posts_service(self, mock_requests):
+        """Posts doesn't like the requests, e.g. author_id doesn't match."""
+        post_id = "abc123"
+        mock_requests.delete(
+            app.app.config['POSTS_ENDPOINT'] + post_id,
+            text="Document not found.", status_code=404)
+        response = self.client.delete(
+            f'/v1/delete_post/{post_id}')
+        self.assertEqual(response.status_code, 404)
+
+
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()
