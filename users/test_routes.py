@@ -66,6 +66,79 @@ IDINFO_NON_AUTHORIZED_UPDATER = {
     "name": "Draco Malfo"}
 
 
+class TestAuthenticateUser(unittest.TestCase):
+    """Test authenticate user endpoint POST /v1/authenticate."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
+        app.app.config["TESTING"] = True  # propagate exceptions to test client
+        self.client = app.app.test_client()
+        # Patch google.oauth2.id_token
+        patcher = mock.patch('app.id_token')
+        self.verify_oauth2_token = patcher.start().verify_oauth2_token
+        self.addCleanup(patcher.stop)
+
+    def assert_equal_idinfos(self, response, fake):
+        """Asserts if the 2 idinfo objects are the same.
+
+        Based on the 'sub'/'user_id' and 'name' attributes.
+        Note: 'sub' in the fake corresponds to 'user_id' in the real
+        object from the response.
+        """
+        self.assertEqual(response['user_id'], fake['sub'])
+        self.assertEqual(response['name'], fake['name'])
+
+    def test_valid_token(self):
+        """Simulate extracting a valid token."""
+        self.verify_oauth2_token.return_value = IDINFO_VALID
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+        response_body = json.loads(result.data)
+        self.assert_equal_idinfos(response_body, IDINFO_VALID)
+        self.assertEqual(result.status_code, 201)
+
+    def test_missing_name(self):
+        """User object missing name, perhaps from lack of permissions."""
+        self.verify_oauth2_token.return_value = IDINFO_MISSING_NAME
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+        response_body = result.data.decode()
+        self.assertIn("Error", response_body)
+        self.assertEqual(result.status_code, 400)
+
+    def test_no_authentication_token(self):
+        """No token provided."""
+        result = self.client.post(
+            "/v1/authenticate")
+        response_body = result.data.decode()
+        self.assertIn("Error", response_body)
+        self.assertEqual(result.status_code, 400)
+
+    def test_bad_issuer(self):
+        """Bad token issuer(not Google Accounts)."""
+        self.verify_oauth2_token.return_value = IDINFO_INVALID_ISSUER
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+        response_body = result.data.decode()
+        self.assertIn("Error", response_body)
+        self.assertEqual(result.status_code, 400)
+
+    def test_authentication_failed(self):
+        """Authentication failed due to invalid token.
+
+        This might occur when the token has expired, it's Google OAuth
+        client ID does not match that of the server, or the token is
+        otherwise invalid.
+        """
+        self.verify_oauth2_token.side_effect = ValueError("Bad token.")
+        result = self.client.post(
+            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
+        response_body = result.data.decode()
+        self.assertIn("Error", response_body)
+        self.assertEqual(result.status_code, 400)
+
+
 class TestGetAuthorization(unittest.TestCase):
     """Test get authorization endpoint POST /v1/authorization."""
 
@@ -243,79 +316,6 @@ class TestUpdateAuthorization(unittest.TestCase):
         """Invalid request missing parameters."""
         result = self.client.post("/v1/authorization/update", data={})
         self.assertIn("Error", result.data.decode())
-        self.assertEqual(result.status_code, 400)
-
-
-class TestAuthenticateUser(unittest.TestCase):
-    """Test authenticate user endpoint POST /v1/authenticate."""
-
-    def setUp(self):
-        """Set up test client and seed mock DB for testing."""
-        app.app.config["COLLECTION"] = mongomock.MongoClient().db.collection
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
-        self.client = app.app.test_client()
-        # Patch google.oauth2.id_token
-        patcher = mock.patch('app.id_token')
-        self.verify_oauth2_token = patcher.start().verify_oauth2_token
-        self.addCleanup(patcher.stop)
-
-    def assert_equal_idinfos(self, response, fake):
-        """Asserts if the 2 idinfo objects are the same.
-
-        Based on the 'sub'/'user_id' and 'name' attributes.
-        Note: 'sub' in the fake corresponds to 'user_id' in the real
-        object from the response.
-        """
-        self.assertEqual(response['user_id'], fake['sub'])
-        self.assertEqual(response['name'], fake['name'])
-
-    def test_valid_token(self):
-        """Simulate extracting a valid token."""
-        self.verify_oauth2_token.return_value = IDINFO_VALID
-        result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
-        response_body = json.loads(result.data)
-        self.assert_equal_idinfos(response_body, IDINFO_VALID)
-        self.assertEqual(result.status_code, 201)
-
-    def test_missing_name(self):
-        """User object missing name, perhaps from lack of permissions."""
-        self.verify_oauth2_token.return_value = IDINFO_MISSING_NAME
-        result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
-        response_body = result.data.decode()
-        self.assertIn("Error", response_body)
-        self.assertEqual(result.status_code, 400)
-
-    def test_no_authentication_token(self):
-        """No token provided."""
-        result = self.client.post(
-            "/v1/authenticate")
-        response_body = result.data.decode()
-        self.assertIn("Error", response_body)
-        self.assertEqual(result.status_code, 400)
-
-    def test_bad_issuer(self):
-        """Bad token issuer(not Google Accounts)."""
-        self.verify_oauth2_token.return_value = IDINFO_INVALID_ISSUER
-        result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
-        response_body = result.data.decode()
-        self.assertIn("Error", response_body)
-        self.assertEqual(result.status_code, 400)
-
-    def test_authentication_failed(self):
-        """Authentication failed due to invalid token.
-
-        This might occur when the token has expired, it's Google OAuth
-        client ID does not match that of the server, or the token is
-        otherwise invalid.
-        """
-        self.verify_oauth2_token.side_effect = ValueError("Bad token.")
-        result = self.client.post(
-            "/v1/authenticate", data=DUMMY_GAUTH_REQUEST_DATA)
-        response_body = result.data.decode()
-        self.assertIn("Error", response_body)
         self.assertEqual(result.status_code, 400)
 
 
