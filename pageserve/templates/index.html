@@ -25,11 +25,12 @@ limitations under the License.
 
 <h2>Past Posts</h2>
 {% for post in posts %}
+
   <div class="content_box">
     <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-
+    <!-- TODO(cmei4444) - link to event info -->
     <p>For event {{ post.event_id }}</p>
-
+    
     {% if post.text %}
     <p>{{post.text}}</p>
     {% endif %}
