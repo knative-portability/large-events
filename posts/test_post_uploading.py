@@ -22,43 +22,43 @@ import collections
 import mongomock
 import app
 
-MOCK_FILE_URL = "the url of an uploaded file"
+MOCK_FILE_URL = 'the url of an uploaded file'
 File = collections.namedtuple('File', 'filename')
-MOCK_FILE = File(filename="the name of a file")
+MOCK_FILE = File(filename='the name of a file')
 
 VALID_POST_FULL = {
-    "event_id": "abc123",
-    "author_id": "jrr_tolkien",
-    "text": "This is a very valid post with text and files.",
-    "files": [
+    'event_id': 'abc123',
+    'author_id': 'jrr_tolkien',
+    'text': 'This is a very valid post with text and files.',
+    'files': [
         MOCK_FILE,
         MOCK_FILE
     ]}
 VALID_POST_TEXT_NO_FILES = {
-    "event_id": "abc123",
-    "author_id": "ray_bradbury",
-    "text": "This post has no files but is still valid.",
-    "files": []}
+    'event_id': 'abc123',
+    'author_id': 'ray_bradbury',
+    'text': 'This post has no files but is still valid.',
+    'files': []}
 VALID_POST_FILES_NO_TEXT = {
-    "event_id": "abc123",
-    "author_id": "No text is alright if I have files.",
-    "text": "",
-    "files": [
+    'event_id': 'abc123',
+    'author_id': 'No text is alright if I have files.',
+    'text': '',
+    'files': [
         MOCK_FILE
     ]}
 INVALID_POST_NO_TEXT_NOR_FILES = {
-    "event_id": "abc123",
-    "author_id": "I'm missing text and files and am invalid.",
-    "text": "",
-    "files": []}
+    'event_id': 'abc123',
+    'author_id': 'I am missing text and files and am invalid.',
+    'text': '',
+    'files': []}
 INVALID_POST_NOT_ENOUGH_ATTRS = {
-    "where_did_all_the_attributes_go?": "I don't know"}
+    'where_did_all_the_attributes_go?': 'I do not know'}
 INVALD_POST_TOO_MANY_ATTRS = {
-    "event_id": "abc123",
-    "author_id": "grr_martin",
-    "text": "I have a valid description but too many fields.",
-    "files": [],
-    "woah_where_did_I_come_from?": "malicious data"}
+    'event_id': 'abc123',
+    'author_id': 'grr_martin',
+    'text': 'I have a valid description but too many fields.',
+    'files': [],
+    'woah_where_did_I_come_from?': 'malicious data'}
 
 
 class TestPostUploading(unittest.TestCase):
@@ -70,17 +70,17 @@ class TestPostUploading(unittest.TestCase):
         Only looks at required post attributes
         (event_id, author_id, text, files).
         """
-        self.assertEqual(first["event_id"], second["event_id"])
-        self.assertEqual(first["author_id"], second["author_id"])
-        self.assertEqual(first["text"], second["text"])
-        self.assertEqual(first["files"], second["files"])
+        self.assertEqual(first['event_id'], second['event_id'])
+        self.assertEqual(first['author_id'], second['author_id'])
+        self.assertEqual(first['text'], second['text'])
+        self.assertEqual(first['files'], second['files'])
 
     def setUp(self):
         """Set up mocks for testing."""
         # mock db
         self.mock_collection = mongomock.MongoClient().db.collection
         # mock Google Cloud Storage bucket for file uploading
-        patcher = mock.patch("app.CLOUD_STORAGE_BUCKET")
+        patcher = mock.patch('app.CLOUD_STORAGE_BUCKET')
         self.mock_bucket = patcher.start()
         self.addCleanup(patcher.stop)
         self.mock_bucket.blob().public_url = MOCK_FILE_URL
@@ -145,9 +145,9 @@ class TestGenerateTimestamp(unittest.TestCase):
         test_time = datetime.datetime(1999, 12, 15, 3, 23, 3, 318274)
         mock_datetime = mock.MagicMock()
         mock_datetime.datetime.utcnow.return_value = test_time
-        with mock.patch("app.datetime", mock_datetime):
+        with mock.patch('app.datetime', mock_datetime):
             self.assertEqual(app.generate_timestamp(),
-                             test_time.isoformat(sep=" ", timespec="seconds"))
+                             test_time.isoformat(sep=' ', timespec='seconds'))
 
 
 if __name__ == '__main__':

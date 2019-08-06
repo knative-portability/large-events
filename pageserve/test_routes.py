@@ -21,19 +21,20 @@ import ast
 import requests_mock
 from flask_testing import TestCase
 import flask
+from flask import url_for
 import app
 
 VALID_SESSION = {
-    "user_id": "42",
-    "name": "Ford Prefect",
-    "gauth_token": "I am a pretend token"}
-ERROR_BAD_TOKEN_TEXT = "Error: bad gauth_token."
+    'user_id': '42',
+    'name': 'Ford Prefect',
+    'gauth_token': 'I am a pretend token'}
+ERROR_BAD_TOKEN_TEXT = 'Error: bad gauth_token.'
 ERROR_BAD_TOKEN_STATUS = 400
 VALID_USER_AUTH_STATUS = 201
 
 EXAMPLE_USER_OBJECT = {
-    "user_id": "app_user",
-    "name": "app_user"}
+    'user_id': 'app_user',
+    'name': 'app_user'}
 
 VALID_POST_FORM = {
     'event_id': 'valid_post_id',
@@ -67,27 +68,27 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
     def assert_sessions_are_equal(self, first, second):
         """Asserts the two sessions are the same.
 
-        Only compares the "user_id" and "name" fields, but ignores the
-        "gauth_token" field which is not returned from the users service
+        Only compares the 'user_id' and 'name' fields, but ignores the
+        'gauth_token' field which is not returned from the users service
         but is stored in the session by app.authenticate_with_users_service.
         """
-        self.assertEqual(first["user_id"], second["user_id"])
-        self.assertEqual(first["name"], second["name"])
+        self.assertEqual(first['user_id'], second['user_id'])
+        self.assertEqual(first['name'], second['name'])
 
     def setUp(self):
         """Set up test client."""
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
-        app.app.secret_key = "Dummy key used for testing the flask session"
+        app.app.config['TESTING'] = True  # propagate exceptions to test client
+        app.app.secret_key = 'Dummy key used for testing the flask session'
 
     @requests_mock.Mocker()
     def test_valid_authentication(self, requests_mocker):
         """GAuth token successfully authenticates."""
         with app.app.test_request_context(), app.app.test_client() as client:
-            requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authenticate",
+            requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authenticate',
                                  json=VALID_SESSION,
                                  status_code=VALID_USER_AUTH_STATUS)
-            result = client.post("/v1/authenticate", data={
-                "gauth_token": "I don't matter because requests is mocked"})
+            result = client.post('/v1/authenticate', data={
+                'gauth_token': 'I do not matter because requests is mocked'})
             self.assertEqual(result.status_code, VALID_USER_AUTH_STATUS)
             result_dict = ast.literal_eval(result.data.decode())
             self.assert_sessions_are_equal(
@@ -101,23 +102,23 @@ class TestAuthenticateAndGetUser(unittest.TestCase):
     def test_failed_authentication(self, requests_mocker):
         """GAuth token fails authentication."""
         with app.app.test_request_context(), app.app.test_client() as client:
-            requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authenticate",
+            requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authenticate',
                                  text=ERROR_BAD_TOKEN_TEXT,
                                  status_code=ERROR_BAD_TOKEN_STATUS)
-            result = client.post("/v1/authenticate", data={
-                "gauth_token": "I don't matter because requests is mocked"})
+            result = client.post('/v1/authenticate', data={
+                'gauth_token': 'I do not matter because requests is mocked'})
             self.assertEqual(result.status_code, ERROR_BAD_TOKEN_STATUS)
             self.assertEqual(result.data.decode(), ERROR_BAD_TOKEN_TEXT)
             # user not stored in session
             self.assertEqual(len(flask.session), 0)
-            self.assertNotIn("user_id", flask.session)
+            self.assertNotIn('user_id', flask.session)
 
     def test_no_token_given(self):
         """Failed to provide a GAuth token to authenticate."""
         with app.app.test_request_context(), app.app.test_client() as client:
-            result = client.post("/v1/authenticate")
+            result = client.post('/v1/authenticate')
             self.assertEqual(result.status_code, 400)
-            self.assertIn("Error", result.data.decode())
+            self.assertIn('Error', result.data.decode())
             # nothing stored in session
             self.assertEqual(len(flask.session), 0)
 
@@ -127,41 +128,45 @@ class TestSignOut(unittest.TestCase):
 
     def setUp(self):
         """Set up test client."""
-        app.app.config["TESTING"] = True  # propagate exceptions to test client
-        app.app.secret_key = "Dummy key used for testing the flask session"
+        app.app.config['TESTING'] = True  # propagate exceptions to test client
+        app.app.secret_key = 'Dummy key used for testing the flask session'
 
     def test_was_logged_in(self):
         """Sign out a user that was logged in (usual behaviour)."""
         with app.app.test_request_context(), app.app.test_client() as client:
-            flask.session["user_id"] = VALID_SESSION["user_id"]
-            flask.session["name"] = VALID_SESSION["name"]
-            flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+            flask.session['user_id'] = VALID_SESSION['user_id']
+            flask.session['name'] = VALID_SESSION['name']
+            flask.session['gauth_token'] = VALID_SESSION['gauth_token']
             # user in session before
-            self.assertIn("user_id", flask.session)
+            self.assertIn('user_id', flask.session)
             self.assertEqual(len(flask.session), len(VALID_SESSION))
             result = client.get(
-                "/v1/sign_out")
+                '/v1/sign_out')
             # empty session after
-            self.assertNotIn("user_id", flask.session)
+            self.assertNotIn('user_id', flask.session)
             self.assertEqual(len(flask.session), 0)
-            # correct redirect response
-            self.assertEqual(result.status_code, 302)  # redirect
-            self.assertIn("redirect", result.data.decode())
+            # check for redirect to index
+            self.assertEqual(result.status_code, 302)
+            with app.app.test_request_context():
+                self.assertTrue(
+                    result.headers['location'].endswith(url_for('index')))
 
     def test_was_not_logged_in(self):
         """Try to sign out a user that was not logged in."""
         with app.app.test_request_context(), app.app.test_client() as client:
                 # empty session before
-            self.assertNotIn("user_id", flask.session)
+            self.assertNotIn('user_id', flask.session)
             self.assertEqual(len(flask.session), 0)
             result = client.get(
-                "/v1/sign_out")
+                '/v1/sign_out')
             # empty session after
-            self.assertNotIn("user_id", flask.session)
+            self.assertNotIn('user_id', flask.session)
             self.assertEqual(len(flask.session), 0)
-            # correct redirect response
-            self.assertEqual(result.status_code, 302)  # redirect
-            self.assertIn("redirect", result.data.decode())
+            # check for redirect to index
+            self.assertEqual(result.status_code, 302)
+            with app.app.test_request_context():
+                self.assertTrue(
+                    result.headers['location'].endswith(url_for('index')))
 
 
 class TestTemplateRoutes(TestCase):
@@ -226,7 +231,7 @@ class TestAddPostRoute(unittest.TestCase):
     """Tests adding posts at POST /v1/add_post."""
 
     def setUp(self):
-        app.app.config["TESTING"] = True
+        app.app.config['TESTING'] = True
         self.client = app.app.test_client()
         self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'add'
 
@@ -235,33 +240,36 @@ class TestAddPostRoute(unittest.TestCase):
     def test_add_valid_post(self, mock_requests):
         """Tests adding a valid post."""
         mock_requests.post(app.app.config['POSTS_ENDPOINT'] + 'add',
-                           text="Example success message",
+                           text='Example success message',
                            status_code=201)
 
         response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        # check for redirect to index
+        self.assertEqual(response.status_code, 302)
+        with app.app.test_request_context():
+            self.assertTrue(
+                response.headers['location'].endswith(url_for('index')))
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_invalid_post(self, mock_requests):
         """Tests adding an invalid post."""
         mock_requests.post(app.app.config['POSTS_ENDPOINT'] + 'add',
-                           text="Example error message",
+                           text='Example error message',
                            status_code=400)
 
         response = self.client.post('/v1/add_post', data=INVALID_POST_FORM)
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data.decode(), "Example error message")
+        self.assertEqual(response.data.decode(), 'Example error message')
 
 
 class TestAddEventRoute(unittest.TestCase):
     """Tests adding events at POST /v1/add_event."""
 
     def setUp(self):
-        app.app.config["TESTING"] = True
+        app.app.config['TESTING'] = True
         self.client = app.app.test_client()
         self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'add'
 
@@ -270,63 +278,66 @@ class TestAddEventRoute(unittest.TestCase):
     def test_add_valid_event(self, mock_requests):
         """Tests adding a valid event."""
         mock_requests.post(app.app.config['EVENTS_ENDPOINT'] + 'add',
-                           text="Example success message",
+                           text='Example success message',
                            status_code=201)
 
         response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        # check for redirect to index
+        self.assertEqual(response.status_code, 302)
+        with app.app.test_request_context():
+            self.assertTrue(
+                response.headers['location'].endswith(url_for('index')))
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_add_invalid_event(self, mock_requests):
         """Tests adding an invalid event."""
         mock_requests.post(app.app.config['EVENTS_ENDPOINT'] + 'add',
-                           text="Example error message",
+                           text='Example error message',
                            status_code=400)
 
         response = self.client.post('/v1/add_event', data=INVALID_EVENT_FORM)
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data.decode(), "Example error message")
+        self.assertEqual(response.data.decode(), 'Example error message')
 
 
 class TestDeletePostRoute(unittest.TestCase):
     """Tests delete posts at DELETE /v1/delete_post/<post_id>."""
 
     def setUp(self):
-        app.app.config["TESTING"] = True
+        app.app.config['TESTING'] = True
         self.client = app.app.test_client()
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_valid_delete(self, mock_requests):
         """Happy case, authenticated and authorized to delete post."""
-        post_id = "abc123"
+        post_id = 'abc123'
         mock_requests.delete(
             app.app.config['POSTS_ENDPOINT'] + post_id,
-            text="Example success message", status_code=204)
+            text='Example success message', status_code=204)
         response = self.client.delete(
             f'/v1/delete_post/{post_id}')
         self.assertEqual(response.status_code, 204)
 
     def test_invalid_not_authenticated(self):
         """Not authenticated, i.e. get_user() returns None."""
-        post_id = "abc123"
+        post_id = 'abc123'
         response = self.client.delete(
             f'/v1/delete_post/{post_id}')
         self.assertEqual(response.status_code, 401)
-        self.assertIn("Error", response.data.decode())
+        self.assertIn('Error', response.data.decode())
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
     def test_invalid_fails_on_posts_service(self, mock_requests):
         """Posts doesn't like the requests, e.g. author_id doesn't match."""
-        post_id = "abc123"
+        post_id = 'abc123'
         mock_requests.delete(
             app.app.config['POSTS_ENDPOINT'] + post_id,
-            text="Document not found.", status_code=404)
+            text='Document not found.', status_code=404)
         response = self.client.delete(
             f'/v1/delete_post/{post_id}')
         self.assertEqual(response.status_code, 404)
