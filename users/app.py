@@ -35,6 +35,34 @@ VALID_GAUTH_TOKEN_ISSUERS = [
     'accounts.google.com', 'https://accounts.google.com']
 
 
+@app.route('/v1/authenticate', methods=['POST'])
+def authenticate_and_get_user():
+    """Authenticate user, upsert in the db, and return new user object.
+
+    Request data:
+        'gauth_token': Google ID token to authenticate.
+
+    Response:
+        201: user object as it is in the db if authentication
+            was successful.
+        400: error message if authentication was not successful.
+    """
+    gauth_token = request.form.get('gauth_token')
+    if gauth_token is None:
+        return "Error: You must authenticate through Google.", 400
+    try:
+        idinfo = get_user_from_gauth_token(gauth_token)
+        user_object = {
+            "user_id": idinfo["sub"],
+            "name": idinfo["name"]}
+        upsert_user_in_db(user_object, app.config["COLLECTION"])
+        response = make_response(jsonify(user_object), 201)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except (AttributeError, ValueError, KeyError) as error:
+        return f"Error: {error}", 400
+
+
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
     """Finds whether the given user is authorized for edit access."""
@@ -64,32 +92,13 @@ def update_authorization():
         return f"Error: {error}", 400
 
 
-@app.route('/v1/authenticate', methods=['POST'])
-def authenticate_and_get_user():
-    """Authenticate user, upsert in the db, and return new user object.
-
-    Request data:
-        'gauth_token': Google ID token to authenticate.
-
-    Response:
-        201: user object as it is in the db if authentication
-            was successful.
-        400: error message if authentication was not successful.
-    """
-    gauth_token = request.form.get('gauth_token')
-    if gauth_token is None:
-        return "Error: You must authenticate through Google.", 400
-    try:
-        idinfo = get_user_from_gauth_token(gauth_token)
-        user_object = {
-            "user_id": idinfo["sub"],
-            "name": idinfo["name"]}
-        upsert_user_in_db(user_object, app.config["COLLECTION"])
-        response = make_response(jsonify(user_object), 201)
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        return response
-    except (AttributeError, ValueError, KeyError) as error:
-        return f"Error: {error}", 400
+def find_authorization_in_db(user_id, users_collection):
+    """Queries the db to find authorization of the given user."""
+    first_user = users_collection.find_one({"user_id": user_id})
+    if first_user is None:  # user not found
+        return False
+    authorized = first_user.get("is_organizer")
+    return bool(authorized)  # handle 'None' case
 
 
 def get_user_from_gauth_token(gauth_token):
@@ -120,32 +129,6 @@ def get_user_from_gauth_token(gauth_token):
     return idinfo
 
 
-def upsert_user_in_db(user_object, users_collection):
-    """Updates or inserts the user object into users_collection.
-
-    Args:
-        user_object (dict): must contain a user_id and name and must not
-            contain other attributes.
-        users_collection (pymongo.collection): the MongoDB collection to use.
-
-    Returns:
-        ObjectID: The ID of the upserted object from the db. This can be used
-            to find the object with collection.find_one(object_id).
-
-    Raises:
-        AttributeError: if user_object is malformatted.
-    """
-    required_attributes = {"user_id", "name"}
-    if user_object.keys() != required_attributes:
-        raise AttributeError("malformatted user object")
-    # upsert user in db
-    return users_collection.update_one(
-        {"user_id": user_object["user_id"]},
-        {"$set": user_object,
-         "$setOnInsert": {"is_organizer": False}},
-        upsert=True).upserted_id
-
-
 def update_user_authorization_in_db(
         user_id: str, is_organizer: bool, users_collection):
     """Updates the authorization of the given user in the database.
@@ -173,13 +156,30 @@ def update_user_authorization_in_db(
     return result.upserted_id
 
 
-def find_authorization_in_db(user_id, users_collection):
-    """Queries the db to find authorization of the given user."""
-    first_user = users_collection.find_one({"user_id": user_id})
-    if first_user is None:  # user not found
-        return False
-    authorized = first_user.get("is_organizer")
-    return bool(authorized)  # handle 'None' case
+def upsert_user_in_db(user_object, users_collection):
+    """Updates or inserts the user object into users_collection.
+
+    Args:
+        user_object (dict): must contain a user_id and name and must not
+            contain other attributes.
+        users_collection (pymongo.collection): the MongoDB collection to use.
+
+    Returns:
+        ObjectID: The ID of the upserted object from the db. This can be used
+            to find the object with collection.find_one(object_id).
+
+    Raises:
+        AttributeError: if user_object is malformatted.
+    """
+    required_attributes = {"user_id", "name"}
+    if user_object.keys() != required_attributes:
+        raise AttributeError("malformatted user object")
+    # upsert user in db
+    return users_collection.update_one(
+        {"user_id": user_object["user_id"]},
+        {"$set": user_object,
+         "$setOnInsert": {"is_organizer": False}},
+        upsert=True).upserted_id
 
 
 def connect_to_mongodb():  # pragma: no cover
