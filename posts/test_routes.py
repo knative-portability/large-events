@@ -43,7 +43,7 @@ VALID_REQUEST_FILES_NO_TEXT = {
 INVALID_REQUEST_NO_TEXT_NOR_FILES = {
     'event_id': 'abc123',
     'author_id': 'I am missing text and files and am invalid.',
-    'text': '""'}
+    'text': ''}
 INVALID_REQUEST_NOT_ENOUGH_ATTRS = {
     'where_did_all_the_attributes_go?': 'I do not know'}
 
@@ -66,7 +66,7 @@ VALID_DB_POST_TEXT_NO_FILES = {
 VALID_DB_POST_FILES_NO_TEXT = {
     'event_id': 'bar',
     'author_id': 'No text is alright if I have files.',
-    'text': "",
+    'text': '',
     'files': [
         MOCK_DB_FILE
     ]}
@@ -292,8 +292,8 @@ class TestDeletePostByPostIDRoute(unittest.TestCase):
 
     def test_not_existing_author_id(self):
         """Wrong author_id, don't delete."""
-        post_id = self.mock_posts[0]['_id']              # valid
-        author_id = 'I don't think, therefore I'm not.'  # invalid
+        post_id = self.mock_posts[0]['_id']                # valid
+        author_id = 'I do not think, therefore I am not.'  # invalid
         result = self.client.delete(
             f'/v1/{str(post_id)}', data={'author_id': author_id})
         self.assertEqual(result.status_code, 404)
