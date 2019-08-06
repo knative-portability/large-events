@@ -26,7 +26,7 @@ limitations under the License.
     <script>
         // initialize gapi.auth2 to make sign out button work
         function onLoad() {
-            gapi.load('auth2', function () {
+            gapi.load("auth2", function () {
                 gapi.auth2.init();
             });
         }
@@ -37,12 +37,12 @@ limitations under the License.
 <body>
     <div class="topnav">
         <div id="nav_left">
-            <a class="{% block home_tab_active %}{% endblock %} navtab navbtn" href='/v1/'>Home</a>
-            <a class="{% block events_tab_active %}{% endblock %} navtab navbtn" href='/v1/events'>Events</a>
+            <a class="{% block home_tab_active %}{% endblock %} navtab navbtn" href="/v1/">Home</a>
+            <a class="{% block events_tab_active %}{% endblock %} navtab navbtn" href="/v1/events">Events</a>
         </div>
         <div id="user_nav">
             {% block login_buttons %}
-            {% if not session['gauth_token'] %}
+            {% if not session["gauth_token"] %}
             <div id="sign_in_button">
                 <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
                 <script>
@@ -50,8 +50,8 @@ limitations under the License.
                         // Secure Google ID token to send to backend for verification.
                         var id_token = googleUser.getAuthResponse().id_token;
                         var xhr = new XMLHttpRequest();
-                        xhr.open('POST', "authenticate");
-                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.open("POST", "authenticate");
+                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                         xhr.onload = function () {
                             if (xhr.status === 201) {
                                 // backend authentication successful
@@ -62,13 +62,13 @@ limitations under the License.
                                 signOut();
                             }
                         };
-                        xhr.send('gauth_token=' + id_token);
+                        xhr.send("gauth_token=" + id_token);
                     }
                 </script>
             </div>
             {% else %}
-            <div class='navtab'>Hi {{ session['name'] }}!</div>
-            <a href="#" onclick="signOut();" id="sign_out_button" class='navtab navbtn'>Sign out</a>
+            <div class="navtab">Hi {{ session["name"] }}!</div>
+            <a href="#" onclick="signOut();" id="sign_out_button" class="navtab navbtn">Sign out</a>
             <script>
                 function signOut() {
                     var auth2 = gapi.auth2.getAuthInstance();

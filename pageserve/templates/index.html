@@ -19,8 +19,8 @@ limitations under the License.
     // function to allow for deleting a post by ID
     function deletePost(post_id) {
         var xhr = new XMLHttpRequest();
-        xhr.open('DELETE', "delete_post/" + post_id);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.open("DELETE", "delete_post/" + post_id);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onload = function () {
             if (xhr.status === 204) {
                 // post successfully deleted, refresh UI
@@ -59,7 +59,7 @@ limitations under the License.
         {% endif %}
 
         {% if post.author_id == session["user_id"] %}
-            <a href='#' onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
+            <a href="#" onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
         {% endif %}
 
         <hr>
@@ -73,7 +73,7 @@ limitations under the License.
             <select id="event_id" name="event_id">
                 {% for event in events %}
                     <!-- TODO (cmei4444) - update field names once other changes are pushed -->
-                    <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
+                    <option value="{{ event._id['$oid'] }}">{{ event._id["$oid"] }} - {{ event.name }}</option>
                 {% endfor %}
             </select>
         </div>
