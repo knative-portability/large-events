@@ -29,5 +29,8 @@ limitations under the License.
         <p>Created by {{event.author}} at {{event.created_at}}</p>
     </div>
 {% endfor %}
+{% if not events %}
+    <p>No events were found.</p>
+{% endif %}
 
 {% endblock content%}
