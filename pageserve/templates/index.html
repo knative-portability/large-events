@@ -33,9 +33,9 @@ limitations under the License.
 <p>{{post.text}}</p>
 {% endif %}
 {% if post.files %}
-  {% for file in post.files %}
-  <img src="{{ file }}">
-  {% endfor %}
+{% for file in post.files %}
+<img src="{{ file }}">
+{% endfor %}
 {% endif %}
 
 <hr>
@@ -49,13 +49,13 @@ limitations under the License.
         <select id="event_id" name="event_id">
             {% for event in events %}
             <!-- TODO (cmei4444) - update field names once other changes are pushed -->
-            <option value="{{ event.event_id['$oid'] }}">{{ event.event_id['$oid'] }} - {{ event.name }}</option>
+            <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
             {% endfor %}
         </select>
     </div>
     <div>
         <label for="text">Text:</label>
-        <textarea type="text" rows = "5" cols = "60" id="text" name="text">
+        <textarea type="text" rows="5" cols="60" id="text" name="text">
           Enter your post here.
         </textarea>
     </div>
