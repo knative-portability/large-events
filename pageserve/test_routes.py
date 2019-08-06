@@ -307,9 +307,21 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Error", response.data.decode())
 
-    @patch('app.get_user', MagicMock(return_value=NOT_AUTHORIZED_USER_OBJECT))
+    @patch('app.get_user', MagicMock(return_value=AUTHORIZED_USER_OBJECT))
     @requests_mock.Mocker()
-    def test_not_authorized(self, mock_requests):
+    def test_error_at_events_service(self, mock_requests):
+        """Events service doesn't like what we give it."""
+        mock_requests.post(app.app.config['EVENTS_ENDPOINT'] + 'add',
+                           text='Error: Example error message',
+                           status_code=400)
+
+        response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Error", response.data.decode())
+
+    @patch('app.get_user', MagicMock(return_value=NOT_AUTHORIZED_USER_OBJECT))
+    def test_not_authorized(self):
         """Tests trying to add an event without authorization."""
         response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
 
