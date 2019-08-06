@@ -18,54 +18,54 @@ limitations under the License.
 {% block home_tab_active %}active{% endblock %}
 
 {% block header %}
-<h1>{% block title %}Event Main Page{% endblock title %}</h1>
+    <h1>{% block title %}Event Main Page{% endblock title %}</h1>
 {% endblock header %}
 
 {% block content %}
 
-<h2>Past posts</h2>
-{% for post in posts %}
-<p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-<!-- TODO(cmei4444) - link to event info -->
-<p>For event with ID {{ post.event_id }}</p>
+    <h2>Past posts</h2>
+    {% for post in posts %}
+        <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
+        <!-- TODO(cmei4444) - link to event info -->
+        <p>For event with ID {{ post.event_id }}</p>
 
-{% if post.text %}
-<p>{{post.text}}</p>
-{% endif %}
-{% if post.files %}
-{% for file in post.files %}
-<img src="{{ file }}">
-{% endfor %}
-{% endif %}
-
-<hr>
-
-{% endfor %}
-
-<h2>Create New Post</h2>
-<form action="/v1/add_post" method="post" enctype="multipart/form-data">
-    <div>
-        <label for="event_id">Event ID:</label>
-        <select id="event_id" name="event_id">
-            {% for event in events %}
-            <!-- TODO (cmei4444) - update field names once other changes are pushed -->
-            <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
+        {% if post.text %}
+            <p>{{post.text}}</p>
+        {% endif %}
+        {% if post.files %}
+            {% for file in post.files %}
+                <img src="{{ file }}">
             {% endfor %}
-        </select>
-    </div>
-    <div>
-        <label for="text">Text:</label>
-        <textarea type="text" rows="5" cols="60" id="text" name="text">
-          Enter your post here.
-        </textarea>
-    </div>
-    <div>
-        <label for="images">Images:</label>
-        <input type="file" name="images" multiple>
-    </div>
-    <div class="button">
-        <button type="submit">Post</button>
-    </div>
-</form>
+        {% endif %}
+
+        <hr>
+
+    {% endfor %}
+
+    <h2>Create New Post</h2>
+    <form action="/v1/add_post" method="post" enctype="multipart/form-data">
+        <div>
+            <label for="event_id">Event ID:</label>
+            <select id="event_id" name="event_id">
+                {% for event in events %}
+                    <!-- TODO (cmei4444) - update field names once other changes are pushed -->
+                    <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="text">Text:</label>
+            <textarea type="text" rows="5" cols="60" id="text" name="text">
+            Enter your post here.
+            </textarea>
+        </div>
+        <div>
+            <label for="images">Images:</label>
+            <input type="file" name="images" multiple>
+        </div>
+        <div class="button">
+            <button type="submit">Post</button>
+        </div>
+    </form>
 
 {% endblock content%}
