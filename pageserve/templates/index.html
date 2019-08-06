@@ -49,7 +49,7 @@ limitations under the License.
       <div class="content_box">
         <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
         <!-- TODO(cmei4444) - link to event info -->
-        <p>For event {{ post.event_id }}</p>
+        <p>For event with ID {{ post.event_id }}</p>
 
         {% if post.text %}
         <p>{{post.text}}</p>
@@ -58,6 +58,10 @@ limitations under the License.
           {% for file in post.files %}
           <img src="{{ file }}">
           {% endfor %}
+        {% endif %}
+
+        {% if post.author_id == session["user_id"] %}
+            <a href='#' onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
         {% endif %}
       </div>
     {% endfor %}
