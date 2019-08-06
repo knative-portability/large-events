@@ -29,7 +29,7 @@ from google.auth.transport import requests
 
 app = Flask(__name__)  # pylint: disable=invalid-name
 
-app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
+app.config['GAUTH_CLIENT_ID'] = os.environ.get('GAUTH_CLIENT_ID')
 
 VALID_GAUTH_TOKEN_ISSUERS = [
     'accounts.google.com', 'https://accounts.google.com']
@@ -49,18 +49,18 @@ def authenticate_and_get_user():
     """
     gauth_token = request.form.get('gauth_token')
     if gauth_token is None:
-        return "Error: You must authenticate through Google.", 400
+        return 'Error: You must authenticate through Google.', 400
     try:
         idinfo = get_user_from_gauth_token(gauth_token)
         user_object = {
-            "user_id": idinfo["sub"],
-            "name": idinfo["name"]}
-        upsert_user_in_db(user_object, app.config["COLLECTION"])
+            'user_id': idinfo['sub'],
+            'name': idinfo['name']}
+        upsert_user_in_db(user_object, app.config['COLLECTION'])
         response = make_response(jsonify(user_object), 201)
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
     except (AttributeError, ValueError, KeyError) as error:
-        return f"Error: {error}", 400
+        return f'Error: {error}', 400
 
 
 @app.route('/v1/authorization', methods=['POST'])
@@ -68,8 +68,8 @@ def get_authorization():
     """Finds whether the given user is authorized for edit access."""
     user_id = request.form.get('user_id')
     if user_id is None:
-        return "Error: You must supply a 'user_id' POST parameter!", 400
-    authorized = find_authorization_in_db(user_id, app.config["COLLECTION"])
+        return 'Error: You must supply a "user_id" POST parameter!', 400
+    authorized = find_authorization_in_db(user_id, app.config['COLLECTION'])
     return jsonify(edit_access=authorized)
 
 
@@ -79,25 +79,25 @@ def update_authorization():
     try:
         gauth_token = request.form['gauth_token']
         target_user_id = request.form['target_user_id']
-        is_organizer = request.form['is_organizer'] == "True"  # str to bool
+        is_organizer = request.form['is_organizer'] == 'True'  # str to bool
         idinfo = get_user_from_gauth_token(gauth_token)
         authorized = find_authorization_in_db(
-            idinfo["sub"], app.config["COLLECTION"])
+            idinfo['sub'], app.config['COLLECTION'])
         if not authorized:
-            return "Not authorized to make this request.", 403
+            return 'Not authorized to make this request.', 403
         update_user_authorization_in_db(
-            target_user_id, is_organizer, app.config["COLLECTION"])
+            target_user_id, is_organizer, app.config['COLLECTION'])
         return jsonify(edit_access=is_organizer)
     except (AttributeError, ValueError, KeyError, BadRequestKeyError) as error:
-        return f"Error: {error}", 400
+        return f'Error: {error}', 400
 
 
 def find_authorization_in_db(user_id, users_collection):
     """Queries the db to find authorization of the given user."""
-    first_user = users_collection.find_one({"user_id": user_id})
+    first_user = users_collection.find_one({'user_id': user_id})
     if first_user is None:  # user not found
         return False
-    authorized = first_user.get("is_organizer")
+    authorized = first_user.get('is_organizer')
     return bool(authorized)  # handle 'None' case
 
 
@@ -119,7 +119,7 @@ def get_user_from_gauth_token(gauth_token):
     """
     # Authenticate token and match to client ID
     idinfo = id_token.verify_oauth2_token(
-        gauth_token, requests.Request(), app.config["GAUTH_CLIENT_ID"])
+        gauth_token, requests.Request(), app.config['GAUTH_CLIENT_ID'])
 
     issuer = idinfo['iss']
     if issuer not in VALID_GAUTH_TOKEN_ISSUERS:
@@ -146,13 +146,13 @@ def update_user_authorization_in_db(
         TypeError: `is_organizer` is not a bool.
     """
     if not isinstance(is_organizer, bool):
-        raise TypeError("Trying to set authorization to a non-bool type.")
+        raise TypeError('Trying to set authorization to a non-bool type.')
     result = users_collection.update_one(
-        {"user_id": user_id},
-        {"$set": {"is_organizer": bool(is_organizer)}},
+        {'user_id': user_id},
+        {'$set': {'is_organizer': bool(is_organizer)}},
         upsert=False)
     if result.matched_count == 0:
-        raise KeyError(f"User with ID '{user_id}' not found.'")
+        raise KeyError(f'User with ID "{user_id}" not found.')
     return result.upserted_id
 
 
@@ -171,14 +171,14 @@ def upsert_user_in_db(user_object, users_collection):
     Raises:
         AttributeError: if user_object is malformatted.
     """
-    required_attributes = {"user_id", "name"}
+    required_attributes = {'user_id', 'name'}
     if user_object.keys() != required_attributes:
-        raise AttributeError("malformatted user object")
+        raise AttributeError('malformatted user object')
     # upsert user in db
     return users_collection.update_one(
-        {"user_id": user_object["user_id"]},
-        {"$set": user_object,
-         "$setOnInsert": {"is_organizer": False}},
+        {'user_id': user_object['user_id']},
+        {'$set': user_object,
+         '$setOnInsert': {'is_organizer': False}},
         upsert=True).upserted_id
 
 
@@ -193,17 +193,17 @@ def connect_to_mongodb():  # pragma: no cover
 
         def __getattribute__(self, _):
             raise DBNotConnectedError(
-                "Not able to find MONGODB_URI environment variable")
+                'Not able to find MONGODB_URI environment variable')
 
-    mongodb_uri = os.environ.get("MONGODB_URI")
+    mongodb_uri = os.environ.get('MONGODB_URI')
     if mongodb_uri is None:
         return Thrower()  # not able to find db config var
     return pymongo.MongoClient(mongodb_uri).users_db.users_collection
 
 
-app.config["COLLECTION"] = connect_to_mongodb()
+app.config['COLLECTION'] = connect_to_mongodb()
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     app.run(debug=True, host='0.0.0.0',
             port=int(os.environ.get('PORT', 8080)))

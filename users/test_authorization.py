@@ -19,10 +19,10 @@ import unittest
 import mongomock
 import app
 
-AUTHORIZED_USER = "authorized-user"
-NON_AUTHORIZED_USER = "non-authorized-user"
-MALFORMATTED_IN_DB_USER = "this-user-has-no-'is_organizer'_db_field"
-MISSING_USER = "not-a-user-in-the-database"
+AUTHORIZED_USER = 'authorized-user'
+NON_AUTHORIZED_USER = 'non-authorized-user'
+MALFORMATTED_IN_DB_USER = 'this-user-has-no-"is_organizer"_db_field'
+MISSING_USER = 'not-a-user-in-the-database'
 
 
 class TestAuthorization(unittest.TestCase):
@@ -32,13 +32,13 @@ class TestAuthorization(unittest.TestCase):
         """Seed mock DB for testing"""
         self.mock_collection = mongomock.MongoClient().db.collection
         mock_data = [
-            {"user_id": AUTHORIZED_USER,
-             "name": AUTHORIZED_USER,
-             "is_organizer": True},
-            {"user_id": NON_AUTHORIZED_USER,
-             "name": NON_AUTHORIZED_USER,
-             "is_organizer": False},
-            {"user_id": MALFORMATTED_IN_DB_USER}
+            {'user_id': AUTHORIZED_USER,
+             'name': AUTHORIZED_USER,
+             'is_organizer': True},
+            {'user_id': NON_AUTHORIZED_USER,
+             'name': NON_AUTHORIZED_USER,
+             'is_organizer': False},
+            {'user_id': MALFORMATTED_IN_DB_USER}
         ]
         self.mock_collection.insert_many(mock_data)
 
