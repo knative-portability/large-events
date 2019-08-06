@@ -21,6 +21,7 @@ import ast
 import requests_mock
 from flask_testing import TestCase
 import flask
+from flask import url_for
 import app
 
 VALID_SESSION = {
@@ -144,9 +145,11 @@ class TestSignOut(unittest.TestCase):
             # empty session after
             self.assertNotIn("user_id", flask.session)
             self.assertEqual(len(flask.session), 0)
-            # correct redirect response
-            self.assertEqual(result.status_code, 302)  # redirect
-            self.assertIn("redirect", result.data.decode())
+            # check for redirect to index
+            self.assertEqual(result.status_code, 302)
+            with app.app.test_request_context():
+                self.assertTrue(
+                    result.headers['location'].endswith(url_for('index')))
 
     def test_was_not_logged_in(self):
         """Try to sign out a user that was not logged in."""
@@ -159,9 +162,11 @@ class TestSignOut(unittest.TestCase):
             # empty session after
             self.assertNotIn("user_id", flask.session)
             self.assertEqual(len(flask.session), 0)
-            # correct redirect response
-            self.assertEqual(result.status_code, 302)  # redirect
-            self.assertIn("redirect", result.data.decode())
+            # check for redirect to index
+            self.assertEqual(result.status_code, 302)
+            with app.app.test_request_context():
+                self.assertTrue(
+                    result.headers['location'].endswith(url_for('index')))
 
 
 class TestTemplateRoutes(TestCase):
@@ -240,8 +245,11 @@ class TestAddPostRoute(unittest.TestCase):
 
         response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        # check for redirect to index
+        self.assertEqual(response.status_code, 302)
+        with app.app.test_request_context():
+            self.assertTrue(
+                response.headers['location'].endswith(url_for('index')))
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
@@ -275,8 +283,11 @@ class TestAddEventRoute(unittest.TestCase):
 
         response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.decode(), "Example success message")
+        # check for redirect to index
+        self.assertEqual(response.status_code, 302)
+        with app.app.test_request_context():
+            self.assertTrue(
+                response.headers['location'].endswith(url_for('index')))
 
     @patch('app.get_user', MagicMock(return_value=EXAMPLE_USER_OBJECT))
     @requests_mock.Mocker()
