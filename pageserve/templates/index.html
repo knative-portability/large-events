@@ -43,45 +43,45 @@ limitations under the License.
 
 {% block content %}
 
-    <h2>Past posts</h2>
+    <h2>Past Posts</h2>
     {% for post in posts %}
+
+      <div class="content_box">
         <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
         <!-- TODO(cmei4444) - link to event info -->
         <p>For event with ID {{ post.event_id }}</p>
 
         {% if post.text %}
-            <p>{{post.text}}</p>
+        <p>{{post.text}}</p>
         {% endif %}
         {% if post.files %}
-            {% for file in post.files %}
-                <img src="{{ file }}">
-            {% endfor %}
+          {% for file in post.files %}
+          <img src="{{ file }}">
+          {% endfor %}
         {% endif %}
 
         {% if post.author_id == session["user_id"] %}
             <a href='#' onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
         {% endif %}
-
-        <hr>
-
+      </div>
     {% endfor %}
 
+    <hr class="form_divider">
+
+    <div class="content_box form">
     <h2>Create New Post</h2>
     <form action="/v1/add_post" method="post" enctype="multipart/form-data">
         <div>
             <label for="event_id">Event ID:</label>
             <select id="event_id" name="event_id">
                 {% for event in events %}
-                    <!-- TODO (cmei4444) - update field names once other changes are pushed -->
-                    <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
+                <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
                 {% endfor %}
             </select>
         </div>
         <div>
             <label for="text">Text:</label>
-            <textarea type="text" rows="5" cols="60" id="text" name="text">
-            Enter your post here.
-            </textarea>
+            <textarea type="text" rows="5" cols="60" id="text" name="text" placeholder="Enter your post here."></textarea>
         </div>
         <div>
             <label for="images">Images:</label>
@@ -91,5 +91,6 @@ limitations under the License.
             <button type="submit">Post</button>
         </div>
     </form>
+    </div>
 
 {% endblock content%}
