@@ -75,7 +75,7 @@ limitations under the License.
             <label for="event_id">Event ID:</label>
             <select id="event_id" name="event_id">
                 {% for event in events %}
-                <option value="{{ event._id['$oid'] }}">{{ event._id['$oid'] }} - {{ event.name }}</option>
+                    <option value="{{ event._id['$oid'] }}">{{ event._id["$oid"] }} - {{ event.name }}</option>
                 {% endfor %}
             </select>
         </div>
