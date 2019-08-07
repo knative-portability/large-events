@@ -332,7 +332,7 @@ class TestQueryEventsByIDRoute(TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['EVENTS_ENDPOINT']
 
-    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_query_existing_event(self, mock_requests):
         """Test querying for existing event."""
@@ -348,7 +348,7 @@ class TestQueryEventsByIDRoute(TestCase):
         self.assertContext('events', EXAMPLE_EVENTS[0])
         self.assertContext('app_config', app.app.config)
 
-    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_query_no_event_found(self, mock_requests):
         """Test querying for nonexisting event."""
