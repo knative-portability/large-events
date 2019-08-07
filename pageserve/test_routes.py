@@ -214,6 +214,65 @@ class TestMainTemplateRoutes(TestCase):
         self.assertEqual(response.status_code, 500)
 
 
+class TestSearchEventsRoute(unittest.TestCase):
+    """Tests searching for events at GET /v1/search_event."""
+
+    def create_app(self):
+        """Creates and returns a Flask instance.
+
+        Required by flask_testing to test templates."""
+        test_app = flask.Flask(__name__)
+        test_app.config['TESTING'] = True
+        return test_app
+
+    def setUp(self):
+        """Set up test client."""
+        app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'search'
+
+    @requests_mock.Mocker()
+    def test_search_existing_events(self, mock_requests):
+        """Test searching for existing events"""
+        mock_requests.post(self.expected_url,
+                           json={'events': EXAMPLE_EVENTS,
+                                 'num_events': len(EXAMPLE_EVENTS)},
+                           status_code=200)
+        query = {'name': 'valid_event'}
+        response = self.client.post('/v1/search_event', data=query)
+
+        self.assertEqual(response.status_code, 200)
+
+    @requests_mock.Mocker()
+    def test_search_no_events_found(self, mock_requests):
+        """Test searching for nonexisting events"""
+        mock_requests.post(self.expected_url,
+                           json={'events': [], 'num_events': 0},
+                           status_code=200)
+        query = {'name': 'nonexistent_event'}
+        response = self.client.post('/v1/search_event', data=query)
+
+        self.assertEqual(response.status_code, 200)
+
+    @requests_mock.Mocker()
+    def test_search_events_error(self, mock_requests):
+        """Test events service error when searching for events"""
+        mock_requests.post(self.expected_url,
+                           text="Error in getting events",
+                           status_code=500)
+        query = {'name': 'valid_event'}
+        response = self.client.post('/v1/search_event', data=query)
+
+        self.assertEqual(response.status_code, 500)
+
+    @requests_mock.Mocker()
+    def test_malformatted_search(self, mock_requests):
+        """Test searching without required event_name field."""
+        response = self.client.post('/v1/search_event')
+
+        self.assertEqual(response.status_code, 400)
+
+
 class TestAddPostRoute(unittest.TestCase):
     """Tests adding posts at POST /v1/add_post."""
 
@@ -282,65 +341,6 @@ class TestAddEventRoute(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data.decode(), "Example error message")
-
-
-class TestSearchEventsRoute(unittest.TestCase):
-    """Tests searching for events at GET /v1/search_event."""
-
-    def create_app(self):
-        """Creates and returns a Flask instance.
-
-        Required by flask_testing to test templates."""
-        test_app = flask.Flask(__name__)
-        test_app.config['TESTING'] = True
-        return test_app
-
-    def setUp(self):
-        """Set up test client."""
-        app.app.config["TESTING"] = True
-        self.client = app.app.test_client()
-        self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'search'
-
-    @requests_mock.Mocker()
-    def test_search_existing_events(self, mock_requests):
-        """Test searching for existing events"""
-        mock_requests.post(self.expected_url,
-                           json={'events': EXAMPLE_EVENTS,
-                                 'num_events': len(EXAMPLE_EVENTS)},
-                           status_code=200)
-        query = {'name': 'valid_event'}
-        response = self.client.post('/v1/search_event', data=query)
-
-        self.assertEqual(response.status_code, 200)
-
-    @requests_mock.Mocker()
-    def test_search_no_events_found(self, mock_requests):
-        """Test searching for nonexisting events"""
-        mock_requests.post(self.expected_url,
-                           json={'events': [], 'num_events': 0},
-                           status_code=200)
-        query = {'name': 'nonexistent_event'}
-        response = self.client.post('/v1/search_event', data=query)
-
-        self.assertEqual(response.status_code, 200)
-
-    @requests_mock.Mocker()
-    def test_search_events_error(self, mock_requests):
-        """Test events service error when searching for events"""
-        mock_requests.post(self.expected_url,
-                           text="Error in getting events",
-                           status_code=500)
-        query = {'name': 'valid_event'}
-        response = self.client.post('/v1/search_event', data=query)
-
-        self.assertEqual(response.status_code, 500)
-
-    @requests_mock.Mocker()
-    def test_malformatted_search(self, mock_requests):
-        """Test searching without required event_name field."""
-        response = self.client.post('/v1/search_event')
-
-        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == '__main__':
