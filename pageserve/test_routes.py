@@ -59,14 +59,15 @@ EXAMPLE_POSTS = [
     {'_id': {'$oid': '456def'},
      'event_id': 'valid_post_id',
      'text': 'example post 2.'}]
+EXAMPLE_EVENT_ID = '123456789123456789123456'
 EXAMPLE_EVENTS = [
-    {'_id': {'$oid': '123abc'},
+    {'_id': EXAMPLE_EVENT_ID,
      'name': 'valid_event',
      'description': 'this event is valid',
      'event_time': 'soon',
      'author': 'app_user',
      'created_at': 'in the past'},
-    {'_id': {'$oid': '456def'},
+    {'_id': '987654321987654321654321',
      'name': 'valid_event',
      'description': 'this event is valid too',
      'event_time': 'soon',
@@ -293,7 +294,7 @@ class TestSearchEventsRoute(TestCase):
     def test_search_events_error(self, mock_requests):
         """Test events service error when searching for events"""
         mock_requests.get(self.expected_url,
-                          text="Error in getting events",
+                          text='Error in getting events',
                           status_code=500)
         query = {'event_name': 'valid_event'}
         response = self.client.post('/v1/search_event', data=query)
@@ -304,6 +305,75 @@ class TestSearchEventsRoute(TestCase):
     def test_malformatted_search(self, mock_requests):
         """Test searching without required event_name field."""
         response = self.client.post('/v1/search_event')
+
+        self.assertEqual(response.status_code, 400)
+
+
+class TestQueryEventsByIDRoute(TestCase):
+    """Tests searching for events at GET /v1/search_event."""
+
+    def create_app(self):
+        """Creates and returns a Flask instance.
+
+        Required by flask_testing to test templates."""
+        test_app = flask.Flask(__name__)
+        test_app.config['TESTING'] = True
+        return test_app
+
+    def setUp(self):
+        """Set up test client."""
+        # app.app.config["TESTING"] = True
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['EVENTS_ENDPOINT']
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @requests_mock.Mocker()
+    def test_query_existing_event(self, mock_requests):
+        """Test searching for existing events"""
+        mock_requests.put(self.expected_url + EXAMPLE_EVENT_ID,
+                          json={'events': EXAMPLE_EVENTS[0], 'num_events': 1},
+                          status_code=200)
+        query = {'event_id': EXAMPLE_EVENT_ID}
+        response = self.client.get('/v1/query_event', query_string=query)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('search_results.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('events', EXAMPLE_EVENTS[0])
+        self.assertContext('app_config', app.app.config)
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @requests_mock.Mocker()
+    def test_query_no_event_found(self, mock_requests):
+        """Test searching for nonexisting events"""
+        nonexistent_id = 'nonexistent1234567890123'
+        mock_requests.put(self.expected_url + nonexistent_id,
+                          json={'events': [], 'num_events': 0},
+                          status_code=200)
+        query = {'event_id': nonexistent_id}
+        response = self.client.get('/v1/query_event', query_string=query)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('search_results.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('events', [])
+        self.assertContext('app_config', app.app.config)
+
+    @requests_mock.Mocker()
+    def test_query_events_error(self, mock_requests):
+        """Test events service error when querying for events"""
+        mock_requests.put(self.expected_url + EXAMPLE_EVENT_ID,
+                          text='Error in getting events',
+                          status_code=500)
+        query = {'event_id': EXAMPLE_EVENT_ID}
+        response = self.client.get('/v1/query_event', query_string=query)
+
+        self.assertEqual(response.status_code, 500)
+
+    @requests_mock.Mocker()
+    def test_malformatted_query(self, mock_requests):
+        """Test querying without required event_id field."""
+        response = self.client.get('/v1/query_event')
 
         self.assertEqual(response.status_code, 400)
 
