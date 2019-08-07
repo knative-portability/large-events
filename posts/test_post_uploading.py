@@ -23,8 +23,8 @@ import mongomock
 import app
 
 MOCK_FILE_URL = 'the url of an uploaded file'
-File = collections.namedtuple('File', ['filename', 'content_type'])
-MOCK_FILE = File(filename='the name of a file', content_type='image/jpeg')
+File = collections.namedtuple('File', 'filename')
+MOCK_FILE = File(filename='the name of a file')
 
 VALID_POST_FULL = {
     'event_id': 'abc123',

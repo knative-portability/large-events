@@ -84,7 +84,6 @@ def upload_new_post():
             'text':  request.form['text'],
             'files': [file for file in request.files.values()]
         }
-        print(request.files)
         return str(upload_new_post_to_db(post, app.config['COLLECTION'])), 201
     except BadRequestKeyError:
         return f'Invalid request. Required data: {REQUIRED_ATTRIBUTES}.', 400
@@ -205,7 +204,7 @@ def upload_new_post_to_db(post, collection):
     # post is valid, add on timestamp, upload files, insert into db
     post['created_at'] = generate_timestamp()
     post['files'] = [
-        upload_file_to_cloud(file) for file in post['files'] if file.content_type is not None]
+        upload_file_to_cloud(file) for file in post['files']]
     return collection.insert_one(post).inserted_id
 
 
