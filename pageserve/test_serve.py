@@ -22,8 +22,8 @@ import requests_mock
 import flask
 import app
 
-AUTHORIZED_RESPONSE_JSON = {'edit_access': True}
-UNAUTHORIZED_RESPONSE_JSON = {'edit_access': False}
+AUTHORIZED_RESPONSE_JSON = {'is_organizer': True}
+UNAUTHORIZED_RESPONSE_JSON = {'is_organizer': False}
 
 VALID_SESSION = {
     'user_id': 'abc123 pretend I am a user ID.',
@@ -73,25 +73,25 @@ class TestServe(unittest.TestCase):
             self.assertIsNone(app.get_user())
 
     @requests_mock.Mocker()
-    def test_edit_access(self, requests_mocker):
+    def test_is_organizer(self, requests_mocker):
         """Tests if authorization is correctly retrieved from users service.
 
         This test mocks away requests to the users service which is normally
-        called by app.has_edit_access.
+        called by app.is_organizer.
         """
         # is authorized
         requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authorization',
                              json=AUTHORIZED_RESPONSE_JSON)
-        self.assertTrue(app.has_edit_access(
+        self.assertTrue(app.is_organizer(
             {'user_id': 'Pretend I am authorized.'}))
         # not authorized
         requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authorization',
                              json=UNAUTHORIZED_RESPONSE_JSON)
-        self.assertFalse(app.has_edit_access(
+        self.assertFalse(app.is_organizer(
             {'user_id': 'Pretend I am NOT authorized.'}))
         # No user sent give no authorization. This might happens when a user
         # is logged out so app.get_user() returns None.
-        self.assertFalse(app.has_edit_access(None))
+        self.assertFalse(app.is_organizer(None))
 
     @mock.patch('app.os')
     def test_config_endpoints(self, mock_os):

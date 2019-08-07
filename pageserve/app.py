@@ -33,7 +33,7 @@ def index():
         return render_template(
             'index.html',
             posts=get_posts(),
-            auth=has_edit_access(get_user()),
+            auth=is_organizer(get_user()),
             events=get_events(),
             app_config=app.config
         )
@@ -55,7 +55,7 @@ def search_event():
         if response.status_code == 200:
             return render_template(
                 'search_results.html',
-                auth=has_edit_access(get_user()),
+                auth=is_organizer(get_user()),
                 events=parse_events(response.json()),
                 app_config=app.config
             )
@@ -84,7 +84,7 @@ def show_events():
         return render_template(
             'events.html',
             events=get_events(),
-            auth=has_edit_access(get_user()),
+            auth=is_organizer(get_user()),
             app_config=app.config
         )
     except RuntimeError as error:
@@ -257,13 +257,13 @@ def parse_events(events_dict):
     return events_dict['events']
 
 
-def has_edit_access(user):
-    """Determines if the user with the given info has edit access."""
+def is_organizer(user):
+    """Determines if the user with the given info is an event organizer."""
     if user is None:
         return False
     url = app.config['USERS_ENDPOINT'] + 'authorization'
     response = requests.post(url, data={'user_id': user['user_id']})
-    return response.json()['edit_access'] is True
+    return response.json()['is_organizer'] is True
 
 
 def get_user():

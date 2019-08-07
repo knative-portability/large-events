@@ -155,7 +155,7 @@ class TestGetAuthorization(unittest.TestCase):
             '/v1/authorization', data={'user_id': AUTHORIZED_USER_ID})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {'edit_access': True})
+        self.assertEqual(response_body, {'is_organizer': True})
 
     def test_not_authorized(self):
         """Get authorization of non-authorized user."""
@@ -163,7 +163,7 @@ class TestGetAuthorization(unittest.TestCase):
             '/v1/authorization', data={'user_id': NON_AUTHORIZED_USER_ID})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {'edit_access': False})
+        self.assertEqual(response_body, {'is_organizer': False})
 
     def test_malformatted_in_db(self):
         """Get authorization of user that is malformatted in the db."""
@@ -171,7 +171,7 @@ class TestGetAuthorization(unittest.TestCase):
             '/v1/authorization', data={'user_id': MALFORMATTED_IN_DB_USER})
         self.assertEqual(result.status_code, 200)
         response_body = json.loads(result.data)
-        self.assertEqual(response_body, {'edit_access': False})
+        self.assertEqual(response_body, {'is_organizer': False})
 
     def test_missing_param(self):
         """Try to get authorization but don't supply user_id."""
