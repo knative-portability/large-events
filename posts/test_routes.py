@@ -72,180 +72,6 @@ VALID_DB_POST_FILES_NO_TEXT = {
     ]}
 
 
-class TestUploadNewPostRoute(unittest.TestCase):
-    """Test upload new post endpoint POST /v1/add."""
-
-    def setUp(self):
-        """Set up test client and seed mock DB for testing."""
-        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
-        app.config['TESTING'] = True  # propagate exceptions to test client
-        self.client = app.test_client()
-        # mock Google Cloud Storage bucket for file uploading
-        patcher = mock.patch('app.CLOUD_STORAGE_BUCKET')
-        self.mock_bucket = patcher.start()
-        self.addCleanup(patcher.stop)
-        self.mock_bucket.blob().public_url = MOCK_FILE_URL
-
-    def assert_count_in_collection(self, query, target_count):
-        """Assert the count of a given object in the database."""
-        self.assertEqual(
-            app.config['COLLECTION'].count_documents(query), target_count)
-
-    def test_upload_full_post(self):
-        """Valid upload of post with text and files."""
-        result = self.client.post('/v1/add', data=VALID_REQUEST_FULL,
-                                  content_type='multipart/form-data')
-        self.assertEqual(result.status_code, 201)
-        self.assert_count_in_collection(
-            {'_id': ObjectId(result.data.decode())}, 1)
-
-    def test_upload_text_no_files(self):
-        """Valid upload of post with text but no files."""
-        result = self.client.post('/v1/add', data=VALID_REQUEST_TEXT_NO_FILES,
-                                  content_type='multipart/form-data')
-        self.assertEqual(result.status_code, 201)
-        self.assert_count_in_collection(
-            {'_id': ObjectId(result.data.decode())}, 1)
-
-    def test_upload_files_no_text(self):
-        """Valid upload of post with files but no text."""
-        result = self.client.post('/v1/add', data=VALID_REQUEST_FILES_NO_TEXT,
-                                  content_type='multipart/form-data')
-        self.assertEqual(result.status_code, 201)
-        self.assert_count_in_collection(
-            {'_id': ObjectId(result.data.decode())}, 1)
-
-    def test_invalid_no_text_nor_files(self):
-        """Invalid upload of post with no text nor files."""
-        result = self.client.post('/v1/add',
-                                  data=INVALID_REQUEST_NO_TEXT_NOR_FILES,
-                                  content_type='multipart/form-data')
-        self.assertEqual(result.status_code, 400)
-        self.assert_count_in_collection({}, 0)
-
-    def test_invalid_not_enough_attrs(self):
-        """Invalid upload of post with not enough attributes."""
-        result = self.client.post('/v1/add',
-                                  data=INVALID_REQUEST_NOT_ENOUGH_ATTRS,
-                                  content_type='multipart/form-data')
-        self.assertEqual(result.status_code, 400)
-        self.assert_count_in_collection({}, 0)
-
-
-class TestGetAllPostsRoute(unittest.TestCase):
-    """Test get all posts endpoint GET /v1/."""
-
-    def setUp(self):
-        """Set up test client and seed mock DB for testing."""
-        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
-        app.config['TESTING'] = True  # propagate exceptions to test client
-        self.client = app.test_client()
-
-    def assert_count_in_collection(self, query, target_count):
-        """Assert the count of a given object in the database."""
-        self.assertEqual(
-            app.config['COLLECTION'].count_documents(query), target_count)
-
-    def test_no_posts_found(self):
-        """Get all posts but no posts are in the db."""
-        num_expected_posts = 0
-        self.assert_count_in_collection({}, num_expected_posts)
-        result = self.client.get('/v1/')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-
-    def test_multiple_posts_found(self):
-        """Get all posts and multiple posts in the db."""
-        mock_posts = [
-            VALID_DB_POST_FULL,
-            VALID_DB_POST_TEXT_NO_FILES,
-            VALID_DB_POST_FILES_NO_TEXT]
-        num_expected_posts = len(mock_posts)
-        app.config['COLLECTION'].insert_many(mock_posts)
-        self.assert_count_in_collection({}, num_expected_posts)
-        result = self.client.get('/v1/')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-
-
-class TestGetPostByPostIDRoute(unittest.TestCase):
-    """Test get post by post ID endpoint GET /v1/<post_id>."""
-
-    def setUp(self):
-        """Set up test client and seed mock DB for testing."""
-        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
-        self.mock_posts = [
-            VALID_DB_POST_FULL,
-            VALID_DB_POST_TEXT_NO_FILES,
-            VALID_DB_POST_FILES_NO_TEXT]
-        app.config['COLLECTION'].insert_many(self.mock_posts)
-        app.config['TESTING'] = True  # propagate exceptions to test client
-        self.client = app.test_client()
-
-    def test_no_post_found(self):
-        """Can't find post with given ID in the db."""
-        num_expected_posts = 0
-        id_not_in_db = 'C0011C3DC0FFEED0000000DE'
-        result = self.client.get(f'/v1/{id_not_in_db}')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-
-    def test_yes_post_found(self):
-        """Find a post by ID."""
-        num_expected_posts = 1
-        post_id = self.mock_posts[0]['_id']
-        result = self.client.get(f'/v1/{str(post_id)}')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-        self.assertEqual(data['posts'][0]['_id'], post_id)
-
-
-class TestGetPostByEventIDRoute(unittest.TestCase):
-    """Test get post by event  endpoint GET /v1/by_event/<event_id>."""
-
-    def setUp(self):
-        """Set up test client and seed mock DB for testing."""
-        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
-        self.mock_posts = [
-            VALID_DB_POST_FULL,
-            VALID_DB_POST_TEXT_NO_FILES,
-            VALID_DB_POST_FILES_NO_TEXT]
-        app.config['COLLECTION'].insert_many(self.mock_posts)
-        app.config['TESTING'] = True  # propagate exceptions to test client
-        self.client = app.test_client()
-
-    def test_no_post_found(self):
-        """Can't find post with given event ID in the db."""
-        num_expected_posts = 0
-        id_not_in_db = 'C0011C3DC0FFEED0000000DE'
-        result = self.client.get(f'/v1/by_event/{id_not_in_db}')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-
-    def test_yes_post_found(self):
-        """Find multiple posts by event ID."""
-        event_id = self.mock_posts[0]['event_id']
-        expected_posts = [
-            post for post in self.mock_posts if post['event_id'] is event_id]
-        num_expected_posts = len(expected_posts)
-        result = self.client.get(f'/v1/by_event/{str(event_id)}')
-        self.assertEqual(result.status_code, 200)
-        data = json_util.loads(result.data)
-        self.assertEqual(data['num_posts'], num_expected_posts)
-        self.assertEqual(len(data['posts']), num_expected_posts)
-        self.assertEqual(data['posts'], expected_posts)
-
-
 class TestDeletePostByPostIDRoute(unittest.TestCase):
     """Test delete post by post ID endpoint DELETE /v1/<post_id>."""
 
@@ -318,6 +144,180 @@ class TestDeletePostByPostIDRoute(unittest.TestCase):
         self.assertEqual(result.status_code, 400)
         self.assertEqual(app.config['COLLECTION'].count_documents({}),
                          len(self.mock_posts))
+
+
+class TestGetAllPostsRoute(unittest.TestCase):
+    """Test get all posts endpoint GET /v1/."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        app.config['TESTING'] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def assert_count_in_collection(self, query, target_count):
+        """Assert the count of a given object in the database."""
+        self.assertEqual(
+            app.config['COLLECTION'].count_documents(query), target_count)
+
+    def test_no_posts_found(self):
+        """Get all posts but no posts are in the db."""
+        num_expected_posts = 0
+        self.assert_count_in_collection({}, num_expected_posts)
+        result = self.client.get('/v1/')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+
+    def test_multiple_posts_found(self):
+        """Get all posts and multiple posts in the db."""
+        mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        num_expected_posts = len(mock_posts)
+        app.config['COLLECTION'].insert_many(mock_posts)
+        self.assert_count_in_collection({}, num_expected_posts)
+        result = self.client.get('/v1/')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+
+
+class TestGetPostByEventIDRoute(unittest.TestCase):
+    """Test get post by event  endpoint GET /v1/by_event/<event_id>."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        self.mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        app.config['COLLECTION'].insert_many(self.mock_posts)
+        app.config['TESTING'] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_no_post_found(self):
+        """Can't find post with given event ID in the db."""
+        num_expected_posts = 0
+        id_not_in_db = 'C0011C3DC0FFEED0000000DE'
+        result = self.client.get(f'/v1/by_event/{id_not_in_db}')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+
+    def test_yes_post_found(self):
+        """Find multiple posts by event ID."""
+        event_id = self.mock_posts[0]['event_id']
+        expected_posts = [
+            post for post in self.mock_posts if post['event_id'] is event_id]
+        num_expected_posts = len(expected_posts)
+        result = self.client.get(f'/v1/by_event/{str(event_id)}')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+        self.assertEqual(data['posts'], expected_posts)
+
+
+class TestGetPostByPostIDRoute(unittest.TestCase):
+    """Test get post by post ID endpoint GET /v1/<post_id>."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        self.mock_posts = [
+            VALID_DB_POST_FULL,
+            VALID_DB_POST_TEXT_NO_FILES,
+            VALID_DB_POST_FILES_NO_TEXT]
+        app.config['COLLECTION'].insert_many(self.mock_posts)
+        app.config['TESTING'] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+
+    def test_no_post_found(self):
+        """Can't find post with given ID in the db."""
+        num_expected_posts = 0
+        id_not_in_db = 'C0011C3DC0FFEED0000000DE'
+        result = self.client.get(f'/v1/{id_not_in_db}')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+
+    def test_yes_post_found(self):
+        """Find a post by ID."""
+        num_expected_posts = 1
+        post_id = self.mock_posts[0]['_id']
+        result = self.client.get(f'/v1/{str(post_id)}')
+        self.assertEqual(result.status_code, 200)
+        data = json_util.loads(result.data)
+        self.assertEqual(data['num_posts'], num_expected_posts)
+        self.assertEqual(len(data['posts']), num_expected_posts)
+        self.assertEqual(data['posts'][0]['_id'], post_id)
+
+
+class TestUploadNewPostRoute(unittest.TestCase):
+    """Test upload new post endpoint POST /v1/add."""
+
+    def setUp(self):
+        """Set up test client and seed mock DB for testing."""
+        app.config['COLLECTION'] = mongomock.MongoClient().db.collection
+        app.config['TESTING'] = True  # propagate exceptions to test client
+        self.client = app.test_client()
+        # mock Google Cloud Storage bucket for file uploading
+        patcher = mock.patch('app.CLOUD_STORAGE_BUCKET')
+        self.mock_bucket = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.mock_bucket.blob().public_url = MOCK_FILE_URL
+
+    def assert_count_in_collection(self, query, target_count):
+        """Assert the count of a given object in the database."""
+        self.assertEqual(
+            app.config['COLLECTION'].count_documents(query), target_count)
+
+    def test_upload_full_post(self):
+        """Valid upload of post with text and files."""
+        result = self.client.post('/v1/add', data=VALID_REQUEST_FULL,
+                                  content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 201)
+        self.assert_count_in_collection(
+            {'_id': ObjectId(result.data.decode())}, 1)
+
+    def test_upload_text_no_files(self):
+        """Valid upload of post with text but no files."""
+        result = self.client.post('/v1/add', data=VALID_REQUEST_TEXT_NO_FILES,
+                                  content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 201)
+        self.assert_count_in_collection(
+            {'_id': ObjectId(result.data.decode())}, 1)
+
+    def test_upload_files_no_text(self):
+        """Valid upload of post with files but no text."""
+        result = self.client.post('/v1/add', data=VALID_REQUEST_FILES_NO_TEXT,
+                                  content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 201)
+        self.assert_count_in_collection(
+            {'_id': ObjectId(result.data.decode())}, 1)
+
+    def test_invalid_no_text_nor_files(self):
+        """Invalid upload of post with no text nor files."""
+        result = self.client.post('/v1/add',
+                                  data=INVALID_REQUEST_NO_TEXT_NOR_FILES,
+                                  content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 400)
+        self.assert_count_in_collection({}, 0)
+
+    def test_invalid_not_enough_attrs(self):
+        """Invalid upload of post with not enough attributes."""
+        result = self.client.post('/v1/add',
+                                  data=INVALID_REQUEST_NOT_ENOUGH_ATTRS,
+                                  content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 400)
+        self.assert_count_in_collection({}, 0)
 
 
 if __name__ == '__main__':  # pragma: no cover
