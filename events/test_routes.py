@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import unittest
+from unittest.mock import patch, MagicMock
 import datetime
 from contextlib import contextmanager
 from bson import json_util
@@ -164,6 +165,7 @@ class TestSearchEventsRoute(unittest.TestCase):
         ]
         self.coll.insert_many(self.fake_events)
 
+    @patch('text_search_event_name', MagicMock(return_value=VALID_DB_EVENT))
     def test_search_existing_event(self):
         """Search for an event that exists in the DB."""
         response = self.client.get('/v1/search?name=' + VALID_EVENT_NAME)
@@ -174,6 +176,7 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
+    @patch('text_search_event_name', MagicMock(return_value=VALID_DB_EVENT))
     def test_search_existing_event_uppercase(self):
         """Search for an event that exists with different capitalization.
 
@@ -188,6 +191,7 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
+    @patch('text_search_event_name', MagicMock(return_value=[]))
     def test_search_nonexisting_event(self):
         """Search for an event that doesn't exist in the DB."""
         response = self.client.get('/v1/search?name=' + 'nonexistent event')
