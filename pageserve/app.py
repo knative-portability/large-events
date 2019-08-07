@@ -165,7 +165,10 @@ def add_post():
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
-    response = requests.post(url, data=form_data, files=request.files)
+    images = ((img.filename, img.read())
+              for img in request.files.getlist("images"))
+    response = requests.post(
+        url, data=form_data, files=images)
     if response.status_code == 201:
         # upload successful, redirect to index
         return redirect(url_for("index"))
