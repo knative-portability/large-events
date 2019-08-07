@@ -59,7 +59,19 @@ EXAMPLE_POSTS = [
     {'_id': {'$oid': '456def'},
      'event_id': 'valid_post_id',
      'text': 'example post 2.'}]
-EXAMPLE_EVENTS = ['example', 'events', 'list']
+EXAMPLE_EVENTS = [
+    {'_id': {'$oid': '123abc'},
+     'name': 'valid_event',
+     'description': 'this event is valid',
+     'event_time': 'soon',
+     'author': 'app_user',
+     'created_at': 'in the past'},
+    {'_id': {'$oid': '456def'},
+     'name': 'another_valid_event',
+     'description': 'this event is valid too',
+     'event_time': 'soon',
+     'author': 'app_user',
+     'created_at': 'in the past'}]
 
 
 class TestAuthenticateAndGetUser(unittest.TestCase):
@@ -170,7 +182,7 @@ class TestSignOut(unittest.TestCase):
 
 
 class TestMainTemplateRoutes(TestCase):
-    """Tests all pageserve endpoints that return page templates."""
+    """Tests pageserve endpoints that return the core page templates."""
 
     def create_app(self):
         """Creates and returns a Flask instance.
@@ -227,7 +239,7 @@ class TestMainTemplateRoutes(TestCase):
         self.assertEqual(response.status_code, 500)
 
 
-class TestSearchEventsRoute(unittest.TestCase):
+class TestSearchEventsRoute(TestCase):
     """Tests searching for events at GET /v1/search_event."""
 
     def create_app(self):
@@ -244,36 +256,46 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'search'
 
+    @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_existing_events(self, mock_requests):
         """Test searching for existing events"""
-        mock_requests.post(self.expected_url,
-                           json={'events': EXAMPLE_EVENTS,
-                                 'num_events': len(EXAMPLE_EVENTS)},
-                           status_code=200)
-        query = {'name': 'valid_event'}
+        mock_requests.get(self.expected_url,
+                          json={'events': EXAMPLE_EVENTS,
+                                'num_events': len(EXAMPLE_EVENTS)},
+                          status_code=200)
+        query = {'event_name': 'valid_event'}
         response = self.client.post('/v1/search_event', data=query)
-
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('search_results.html')
 
+        self.assertContext('auth', True)
+        self.assertContext('events', EXAMPLE_EVENTS)
+        self.assertContext('app_config', app.app.config)
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_no_events_found(self, mock_requests):
         """Test searching for nonexisting events"""
-        mock_requests.post(self.expected_url,
-                           json={'events': [], 'num_events': 0},
-                           status_code=200)
-        query = {'name': 'nonexistent_event'}
+        mock_requests.get(self.expected_url,
+                          json={'events': [], 'num_events': 0},
+                          status_code=200)
+        query = {'event_name': 'nonexistent_event'}
         response = self.client.post('/v1/search_event', data=query)
-
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('search_results.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('events', [])
+        self.assertContext('app_config', app.app.config)
 
     @requests_mock.Mocker()
     def test_search_events_error(self, mock_requests):
         """Test events service error when searching for events"""
-        mock_requests.post(self.expected_url,
-                           text="Error in getting events",
-                           status_code=500)
-        query = {'name': 'valid_event'}
+        mock_requests.get(self.expected_url,
+                          text="Error in getting events",
+                          status_code=500)
+        query = {'event_name': 'valid_event'}
         response = self.client.post('/v1/search_event', data=query)
 
         self.assertEqual(response.status_code, 500)

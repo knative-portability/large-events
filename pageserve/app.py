@@ -55,6 +55,7 @@ def search_event():
         if response.status_code == 200:
             return render_template(
                 'search_results.html',
+                auth=has_edit_access(get_user()),
                 events=parse_events(response.json()),
                 app_config=app.config
             )
