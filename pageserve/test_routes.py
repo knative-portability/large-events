@@ -360,6 +360,7 @@ class TestAddEventRoute(unittest.TestCase):
         self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'add'
 
     @patch('app.get_user', MagicMock(return_value=AUTHORIZED_USER_OBJECT))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_add_valid_event(self, mock_requests):
         """Tests adding a valid event."""
@@ -376,6 +377,7 @@ class TestAddEventRoute(unittest.TestCase):
                 response.headers['location'].endswith(url_for('index')))
 
     @patch('app.get_user', MagicMock(return_value=AUTHORIZED_USER_OBJECT))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_add_invalid_event(self, mock_requests):
         """Tests adding an invalid event."""
@@ -389,6 +391,7 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertIn("Error", response.data.decode())
 
     @patch('app.get_user', MagicMock(return_value=AUTHORIZED_USER_OBJECT))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_error_at_events_service(self, mock_requests):
         """Events service doesn't like what we give it."""
