@@ -309,7 +309,7 @@ class TestSearchEventsRoute(unittest.TestCase):
                                  'num_events': len(EXAMPLE_EVENTS)},
                            status_code=200)
         query = {'name': 'valid_event'}
-        response = self.client.get('/v1/search_event', data=query)
+        response = self.client.post('/v1/search_event', data=query)
 
         self.assertEqual(response.status_code, 200)
 
@@ -320,7 +320,7 @@ class TestSearchEventsRoute(unittest.TestCase):
                            json={'events': [], 'num_events': 0},
                            status_code=200)
         query = {'name': 'nonexistent_event'}
-        response = self.client.get('/v1/search_event', data=query)
+        response = self.client.post('/v1/search_event', data=query)
 
         self.assertEqual(response.status_code, 200)
 
@@ -331,14 +331,14 @@ class TestSearchEventsRoute(unittest.TestCase):
                            text="Error in getting events",
                            status_code=500)
         query = {'name': 'valid_event'}
-        response = self.client.get('/v1/search_event', data=query)
+        response = self.client.post('/v1/search_event', data=query)
 
         self.assertEqual(response.status_code, 500)
 
     @requests_mock.Mocker()
     def test_malformatted_search(self, mock_requests):
         """Test searching without required event_name field."""
-        response = self.client.get('/v1/search_event')
+        response = self.client.post('/v1/search_event')
 
         self.assertEqual(response.status_code, 400)
 
