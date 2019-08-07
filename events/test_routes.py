@@ -20,7 +20,7 @@ import datetime
 from contextlib import contextmanager
 from bson import json_util
 import mongomock
-from app import app, os, connect_to_mongodb
+import app
 
 EXAMPLE_TIME_STRING = datetime.datetime(
     2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=' ', timespec='seconds')
@@ -57,16 +57,16 @@ def environ(env):
     """Temporarily set environment variables inside the context manager and
     fully restore previous environment afterwards
     """
-    original_env = {key: os.getenv(key) for key in env}
-    os.environ.update(env)
+    original_env = {key: app.os.getenv(key) for key in env}
+    app.os.environ.update(env)
     try:
         yield
     finally:
         for key, value in original_env.items():
             if value is None:
-                del os.environ[key]
+                del app.os.environ[key]
             else:
-                os.environ[key] = value
+                app.os.environ[key] = value
 
 
 class TestUploadEventRoute(unittest.TestCase):
@@ -75,9 +75,9 @@ class TestUploadEventRoute(unittest.TestCase):
     def setUp(self):
         """Set up test client and mock DB."""
         self.coll = mongomock.MongoClient().db.collection
-        app.config['COLLECTION'] = self.coll
-        app.config['TESTING'] = True
-        self.client = app.test_client()
+        app.app.config['COLLECTION'] = self.coll
+        app.app.config['TESTING'] = True
+        self.client = app.app.test_client()
 
     def test_add_valid_event(self):
         """Test posting of valid event."""
@@ -96,10 +96,10 @@ class TestUploadEventRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test adding event when DB connection is undefined."""
-        with environ(os.environ):
-            if 'MONGODB_URI' in os.environ:
-                del os.environ['MONGODB_URI']
-            app.config['COLLECTION'] = connect_to_mongodb()
+        with environ(app.os.environ):
+            if 'MONGODB_URI' in app.os.environ:
+                del app.os.environ['MONGODB_URI']
+            app.app.config['COLLECTION'] = app.connect_to_mongodb()
             response = self.client.post('/v1/add', data=VALID_REQUEST_INFO)
             self.assertEqual(response.status_code, 500)
 
@@ -112,9 +112,9 @@ class TestGetEventsRoute(unittest.TestCase):
     def setUp(self):
         """Set up test client and mock DB."""
         self.coll = mongomock.MongoClient().db.collection
-        app.config['COLLECTION'] = self.coll
-        app.config['TESTING'] = True
-        self.client = app.test_client()
+        app.app.config['COLLECTION'] = self.coll
+        app.app.config['TESTING'] = True
+        self.client = app.app.test_client()
         self.fake_events = [
             VALID_DB_EVENT,
             VALID_DB_EVENT_WITH_ID
@@ -122,7 +122,7 @@ class TestGetEventsRoute(unittest.TestCase):
 
     def test_get_existing_events(self):
         """Test retrieving all events when valid events are added to the DB."""
-        app.config['COLLECTION'].insert_many(self.fake_events)
+        app.app.config['COLLECTION'].insert_many(self.fake_events)
 
         response = self.client.get('/v1/')
         self.assertEqual(response.status_code, 200)
@@ -142,10 +142,10 @@ class TestGetEventsRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
-        with environ(os.environ):
-            if 'MONGODB_URI' in os.environ:
-                del os.environ['MONGODB_URI']
-            app.config['COLLECTION'] = connect_to_mongodb()
+        with environ(app.os.environ):
+            if 'MONGODB_URI' in app.os.environ:
+                del app.os.environ['MONGODB_URI']
+            app.app.config['COLLECTION'] = app.connect_to_mongodb()
             response = self.client.get('/v1/')
             self.assertEqual(response.status_code, 500)
 
@@ -156,16 +156,16 @@ class TestSearchEventsRoute(unittest.TestCase):
     def setUp(self):
         """Set up test client and seed mock DB."""
         self.coll = mongomock.MongoClient().db.collection
-        app.config['COLLECTION'] = self.coll
-        app.config['TESTING'] = True
-        self.client = app.test_client()
+        app.app.config['COLLECTION'] = self.coll
+        app.app.config['TESTING'] = True
+        self.client = app.app.test_client()
         self.fake_events = [
             VALID_DB_EVENT,
             VALID_DB_EVENT_WITH_ID
         ]
         self.coll.insert_many(self.fake_events)
 
-    @patch('text_search_event_name', MagicMock(return_value=VALID_DB_EVENT))
+    @patch('app.text_search_event_name', MagicMock(return_value=[VALID_DB_EVENT]))
     def test_search_existing_event(self):
         """Search for an event that exists in the DB."""
         response = self.client.get('/v1/search?name=' + VALID_EVENT_NAME)
@@ -176,7 +176,7 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
-    @patch('text_search_event_name', MagicMock(return_value=VALID_DB_EVENT))
+    @patch('app.text_search_event_name', MagicMock(return_value=[VALID_DB_EVENT]))
     def test_search_existing_event_uppercase(self):
         """Search for an event that exists with different capitalization.
 
@@ -187,11 +187,11 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = json_util.loads(response.data)
 
-        self.assertEqual(data['events'][0]['name'], VALID_EVENT_NAME.upper())
+        self.assertEqual(data['events'][0]['name'], VALID_EVENT_NAME)
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
-    @patch('text_search_event_name', MagicMock(return_value=[]))
+    @patch('app.text_search_event_name', MagicMock(return_value=[]))
     def test_search_nonexisting_event(self):
         """Search for an event that doesn't exist in the DB."""
         response = self.client.get('/v1/search?name=' + 'nonexistent event')
@@ -208,10 +208,10 @@ class TestSearchEventsRoute(unittest.TestCase):
 
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
-        with environ(os.environ):
-            if 'MONGODB_URI' in os.environ:
-                del os.environ['MONGODB_URI']
-            app.config['COLLECTION'] = connect_to_mongodb()
+        with environ(app.os.environ):
+            if 'MONGODB_URI' in app.os.environ:
+                del app.os.environ['MONGODB_URI']
+            app.app.config['COLLECTION'] = app.connect_to_mongodb()
             response = self.client.get('/v1/search?name=' + VALID_EVENT_NAME)
             self.assertEqual(response.status_code, 500)
 
@@ -222,9 +222,9 @@ class TestGetEventByID(unittest.TestCase):
     def setUp(self):
         """Set up test client and seed mock DB."""
         self.coll = mongomock.MongoClient().db.collection
-        app.config['COLLECTION'] = self.coll
-        app.config['TESTING'] = True
-        self.client = app.test_client()
+        app.app.config['COLLECTION'] = self.coll
+        app.app.config['TESTING'] = True
+        self.client = app.app.test_client()
         self.fake_events = [
             VALID_DB_EVENT,
             VALID_DB_EVENT_WITH_ID
@@ -255,10 +255,10 @@ class TestGetEventByID(unittest.TestCase):
     def test_db_not_defined(self):
         """Test getting events when DB connection is undefined."""
         id_to_search = VALID_DB_EVENT['_id']
-        with environ(os.environ):
-            if 'MONGODB_URI' in os.environ:
-                del os.environ['MONGODB_URI']
-            app.config['COLLECTION'] = connect_to_mongodb()
+        with environ(app.os.environ):
+            if 'MONGODB_URI' in app.os.environ:
+                del app.os.environ['MONGODB_URI']
+            app.app.config['COLLECTION'] = app.connect_to_mongodb()
             response = self.client.put(f'/v1/{id_to_search}')
             self.assertEqual(response.status_code, 500)
 
