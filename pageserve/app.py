@@ -166,6 +166,8 @@ def add_event():
     """
     try:
         user = get_user()
+        if not user:
+            return 'Error: not logged in.', 401
         if not user['is_organizer']:
             return 'Error: not authorized to add events.', 403
         url = app.config['EVENTS_ENDPOINT'] + 'add'

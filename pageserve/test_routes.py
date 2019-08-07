@@ -320,6 +320,13 @@ class TestAddEventRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Error", response.data.decode())
 
+    def test_not_authenticated(self):
+        """Tests trying to add an event without authorization."""
+        response = self.client.post('/v1/add_event', data=VALID_EVENT_FORM)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Error", response.data.decode())
+
     @patch('app.get_user', MagicMock(return_value=NOT_AUTHORIZED_USER_OBJECT))
     def test_not_authorized(self):
         """Tests trying to add an event without authorization."""
