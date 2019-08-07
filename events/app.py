@@ -44,10 +44,17 @@ def get_all_events():
 
 @app.route('/v1/search', methods=['GET'])
 def search_event():
-    """Search for the event with the given name in the DB."""
+    """Search for the event with the given name in the DB.
+
+    Uses MongoDB text search, which ignores capitalization and searches on word
+    stems.
+    """
     try:
         event_name = request.args['name']
-        events = app.config['COLLECTION'].find({'name': event_name})
+        # create a text index on name to enable searching
+        app.config['COLLECTION'].create_index([('name', 'text')])
+        events = app.config['COLLECTION'].find(
+            {'$text': {'$search': event_name}})
         events_dict = build_events_dict(events)
         # handles MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))

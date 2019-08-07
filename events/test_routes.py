@@ -174,6 +174,20 @@ class TestSearchEventsRoute(unittest.TestCase):
         self.assertEqual(len(data['events']), 1)
         self.assertEqual(data['num_events'], 1)
 
+    def test_search_existing_event_uppercase(self):
+        """Search for an event that exists with different capitalization.
+
+        The event should be found because search is case-insensitive.
+        """
+        response = self.client.get(
+            '/v1/search?name=' + VALID_EVENT_NAME.upper())
+        self.assertEqual(response.status_code, 200)
+        data = json_util.loads(response.data)
+
+        self.assertEqual(data['events'][0]['name'], VALID_EVENT_NAME.upper())
+        self.assertEqual(len(data['events']), 1)
+        self.assertEqual(data['num_events'], 1)
+
     def test_search_nonexisting_event(self):
         """Search for an event that doesn't exist in the DB."""
         response = self.client.get('/v1/search?name=' + 'nonexistent event')
