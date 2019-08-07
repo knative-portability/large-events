@@ -88,7 +88,11 @@ limitations under the License.
             <input type="file" name="images" multiple>
         </div>
         <div class="button">
+            {% if session["gauth_token"] %}
             <button type="submit">Post</button>
+            {% else %}
+            <button type="submit" disabled style="background-color: grey;">Sign in before posting</button>
+            {% endif %}
         </div>
     </form>
     </div>
