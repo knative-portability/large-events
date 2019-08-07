@@ -423,7 +423,7 @@ class TestAddPostRoute(unittest.TestCase):
 
     def test_not_logged_in(self):
         """Not logged in, don't add."""
-        response = self.client.post('/v1/add_post', data=INVALID_POST_FORM)
+        response = self.client.post('/v1/add_post', data=VALID_POST_FORM)
 
         self.assertEqual(response.status_code, 401)
         self.assertIn("Error:", response.data.decode())
