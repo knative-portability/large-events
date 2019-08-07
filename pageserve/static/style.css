@@ -3,6 +3,7 @@
   background-color: #333;
   overflow: hidden;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
 }
