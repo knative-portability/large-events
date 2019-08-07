@@ -256,7 +256,7 @@ class TestSearchEventsRoute(TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'search'
 
-    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_existing_events(self, mock_requests):
         """Test searching for existing events"""
@@ -273,7 +273,7 @@ class TestSearchEventsRoute(TestCase):
         self.assertContext('events', EXAMPLE_EVENTS)
         self.assertContext('app_config', app.app.config)
 
-    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.is_organizer', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_no_events_found(self, mock_requests):
         """Test searching for nonexisting events"""
