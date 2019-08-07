@@ -47,7 +47,7 @@ limitations under the License.
         </div>
         <div id="user_nav">
             {% block login_buttons %}
-            {% if not True %}
+            {% if not session['gauth_token'] %}
             <div id="sign_in_button">
                 <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
                 <script>
