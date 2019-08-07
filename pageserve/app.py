@@ -192,7 +192,7 @@ def add_event():
         user = get_user()
         if not user:
             return 'Error: not logged in.', 401
-        if not user['is_organizer']:
+        if not is_organizer(user):
             return 'Error: not authorized to add events.', 403
         url = app.config['EVENTS_ENDPOINT'] + 'add'
         form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
