@@ -27,7 +27,7 @@ from flask import Flask, request
 from werkzeug.exceptions import BadRequestKeyError
 from eventclass import Event
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/v1/', methods=['GET'])
@@ -38,7 +38,7 @@ def get_all_events():
         events_dict = build_events_dict(events)
         # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
-    except DBNotConnectedError as e:
+    except DBNotConnectedError:
         return 'Events database was undefined.', 500
 
 
@@ -53,7 +53,7 @@ def search_event():
         return json.loads(json_util.dumps(events_dict))
     except BadRequestKeyError:      # missing event attributes
         return 'Event name was entered incorrectly.', 400
-    except DBNotConnectedError as e:
+    except DBNotConnectedError:
         return 'Events database was undefined.', 500
 
 
@@ -77,14 +77,13 @@ def add_event():
         return 'Event added.', 201
     except BadRequestKeyError:      # missing event attributes
         return 'Event info was entered incorrectly.', 400
-    except DBNotConnectedError as e:
+    except DBNotConnectedError:
         return 'Events database was undefined.', 500
 
 
 @app.route('/v1/edit/<event_id>', methods=['PUT'])
 def edit_event(event_id):
     """Edit the event with the given id."""
-    pass
 
 
 @app.route('/v1/<event_id>', methods=['PUT'])
@@ -96,7 +95,7 @@ def get_one_event(event_id):
         events_dict = build_events_dict(events)
         # handle MongoDB objects (e.g. ObjectID) that aren't JSON serializable
         return json.loads(json_util.dumps(events_dict))
-    except DBNotConnectedError as e:
+    except DBNotConnectedError:
         return 'Events database was undefined.', 500
 
 

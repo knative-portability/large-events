@@ -141,11 +141,11 @@ def add_post():
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
-    r = requests.post(url, data=form_data, files=request.files)
-    if r.status_code == 201:
+    response = requests.post(url, data=form_data, files=request.files)
+    if response.status_code == 201:
         # upload successful, redirect to index
         return redirect(url_for("index"))
-    return r.content, r.status_code
+    return response.content, response.status_code
 
 
 @app.route('/v1/add_event', methods=['POST'])
@@ -186,9 +186,9 @@ def add_event():
 def get_posts():
     """Gets all posts from posts service."""
     url = app.config['POSTS_ENDPOINT']
-    r = requests.get(url, params={})
-    if r.status_code == 200:
-        return parse_posts(r.json())
+    response = requests.get(url, params={})
+    if response.status_code == 200:
+        return parse_posts(response.json())
     raise RuntimeError('Error in retrieving posts.')
 
 
@@ -211,9 +211,9 @@ def parse_posts(posts_dict):
 def get_events():
     """Gets all sub-events from events service."""
     url = app.config['EVENTS_ENDPOINT']
-    r = requests.get(url, params={})
-    if r.status_code == 200:
-        return parse_events(r.json())
+    response = requests.get(url, params={})
+    if response.status_code == 200:
+        return parse_events(response.json())
     raise RuntimeError('Error in retrieving events.')
 
 

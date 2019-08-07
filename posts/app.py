@@ -33,31 +33,6 @@ app = Flask(__name__)  # pylint: disable=invalid-name
 REQUIRED_ATTRIBUTES = {'event_id', 'author_id', 'text', 'files'}
 
 
-@app.route('/v1/add', methods=['POST'])
-def upload_new_post():
-    """Make a new post upload to the server.
-
-    Post request body should contain multipart/form-data with:
-    event_id: id of the event to post to
-    author_id: user id of the user making the post
-    text: text to be sent
-    All the files the user wants to upload
-    to the server.
-    """
-    try:
-        post = {
-            'event_id': request.form['event_id'],
-            'author_id': request.form['author_id'],
-            'text':  request.form['text'],
-            'files': [file for file in request.files.values()]
-        }
-        return str(upload_new_post_to_db(post, app.config['COLLECTION'])), 201
-    except BadRequestKeyError:
-        return f'Invalid request. Required data: {REQUIRED_ATTRIBUTES}.', 400
-    except ValueError:
-        return 'Post must contain text and/or files.', 400
-
-
 @app.route('/v1/', methods=['GET'])
 def get_all_posts():
     """Get all posts for the whole event."""
@@ -89,6 +64,31 @@ def delete_post_by_id(post_id):
         return delete_post(post_id, author_id, app.config['COLLECTION'])
     except BadRequestKeyError:
         return 'Error: request missing `author_id`.', 400
+
+
+@app.route('/v1/add', methods=['POST'])
+def upload_new_post():
+    """Make a new post upload to the server.
+
+    Post request body should contain multipart/form-data with:
+    event_id: id of the event to post to
+    author_id: user id of the user making the post
+    text: text to be sent
+    All the files the user wants to upload
+    to the server.
+    """
+    try:
+        post = {
+            'event_id': request.form['event_id'],
+            'author_id': request.form['author_id'],
+            'text':  request.form['text'],
+            'files': [file for file in request.files.values()]
+        }
+        return str(upload_new_post_to_db(post, app.config['COLLECTION'])), 201
+    except BadRequestKeyError:
+        return f'Invalid request. Required data: {REQUIRED_ATTRIBUTES}.', 400
+    except ValueError:
+        return 'Post must contain text and/or files.', 400
 
 
 @app.route('/v1/by_event/<event_id>', methods=['GET'])
@@ -135,6 +135,15 @@ def find_posts_in_db(collection, post_id=None, event_id=None):
     return list_of_posts
 
 
+def generate_timestamp():
+    """Generate timestamp of the current time for placement in db.
+
+    Returns:
+        datetime: the current time.
+    """
+    return datetime.datetime.utcnow().isoformat(sep=' ', timespec='seconds')
+
+
 def serialize_posts_to_json(post_list):
     """Serialize the post list into a json object.
 
@@ -151,6 +160,18 @@ def serialize_posts_to_json(post_list):
     return json.loads(json_util.dumps(
         {'posts': post_list,
          'num_posts': len(post_list)}))
+
+
+def upload_file_to_cloud(file):
+    """Uploads a file to the GCloud Storage bucket.
+
+    Returns:
+        str: Public URL of the file in the cloud.
+    """
+    filename = str(uuid.uuid4()) + '-' + file.filename
+    blob = CLOUD_STORAGE_BUCKET.blob(filename)
+    blob.upload_from_file(file)
+    return blob.public_url
 
 
 def upload_new_post_to_db(post, collection):
@@ -185,27 +206,6 @@ def upload_new_post_to_db(post, collection):
     post['files'] = [
         upload_file_to_cloud(file) for file in post['files']]
     return collection.insert_one(post).inserted_id
-
-
-def generate_timestamp():
-    """Generate timestamp of the current time for placement in db.
-
-    Returns:
-        datetime: the current time.
-    """
-    return datetime.datetime.utcnow().isoformat(sep=' ', timespec='seconds')
-
-
-def upload_file_to_cloud(file):
-    """Uploads a file to the GCloud Storage bucket.
-
-    Returns:
-        str: Public URL of the file in the cloud.
-    """
-    filename = str(uuid.uuid4()) + '-' + file.filename
-    blob = CLOUD_STORAGE_BUCKET.blob(filename)
-    blob.upload_from_file(file)
-    return blob.public_url
 
 
 def connect_to_cloud_storage():  # pragma: no cover
