@@ -188,13 +188,23 @@ def add_event():
         Redirect to index if 201 response from events service.
         Error message and status 400 otherwise.
     """
-    url = app.config['EVENTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
-    response = requests.post(url, data=form_data)
-    if response.status_code == 201:
-        # upload successful, redirect to index
-        return redirect(url_for("index"))
-    return response.content, response.status_code
+    try:
+        user = get_user()
+        if not user:
+            return 'Error: not logged in.', 401
+        if not user['is_organizer']:
+            return 'Error: not authorized to add events.', 403
+        url = app.config['EVENTS_ENDPOINT'] + 'add'
+        form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
+        # get rid of 'T' separator in event_time
+        form_data['event_time'] = form_data['event_time'].replace('T', ' ')
+        r = requests.post(url, data=form_data)
+        if r.status_code == 201:
+            # upload successful, redirect to index
+            return redirect(url_for('index'))
+        return r.content, r.status_code
+    except KeyError as error:
+        return f'Error: {error}', 400
 
 
 def get_posts():
