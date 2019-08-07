@@ -65,12 +65,12 @@ def authenticate_and_get_user():
 
 @app.route('/v1/authorization', methods=['POST'])
 def get_authorization():
-    """Finds whether the given user is authorized for edit access."""
+    """Finds whether the given user is an authorized organizer."""
     user_id = request.form.get('user_id')
     if user_id is None:
         return 'Error: You must supply a "user_id" POST parameter!', 400
     authorized = find_authorization_in_db(user_id, app.config['COLLECTION'])
-    return jsonify(edit_access=authorized)
+    return jsonify(is_organizer=authorized)
 
 
 @app.route('/v1/authorization/update', methods=['POST'])
@@ -87,7 +87,7 @@ def update_authorization():
             return 'Not authorized to make this request.', 403
         update_user_authorization_in_db(
             target_user_id, is_organizer, app.config['COLLECTION'])
-        return jsonify(edit_access=is_organizer)
+        return jsonify(is_organizer=is_organizer)
     except (AttributeError, ValueError, KeyError, BadRequestKeyError) as error:
         return f'Error: {error}', 400
 
