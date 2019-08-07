@@ -60,6 +60,7 @@ EXAMPLE_POSTS = [
      'event_id': 'valid_post_id',
      'text': 'example post 2.'}]
 EXAMPLE_EVENT_ID = '123456789123456789123456'
+DIFFERENT_EVENT_ID = '987654321987654321654321'
 EXAMPLE_EVENTS = [
     {'_id': EXAMPLE_EVENT_ID,
      'name': 'valid_event',
@@ -67,7 +68,7 @@ EXAMPLE_EVENTS = [
      'event_time': 'soon',
      'author': 'app_user',
      'created_at': 'in the past'},
-    {'_id': '987654321987654321654321',
+    {'_id': DIFFERENT_EVENT_ID,
      'name': 'valid_event',
      'description': 'this event is valid too',
      'event_time': 'soon',
