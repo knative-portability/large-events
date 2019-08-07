@@ -260,7 +260,7 @@ class TestSearchEventsRoute(TestCase):
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_existing_events(self, mock_requests):
-        """Test searching for existing events"""
+        """Test searching for existing events."""
         mock_requests.get(self.expected_url,
                           json={'events': EXAMPLE_EVENTS,
                                 'num_events': len(EXAMPLE_EVENTS)},
@@ -277,7 +277,7 @@ class TestSearchEventsRoute(TestCase):
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_search_no_events_found(self, mock_requests):
-        """Test searching for nonexisting events"""
+        """Test searching for nonexisting events."""
         mock_requests.get(self.expected_url,
                           json={'events': [], 'num_events': 0},
                           status_code=200)
@@ -292,7 +292,7 @@ class TestSearchEventsRoute(TestCase):
 
     @requests_mock.Mocker()
     def test_search_events_error(self, mock_requests):
-        """Test events service error when searching for events"""
+        """Test events service error when searching for events."""
         mock_requests.get(self.expected_url,
                           text='Error in getting events',
                           status_code=500)
