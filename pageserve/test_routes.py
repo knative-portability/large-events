@@ -67,7 +67,7 @@ EXAMPLE_EVENTS = [
      'author': 'app_user',
      'created_at': 'in the past'},
     {'_id': {'$oid': '456def'},
-     'name': 'another_valid_event',
+     'name': 'valid_event',
      'description': 'this event is valid too',
      'event_time': 'soon',
      'author': 'app_user',
