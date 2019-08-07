@@ -67,6 +67,11 @@ def search_event():
 
 @app.route('/v1/query_event', methods=['GET'])
 def query_event_by_id():
+    """
+    Queries for the event with the given ID.
+
+    Displays a page with the result if query is successful.
+    """
     try:
         event_id = request.args['event_id']
         response = requests.put(app.config['EVENTS_ENDPOINT'] + event_id)

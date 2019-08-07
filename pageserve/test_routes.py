@@ -241,7 +241,7 @@ class TestMainTemplateRoutes(TestCase):
 
 
 class TestSearchEventsRoute(TestCase):
-    """Tests searching for events at GET /v1/search_event."""
+    """Tests searching for events at POST /v1/search_event."""
 
     def create_app(self):
         """Creates and returns a Flask instance.
@@ -310,7 +310,7 @@ class TestSearchEventsRoute(TestCase):
 
 
 class TestQueryEventsByIDRoute(TestCase):
-    """Tests searching for events at GET /v1/search_event."""
+    """Tests querying for events at GET /v1/query_event."""
 
     def create_app(self):
         """Creates and returns a Flask instance.
@@ -329,7 +329,7 @@ class TestQueryEventsByIDRoute(TestCase):
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_query_existing_event(self, mock_requests):
-        """Test searching for existing events"""
+        """Test querying for existing event."""
         mock_requests.put(self.expected_url + EXAMPLE_EVENT_ID,
                           json={'events': EXAMPLE_EVENTS[0], 'num_events': 1},
                           status_code=200)
@@ -345,7 +345,7 @@ class TestQueryEventsByIDRoute(TestCase):
     @patch('app.has_edit_access', MagicMock(return_value=True))
     @requests_mock.Mocker()
     def test_query_no_event_found(self, mock_requests):
-        """Test searching for nonexisting events"""
+        """Test querying for nonexisting event."""
         nonexistent_id = 'nonexistent1234567890123'
         mock_requests.put(self.expected_url + nonexistent_id,
                           json={'events': [], 'num_events': 0},
@@ -361,7 +361,7 @@ class TestQueryEventsByIDRoute(TestCase):
 
     @requests_mock.Mocker()
     def test_query_events_error(self, mock_requests):
-        """Test events service error when querying for events"""
+        """Test events service error when querying for events."""
         mock_requests.put(self.expected_url + EXAMPLE_EVENT_ID,
                           text='Error in getting events',
                           status_code=500)
