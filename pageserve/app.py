@@ -41,6 +41,30 @@ def index():
         return str(error), 500
 
 
+@app.route('/v1/search_event', methods=['POST'])
+def search_event():
+    """
+    Searches for the event(s) with the given name.
+
+    Displays a page with all results if query is successful.
+    """
+    try:
+        event_name = request.form['event_name']
+        response = requests.get(app.config['EVENTS_ENDPOINT'] + 'search',
+                                params={'name': event_name})
+        if response.status_code == 200:
+            return render_template(
+                'search_results.html',
+                auth=has_edit_access(get_user()),
+                events=parse_events(response.json()),
+                app_config=app.config
+            )
+        else:
+            return 'Unable to retrieve events', 500
+    except BadRequestKeyError as error:
+        return f'Error: {error}.', 400
+
+
 @app.route('/v1/delete_post/<post_id>', methods=['DELETE'])
 def delete_post(post_id):
     """Authenticates and proxies a request to users service to delete a post."""
