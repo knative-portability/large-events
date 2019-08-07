@@ -33,7 +33,7 @@ def index():
         return render_template(
             'index.html',
             posts=get_posts(),
-            auth=has_edit_access(get_user()),
+            auth=is_organizer(get_user()),
             events=get_events(),
             app_config=app.config
         )
@@ -55,7 +55,30 @@ def search_event():
         if response.status_code == 200:
             return render_template(
                 'search_results.html',
-                auth=has_edit_access(get_user()),
+                auth=is_organizer(get_user()),
+                events=parse_events(response.json()),
+                app_config=app.config
+            )
+        else:
+            return 'Unable to retrieve events', 500
+    except BadRequestKeyError as error:
+        return f'Error: {error}.', 400
+
+
+@app.route('/v1/query_event', methods=['GET'])
+def query_event_by_id():
+    """
+    Queries for the event with the given ID.
+
+    Displays a page with the result if query is successful.
+    """
+    try:
+        event_id = request.args['event_id']
+        response = requests.put(app.config['EVENTS_ENDPOINT'] + event_id)
+        if response.status_code == 200:
+            return render_template(
+                'search_results.html',
+                auth=is_organizer(get_user()),
                 events=parse_events(response.json()),
                 app_config=app.config
             )
@@ -84,7 +107,7 @@ def show_events():
         return render_template(
             'events.html',
             events=get_events(),
-            auth=has_edit_access(get_user()),
+            auth=is_organizer(get_user()),
             app_config=app.config
         )
     except RuntimeError as error:
@@ -195,7 +218,7 @@ def add_event():
         user = get_user()
         if not user:
             return 'Error: not logged in.', 401
-        if not user['is_organizer']:
+        if not is_organizer(user):
             return 'Error: not authorized to add events.', 403
         url = app.config['EVENTS_ENDPOINT'] + 'add'
         form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
@@ -260,13 +283,13 @@ def parse_events(events_dict):
     return events_dict['events']
 
 
-def has_edit_access(user):
-    """Determines if the user with the given info has edit access."""
+def is_organizer(user):
+    """Determines if the user with the given info is an event organizer."""
     if user is None:
         return False
     url = app.config['USERS_ENDPOINT'] + 'authorization'
     response = requests.post(url, data={'user_id': user['user_id']})
-    return response.json()['edit_access'] is True
+    return response.json()['is_organizer'] is True
 
 
 def get_user():
