@@ -350,6 +350,13 @@ class TestAddPostRoute(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data.decode(), 'Example error message')
 
+    def test_not_logged_in(self):
+        """Not logged in, don't add."""
+        response = self.client.post('/v1/add_post', data=INVALID_POST_FORM)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Error:", response.data.decode())
+
 
 class TestAddEventRoute(unittest.TestCase):
     """Tests adding events at POST /v1/add_event."""
