@@ -39,7 +39,7 @@
   flex: 1 1 auto;
 }
 
-.search_box input[type=text] {
+.search_box input[type=text] {      /* style search bar */
   padding: 8px;
   margin-left: 20px;
   font-size: 16px;
@@ -47,6 +47,7 @@
   width: 40%;
 }
 
+/* search bar extends if screen is narrow */
 @media screen and (max-width: 900px) {
   .search_box input[type=text]:focus {
     width: 80%;
