@@ -46,7 +46,8 @@
   margin-left: 20px;
   font-size: 16px;
   border: none;
-  width: 40%;
+  width: 80%;
+  max-width: 500px;
 }
 
 /* search bar extends if screen is narrow */
