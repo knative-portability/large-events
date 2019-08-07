@@ -17,17 +17,18 @@
 import json
 import unittest
 from unittest import mock
+import requests
 import requests_mock
 import flask
 import app
 
-AUTHORIZED_RESPONSE_JSON = {"edit_access": True}
-UNAUTHORIZED_RESPONSE_JSON = {"edit_access": False}
+AUTHORIZED_RESPONSE_JSON = {'edit_access': True}
+UNAUTHORIZED_RESPONSE_JSON = {'edit_access': False}
 
 VALID_SESSION = {
-    "user_id": "abc123 pretend I am a user ID.",
-    "name": "Boaty McBoatface",
-    "gauth_token": "Pretend I am a valid GAuth token."}
+    'user_id': 'abc123 pretend I am a user ID.',
+    'name': 'Boaty McBoatface',
+    'gauth_token': 'Pretend I am a valid GAuth token.'}
 
 
 class TestServe(unittest.TestCase):
@@ -35,7 +36,7 @@ class TestServe(unittest.TestCase):
 
     def setUp(self):
         """Create secret key for test session."""
-        app.app.secret_key = "Secret test key!"
+        app.app.secret_key = 'Secret test key!'
 
     def test_get_user(self):
         """Checks if users service returns a correctly formatted object.
@@ -47,21 +48,29 @@ class TestServe(unittest.TestCase):
         with app.app.test_request_context(), app.app.test_client():
             mock_response = mock.MagicMock()
             mock_response.status_code = 201
-            mock_response.json.return_value = {"is_organizer": True}
-            with mock.patch("app.authenticate_with_users_service",
+            mock_response.json.return_value = {'is_organizer': True}
+            with mock.patch('app.authenticate_with_users_service',
                             return_value=mock_response):
-                flask.session["user_id"] = VALID_SESSION["user_id"]
-                flask.session["name"] = VALID_SESSION["name"]
-                flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+                flask.session['user_id'] = VALID_SESSION['user_id']
+                flask.session['name'] = VALID_SESSION['name']
+                flask.session['gauth_token'] = VALID_SESSION['gauth_token']
                 result = app.get_user()
 
-                valid_response = result["is_organizer"] is True
+                valid_response = result['is_organizer'] is True
                 self.assertTrue(valid_response)
 
                 # now test no user in session
                 flask.session.clear()
                 result = app.get_user()
                 self.assertIsNone(result)
+
+    def test_get_user_connection_error(self):
+        """Can't connect to users service, requests raises, return None."""
+        with app.app.test_request_context(), app.app.test_client(), \
+                mock.patch('app.requests.post',
+                           side_effect=requests.exceptions.ConnectionError):
+            flask.session["gauth_token"] = VALID_SESSION["gauth_token"]
+            self.assertIsNone(app.get_user())
 
     @requests_mock.Mocker()
     def test_edit_access(self, requests_mocker):
@@ -71,15 +80,15 @@ class TestServe(unittest.TestCase):
         called by app.has_edit_access.
         """
         # is authorized
-        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+        requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authorization',
                              json=AUTHORIZED_RESPONSE_JSON)
         self.assertTrue(app.has_edit_access(
-            {"user_id": "Pretend I am authorized."}))
+            {'user_id': 'Pretend I am authorized.'}))
         # not authorized
-        requests_mocker.post(app.app.config["USERS_ENDPOINT"] + "authorization",
+        requests_mocker.post(app.app.config['USERS_ENDPOINT'] + 'authorization',
                              json=UNAUTHORIZED_RESPONSE_JSON)
         self.assertFalse(app.has_edit_access(
-            {"user_id": "Pretend I am NOT authorized."}))
+            {'user_id': 'Pretend I am NOT authorized.'}))
         # No user sent give no authorization. This might happens when a user
         # is logged out so app.get_user() returns None.
         self.assertFalse(app.has_edit_access(None))
@@ -104,8 +113,8 @@ class TestGetPosts(unittest.TestCase):
     """Test app.get_posts function with mock call to posts service."""
 
     def setUp(self):
-        self.url = app.app.config["POSTS_ENDPOINT"]
-        self.posts_dict = {"posts": ["these", "are", "fake", "posts"]}
+        self.url = app.app.config['POSTS_ENDPOINT']
+        self.posts_dict = {'posts': ['these', 'are', 'fake', 'posts']}
 
     @requests_mock.Mocker()
     def test_get_posts_success(self, mock_requests):
@@ -118,7 +127,7 @@ class TestGetPosts(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_posts_fail(self, mock_requests):
         """Test that error is raised when posts cannot be retrieved."""
-        mock_requests.get(self.url, text="Error message.", status_code=500)
+        mock_requests.get(self.url, text='Error message.', status_code=500)
         with self.assertRaises(RuntimeError):
             app.get_posts()
 
@@ -127,8 +136,8 @@ class TestGetEvents(unittest.TestCase):
     """Test app.get_events function with mock call to events service."""
 
     def setUp(self):
-        self.url = app.app.config["EVENTS_ENDPOINT"]
-        self.events_dict = {"events": ["these", "are", "fake", "events"]}
+        self.url = app.app.config['EVENTS_ENDPOINT']
+        self.events_dict = {'events': ['these', 'are', 'fake', 'events']}
 
     @requests_mock.Mocker()
     def test_get_events_success(self, mock_requests):
@@ -141,7 +150,7 @@ class TestGetEvents(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_events_fail(self, mock_requests):
         """Test error is raised when events cannot be retrieved."""
-        mock_requests.get(self.url, text="Error message.", status_code=500)
+        mock_requests.get(self.url, text='Error message.', status_code=500)
         with self.assertRaises(RuntimeError):
             app.get_events()
 

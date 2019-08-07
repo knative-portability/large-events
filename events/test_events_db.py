@@ -20,7 +20,7 @@ import mongomock
 import app
 
 EXAMPLE_TIME_STRING = datetime.datetime(
-    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=" ", timespec="seconds")
+    2019, 6, 11, 10, 33, 1, 100000).isoformat(sep=' ', timespec='seconds')
 
 
 class TestEventsDB(unittest.TestCase):

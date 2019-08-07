@@ -68,12 +68,12 @@ def search_event():
 def delete_post(post_id):
     """Authenticates and proxies a request to users service to delete a post."""
     try:
-        my_user_id = get_user()["user_id"]
-        response = requests.delete(app.config["POSTS_ENDPOINT"] + post_id,
-                                   data={"author_id": my_user_id})
+        my_user_id = get_user()['user_id']
+        response = requests.delete(app.config['POSTS_ENDPOINT'] + post_id,
+                                   data={'author_id': my_user_id})
         return response.text, response.status_code
     except TypeError:
-        return "Error: Not signed in", 401
+        return 'Error: Not signed in', 401
 
 
 @app.route('/v1/events', methods=['GET'])
@@ -108,17 +108,17 @@ def authenticate_and_get_user():
             400: error message if authentication was not successful.
     """
     try:
-        gauth_token = request.form["gauth_token"]
+        gauth_token = request.form['gauth_token']
         response = authenticate_with_users_service(gauth_token)
 
         if response.status_code == 201:
             # authentication successful, store login in cookies
-            session["user_id"] = response.json()["user_id"]
-            session["name"] = response.json()["name"]
-            session["gauth_token"] = gauth_token
+            session['user_id'] = response.json()['user_id']
+            session['name'] = response.json()['name']
+            session['gauth_token'] = gauth_token
         return response.content, response.status_code
-    except BadRequestKeyError as error:
-        return f"Error: {error}.", 400
+    except (BadRequestKeyError, requests.exceptions.ConnectionError) as error:
+        return f'Error: {error}.', 400
 
 
 @app.route('/v1/sign_out', methods=['GET'])
@@ -129,7 +129,7 @@ def sign_out():
     Redirects to the index page.
     """
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for('index'))
 
 
 def authenticate_with_users_service(gauth_token):
@@ -142,8 +142,8 @@ def authenticate_with_users_service(gauth_token):
         response: response from the users service
     """
     return requests.post(
-        app.config["USERS_ENDPOINT"] + "authenticate",
-        data={"gauth_token": gauth_token})
+        app.config['USERS_ENDPOINT'] + 'authenticate',
+        data={'gauth_token': gauth_token})
 
 
 @app.route('/v1/add_post', methods=['POST'])
@@ -159,13 +159,15 @@ def add_post():
         All files to be uploaded(can be multiple)
 
     Response:
-        String response and response code returned by posts service:
-            201 if post added successfully
-            400 if post info is malformatted
+        Redirect to index if 201 response from posts service.
+        Error message and status 400 otherwise.
     """
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
+    form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
     r = requests.post(url, data=form_data, files=request.files)
+    if r.status_code == 201:
+        # upload successful, redirect to index
+        return redirect(url_for("index"))
     return r.content, r.status_code
 
 
@@ -182,13 +184,15 @@ def add_event():
         event_time: time of event
 
     Response:
-        String response and response code returned by posts service:
-            201 if event added successfully
-            400 if event info is malformatted
+        Redirect to index if 201 response from events service.
+        Error message and status 400 otherwise.
     """
     url = app.config['EVENTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user()["user_id"])
+    form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
     r = requests.post(url, data=form_data)
+    if r.status_code == 201:
+        # upload successful, redirect to index
+        return redirect(url_for("index"))
     return r.content, r.status_code
 
 
@@ -198,7 +202,7 @@ def get_posts():
     r = requests.get(url, params={})
     if r.status_code == 200:
         return parse_posts(r.json())
-    raise RuntimeError("Error in retrieving posts.")
+    raise RuntimeError('Error in retrieving posts.')
 
 
 def parse_posts(posts_dict):
@@ -223,7 +227,7 @@ def get_events():
     r = requests.get(url, params={})
     if r.status_code == 200:
         return parse_events(r.json())
-    raise RuntimeError("Error in retrieving events.")
+    raise RuntimeError('Error in retrieving events.')
 
 
 def parse_events(events_dict):
@@ -246,25 +250,28 @@ def has_edit_access(user):
     """Determines if the user with the given info has edit access."""
     if user is None:
         return False
-    url = app.config["USERS_ENDPOINT"] + "authorization"
-    response = requests.post(url, data={"user_id": user["user_id"]})
-    return response.json()["edit_access"] is True
+    url = app.config['USERS_ENDPOINT'] + 'authorization'
+    response = requests.post(url, data={'user_id': user['user_id']})
+    return response.json()['edit_access'] is True
 
 
 def get_user():
     """Retrieves the current user of the app or None if not signed in."""
-    if "gauth_token" in session:
-        response = authenticate_with_users_service(
-            session["gauth_token"])
-        if response.status_code == 201:
-            return response.json()
-    return None  # Not signed in
+    try:
+        if 'gauth_token' in session:
+            response = authenticate_with_users_service(
+                session['gauth_token'])
+            if response.status_code == 201:
+                return response.json()
+        return None  # Not signed in
+    except requests.exceptions.ConnectionError:
+        return None  # Can't connect to users service
 
 
 # set GAuth callback to the route defined by the authenticate() function
 with app.test_request_context():
-    app.config["GAUTH_CALLBACK_ENDPOINT"] = url_for(
-        "authenticate_and_get_user")
+    app.config['GAUTH_CALLBACK_ENDPOINT'] = url_for(
+        'authenticate_and_get_user')
 
 
 def config_endpoints(endpoints):
@@ -275,17 +282,17 @@ def config_endpoints(endpoints):
         if endpoint in os.environ:
             app.config[endpoint] = os.environ.get(endpoint)
         else:
-            raise NameError("Endpoint {} not defined.".format(endpoint))
+            raise NameError('Endpoint {} not defined.'.format(endpoint))
 
 
 config_endpoints(['USERS_ENDPOINT', 'EVENTS_ENDPOINT', 'POSTS_ENDPOINT'])
 
-app.config["GAUTH_CLIENT_ID"] = os.environ.get("GAUTH_CLIENT_ID")
-app.config["GAUTH_CALLBACK_ENDPOINT"] = (app.config['USERS_ENDPOINT']
-                                         + "authenticate")
+app.config['GAUTH_CLIENT_ID'] = os.environ.get('GAUTH_CLIENT_ID')
+app.config['GAUTH_CALLBACK_ENDPOINT'] = (app.config['USERS_ENDPOINT']
+                                         + 'authenticate')
 
 # set flask secret key used for session encryption
-app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
-if __name__ == "__main__":    # pragma: no cover
+if __name__ == '__main__':    # pragma: no cover
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
