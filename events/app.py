@@ -46,8 +46,8 @@ def get_all_events():
 def search_event():
     """Search for the event with the given name in the DB.
 
-    Uses MongoDB text search, which ignores capitalization and searches on word
-    stems.
+    Uses MongoDB text search, which ignores capitalization and stop words, and
+    searches on word stems.
     """
     try:
         event_name = request.args['name']
