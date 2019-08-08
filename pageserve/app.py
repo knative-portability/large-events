@@ -97,7 +97,7 @@ def get_posts_for_event(event_id):
         return render_template(
             'index.html',
             posts=parse_events(response.json()),
-            auth=has_edit_access(get_user()),
+            auth=is_organizer(get_user()),
             events=get_events(),
             app_config=app.config
         )
