@@ -29,6 +29,7 @@ limitations under the License.
         <p>Event time: {{event.event_time}}</p>
         <p>Event description: {{event.description}}</p>
         <p>Created by {{event.author}} at {{event.created_at}}</p>
+        <p><a href="/v1/get_posts/{{ event._id }}">Posts for this event</a></p>
     </div>
 {% endfor %}
 
