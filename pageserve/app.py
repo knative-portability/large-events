@@ -73,7 +73,7 @@ def get_posts_for_event(event_id):
     if response.status_code == 200:
         return render_template(
             'index.html',
-            posts=get_posts(),
+            posts=parse_events(response.json()),
             auth=has_edit_access(get_user()),
             events=get_events(),
             app_config=app.config

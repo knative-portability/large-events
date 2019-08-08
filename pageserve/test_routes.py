@@ -308,6 +308,61 @@ class TestSearchEventsRoute(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
+class TestGetPostsForEventRoute(TestCase):
+    """Tests retrieving posts for an event at GET /v1/get_posts/<event_id>."""
+
+    def create_app(self):
+        """Creates and returns a Flask instance.
+
+        Required by flask_testing to test templates."""
+        test_app = flask.Flask(__name__)
+        test_app.config['TESTING'] = True
+        return test_app
+
+    def setUp(self):
+        """Set up test client."""
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['EVENTS_ENDPOINT'] + 'get_posts/'
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @requests_mock.Mocker()
+    def test_get_existing_posts(self):
+        """Checks existing posts are returned correctly."""
+        mock_requests.get(self.expected_url,
+                          json={'events': EXAMPLE_POSTS,
+                                'num_events': len(EXAMPLE_POSTS)},
+                          status_code=200)
+        response = self.client.get('/v1/get_posts')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('posts', EXAMPLE_POSTS)
+        self.assertContext('app_config', app.app.config)
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_posts', MagicMock(side_effect=RuntimeError))
+    def test_get_nonexistent_posts(self):
+        """Checks the case when no posts are found."""
+        mock_requests.get(self.expected_url,
+                          json={'events': [], 'num_events': 0},
+                          status_code=200)
+        response = self.client.get('/v1/get_posts')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('posts', [])
+        self.assertContext('app_config', app.app.config)
+
+    @patch('app.has_edit_access', MagicMock(return_value=True))
+    @patch('app.get_posts', MagicMock(side_effect=RuntimeError))
+    def test_posts_service_error(self):
+        """Checks the case when posts service throws an error."""
+        response = self.client.get('/v1/get_posts')
+        self.assertEqual(response.status_code, 200)
+
+
 class TestAddPostRoute(unittest.TestCase):
     """Tests adding posts at POST /v1/add_post."""
 
