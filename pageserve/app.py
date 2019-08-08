@@ -184,10 +184,13 @@ def add_post():
 
     Response:
         Redirect to index if 201 response from posts service.
-        Error message and status 400 otherwise.
+        Error message and status code otherwise.
     """
+    user = get_user()
+    if not user:
+        return 'Error: not logged in.', 401
     url = app.config['POSTS_ENDPOINT'] + 'add'
-    form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
+    form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
     response = requests.post(url, data=form_data, files=request.files)
     if response.status_code == 201:
         # upload successful, redirect to index
