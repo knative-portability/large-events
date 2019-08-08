@@ -67,8 +67,6 @@ def add_event():
             'author': request.form['author_id'],
             'event_time': request.form['event_time']
         }
-        # TODO(cmei4444): Athenticate user and verify that user has event
-        # editing access
         current_time = datetime.datetime.utcnow().isoformat(sep=' ',
                                                             timespec='seconds')
         info = build_event_info(info, current_time)
