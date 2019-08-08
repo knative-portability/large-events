@@ -145,6 +145,12 @@ textarea {
   margin: 75px 15% 30px;
 }
 
+@media screen and (max-width: 540px) {
+  .page_content {
+    margin-top: 110px;
+  }
+}
+
 body {
   background-color: #f7f7f7;
   margin: 0px;
