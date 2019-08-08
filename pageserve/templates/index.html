@@ -43,7 +43,11 @@ limitations under the License.
 
 {% block content %}
 
-    <h2>Past Posts</h2>
+    {% if sub_event %}
+    <h2>Past Posts for Event {{ sub_event }}</h2>
+    {% else %}
+    <h2>All Past Posts</h2>
+    {% endif %}
     {% for post in posts|reverse %}
 
       <div class="content_box">
@@ -65,6 +69,10 @@ limitations under the License.
         {% endif %}
       </div>
     {% endfor %}
+
+    {% if not posts %}
+    <p>No posts found</p>
+    {% endif %}
 
     <hr class="form_divider">
 

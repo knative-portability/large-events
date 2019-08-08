@@ -99,6 +99,7 @@ def get_posts_for_event(event_id):
             posts=parse_posts(response.json()),
             auth=is_organizer(get_user()),
             events=get_events(),
+            sub_event=event_id,
             app_config=app.config
         )
     else:
