@@ -96,7 +96,7 @@ def get_posts_for_event(event_id):
     if response.status_code == 200:
         return render_template(
             'index.html',
-            posts=parse_events(response.json()),
+            posts=parse_posts(response.json()),
             auth=is_organizer(get_user()),
             events=get_events(),
             app_config=app.config

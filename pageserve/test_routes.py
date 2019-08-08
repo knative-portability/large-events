@@ -406,8 +406,8 @@ class TestGetPostsForEventRoute(TestCase):
     def test_get_existing_posts(self, mock_requests):
         """Checks existing posts are returned correctly."""
         mock_requests.get(self.expected_url + EXAMPLE_EVENT_ID,
-                          json={'events': EXAMPLE_POSTS,
-                                'num_events': len(EXAMPLE_POSTS)},
+                          json={'posts': EXAMPLE_POSTS,
+                                'num_posts': len(EXAMPLE_POSTS)},
                           status_code=200)
         response = self.client.get(f'/v1/get_posts/{EXAMPLE_EVENT_ID}')
         self.assertEqual(response.status_code, 200)
@@ -420,7 +420,7 @@ class TestGetPostsForEventRoute(TestCase):
     def test_get_nonexistent_posts(self, mock_requests):
         """Checks the case when no posts are found."""
         mock_requests.get(self.expected_url + DIFFERENT_EVENT_ID,
-                          json={'events': [], 'num_events': 0},
+                          json={'posts': [], 'num_posts': 0},
                           status_code=200)
         response = self.client.get(f'/v1/get_posts/{DIFFERENT_EVENT_ID}')
         self.assertEqual(response.status_code, 200)
