@@ -204,8 +204,7 @@ def upload_new_post_to_db(post, collection):
     # post is valid, add on timestamp, upload files, insert into db
     post['created_at'] = generate_timestamp()
     post['files'] = [
-        upload_file_to_cloud(file) for file in post['files']
-        if file.filename != '']
+        upload_file_to_cloud(file) for file in post['files']]
     return collection.insert_one(post).inserted_id
 
 

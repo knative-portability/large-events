@@ -166,7 +166,7 @@ def add_post():
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=get_user()['user_id'])
     images = ((img.filename, img.read())
-              for img in request.files.getlist("images"))
+              for img in request.files.getlist("images") if img.filename != '')
     response = requests.post(
         url, data=form_data, files=images)
     if response.status_code == 201:
