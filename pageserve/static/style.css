@@ -102,7 +102,7 @@
   max-height: 15%;
   overflow-y: scroll;
   background-color: #ffffff;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 0px 16px #c4c4c4;
   z-index: 1;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .dropdown-content a:hover {
-  background-color: #f1f1f1
+  background-color: #f1f1f1;
 }
 
 .filter_dropdown:hover .dropdown-content {
