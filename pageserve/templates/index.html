@@ -75,7 +75,7 @@ limitations under the License.
     <hr class="form_divider">
 
     <h2>Past Posts</h2>
-    {% for post in posts %}
+    {% for post in posts|reverse %}
 
       <div class="content_box">
         <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
@@ -92,7 +92,7 @@ limitations under the License.
         {% endif %}
 
         {% if post.author_id == session["user_id"] %}
-            <a href="#" onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
+            <a href onClick="deletePost('{{ post._id['$oid'] }}');" class="delete_button">Delete Post</a>
         {% endif %}
       </div>
     {% endfor %}

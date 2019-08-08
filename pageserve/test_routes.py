@@ -57,14 +57,15 @@ INVALID_EVENT_FORM = {
     'event_name': 'invalid_event_missing',
     'description': 'This event is missing a time!'}
 
+EXAMPLE_EVENT_ID = '123456789123456789123456'
 EXAMPLE_POSTS = [
     {'_id': {'$oid': '123abc'},
-     'event_id': 'valid_post_id',
+     'event_id': EXAMPLE_EVENT_ID,
      'text': 'example post 1.'},
     {'_id': {'$oid': '456def'},
-     'event_id': 'valid_post_id',
+     'event_id': EXAMPLE_EVENT_ID,
      'text': 'example post 2.'}]
-EXAMPLE_EVENT_ID = '123456789123456789123456'
+
 DIFFERENT_EVENT_ID = '987654321987654321654321'
 EXAMPLE_EVENTS = [
     {'_id': EXAMPLE_EVENT_ID,
@@ -317,7 +318,6 @@ class TestSearchEventsRoute(TestCase):
 
 class TestQueryEventsByIDRoute(TestCase):
     """Tests querying for events at GET /v1/query_event."""
-
     def create_app(self):
         """Creates and returns a Flask instance.
 
@@ -382,6 +382,60 @@ class TestQueryEventsByIDRoute(TestCase):
         response = self.client.get('/v1/query_event')
 
         self.assertEqual(response.status_code, 400)
+
+
+@patch('app.is_organizer', MagicMock(return_value=True))
+@patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
+@requests_mock.Mocker()
+class TestGetPostsForEventRoute(TestCase):
+    """Tests retrieving posts for an event at GET /v1/get_posts/<event_id>."""
+
+    def create_app(self):
+        """Creates and returns a Flask instance.
+
+        Required by flask_testing to test templates."""
+        test_app = flask.Flask(__name__)
+        test_app.config['TESTING'] = True
+        return test_app
+
+    def setUp(self):
+        """Set up test client."""
+        self.client = app.app.test_client()
+        self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'by_event/'
+
+    def test_get_existing_posts(self, mock_requests):
+        """Checks existing posts are returned correctly."""
+        mock_requests.get(self.expected_url + EXAMPLE_EVENT_ID,
+                          json={'posts': EXAMPLE_POSTS,
+                                'num_posts': len(EXAMPLE_POSTS)},
+                          status_code=200)
+        response = self.client.get(f'/v1/get_posts/{EXAMPLE_EVENT_ID}')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('posts', EXAMPLE_POSTS)
+        self.assertContext('app_config', app.app.config)
+
+    def test_get_nonexistent_posts(self, mock_requests):
+        """Checks the case when no posts are found."""
+        mock_requests.get(self.expected_url + DIFFERENT_EVENT_ID,
+                          json={'posts': [], 'num_posts': 0},
+                          status_code=200)
+        response = self.client.get(f'/v1/get_posts/{DIFFERENT_EVENT_ID}')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('index.html')
+
+        self.assertContext('auth', True)
+        self.assertContext('posts', [])
+        self.assertContext('app_config', app.app.config)
+
+    def test_posts_service_error(self, mock_requests):
+        """Checks the case when posts service throws an error."""
+        mock_requests.get(self.expected_url + EXAMPLE_EVENT_ID,
+                          status_code=500)
+        response = self.client.get(f'/v1/get_posts/{EXAMPLE_EVENT_ID}')
+        self.assertEqual(response.status_code, 500)
 
 
 class TestAddPostRoute(unittest.TestCase):

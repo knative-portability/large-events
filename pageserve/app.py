@@ -88,6 +88,23 @@ def query_event_by_id():
         return f'Error: {error}.', 400
 
 
+@app.route('/v1/get_posts/<event_id>', methods=['GET'])
+def get_posts_for_event(event_id):
+    """Retrieves all posts for a certain event and displays in web template."""
+    response = requests.get(app.config['POSTS_ENDPOINT'] +
+                            f'by_event/{event_id}')
+    if response.status_code == 200:
+        return render_template(
+            'index.html',
+            posts=parse_posts(response.json()),
+            auth=is_organizer(get_user()),
+            events=get_events(),
+            app_config=app.config
+        )
+    else:
+        return 'Unable to retrieve events', 500
+
+
 @app.route('/v1/delete_post/<post_id>', methods=['DELETE'])
 def delete_post(post_id):
     """Authenticates and proxies a request to users service to delete a post."""
@@ -191,7 +208,10 @@ def add_post():
         return 'Error: not logged in.', 401
     url = app.config['POSTS_ENDPOINT'] + 'add'
     form_data = dict(**request.form.to_dict(), author_id=user['user_id'])
-    response = requests.post(url, data=form_data, files=request.files)
+    images = ((img.filename, img.read())
+              for img in request.files.getlist("images") if img.filename != '')
+    response = requests.post(
+        url, data=form_data, files=images)
     if response.status_code == 201:
         # upload successful, redirect to index
         return redirect(url_for("index"))

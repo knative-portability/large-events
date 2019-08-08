@@ -93,6 +93,23 @@
   box-shadow: 0 0 8px #cccccc;
 }
 
+.content_box .delete_button {
+  border: 1px solid #8c1515;
+  color: #8c1515;
+  background-color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  display: block;
+  transition: all 200ms;
+  width: fit-content;
+  margin: 12px auto;
+}
+
+.content_box .delete_button:hover {
+  color: white;
+  background-color: #8c1515;
+}
+
 hr.form_divider {
   border-top: 5px double #8c8b8b;
 }
