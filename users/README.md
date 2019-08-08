@@ -30,6 +30,8 @@ Set up [Google Sign-In for Websites](https://developers.google.com/identity/sign
 export GAUTH_CLIENT_ID="123-my-google-oauth-service-client-id-456"
 ```
 
+After you have deployed both the users service and the pageserve service, you will need to mark users as organizers in the database for them to be authorized to create events. To do this, after a given user signs in from pageserve such that the users service inserts them into the database, find the user in the `users_collection` through your MongoDB explorer and set their `is_organizer` field to `true`.
+
 ### Running, Testing, and Deploying
 
 The procedures for running, testing, and deploying a microservice are the same for all of the microservices. See [the master README.md](../README.md).

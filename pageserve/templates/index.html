@@ -43,6 +43,37 @@ limitations under the License.
 
 {% block content %}
 
+    <div class="content_box form">
+    <h2>Create New Post</h2>
+    <form action="/v1/add_post" method="post" enctype="multipart/form-data">
+        <div>
+            <label for="event_id">Event ID:</label>
+            <select id="event_id" name="event_id">
+                {% for event in events %}
+                    <option value="{{ event._id['$oid'] }}">{{ event._id["$oid"] }} - {{ event.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="text">Text:</label>
+            <textarea type="text" rows="5" cols="60" id="text" name="text" placeholder="Enter your post here."></textarea>
+        </div>
+        <div>
+            <label for="images">Images:</label>
+            <input type="file" name="images" multiple>
+        </div>
+        <div class="button">
+            {% if session["gauth_token"] %}
+            <button type="submit">Post</button>
+            {% else %}
+            <button type="submit" disabled style="background-color: grey;">Sign in before posting</button>
+            {% endif %}
+        </div>
+    </form>
+    </div>
+
+    <hr class="form_divider">
+
     {% if sub_event %}
     <h2>Past Posts for Event {{ sub_event }}</h2>
     {% else %}
@@ -75,7 +106,7 @@ limitations under the License.
         {% endif %}
 
         {% if post.author_id == session["user_id"] %}
-            <a href="#" onClick="deletePost('{{ post._id['$oid'] }}');">Delete</a>
+            <a href onClick="deletePost('{{ post._id['$oid'] }}');" class="delete_button">Delete Post</a>
         {% endif %}
       </div>
     {% endfor %}
@@ -83,36 +114,5 @@ limitations under the License.
     {% if not posts %}
     <p>No posts found</p>
     {% endif %}
-
-    <hr class="form_divider">
-
-    <div class="content_box form">
-    <h2>Create New Post</h2>
-    <form action="/v1/add_post" method="post" enctype="multipart/form-data">
-        <div>
-            <label for="event_id">Event ID:</label>
-            <select id="event_id" name="event_id">
-                {% for event in events %}
-                    <option value="{{ event._id['$oid'] }}">{{ event._id["$oid"] }} - {{ event.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label for="text">Text:</label>
-            <textarea type="text" rows="5" cols="60" id="text" name="text" placeholder="Enter your post here."></textarea>
-        </div>
-        <div>
-            <label for="images">Images:</label>
-            <input type="file" name="images" multiple>
-        </div>
-        <div class="button">
-            {% if session["gauth_token"] %}
-            <button type="submit">Post</button>
-            {% else %}
-            <button type="submit" disabled style="background-color: grey;">Sign in before posting</button>
-            {% endif %}
-        </div>
-    </form>
-    </div>
 
 {% endblock content%}
