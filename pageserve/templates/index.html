@@ -44,12 +44,12 @@ limitations under the License.
 {% block content %}
 
     <h2>Past Posts</h2>
-    {% for post in posts %}
+    {% for post in posts|reverse %}
 
       <div class="content_box">
         <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
         <!-- TODO(cmei4444) - link to event info -->
-        <p>For event with ID {{ post.event_id }}</p>
+        <p>Posted in <a href="/v1/query_event?event_id={{ post.event_id }}">event with ID {{ post.event_id }}</a></p>
 
         {% if post.text %}
         <p>{{post.text}}</p>
@@ -88,7 +88,11 @@ limitations under the License.
             <input type="file" name="images" multiple>
         </div>
         <div class="button">
+            {% if session["gauth_token"] %}
             <button type="submit">Post</button>
+            {% else %}
+            <button type="submit" disabled style="background-color: grey;">Sign in before posting</button>
+            {% endif %}
         </div>
     </form>
     </div>
