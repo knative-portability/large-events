@@ -43,31 +43,6 @@ limitations under the License.
 
 {% block content %}
 
-    <h2>Past Posts</h2>
-    {% for post in posts|reverse %}
-
-      <div class="content_box">
-        <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-        <!-- TODO(cmei4444) - link to event info -->
-        <p>Posted in <a href="/v1/query_event?event_id={{ post.event_id }}">event with ID {{ post.event_id }}</a></p>
-
-        {% if post.text %}
-        <p>{{post.text}}</p>
-        {% endif %}
-        {% if post.files %}
-          {% for file in post.files %}
-          <img src="{{ file }}">
-          {% endfor %}
-        {% endif %}
-
-        {% if post.author_id == session["user_id"] %}
-            <a href onClick="deletePost('{{ post._id['$oid'] }}');" class="delete_button">Delete Post</a>
-        {% endif %}
-      </div>
-    {% endfor %}
-
-    <hr class="form_divider">
-
     <div class="content_box form">
     <h2>Create New Post</h2>
     <form action="/v1/add_post" method="post" enctype="multipart/form-data">
@@ -96,5 +71,30 @@ limitations under the License.
         </div>
     </form>
     </div>
+
+    <hr class="form_divider">
+
+    <h2>Past Posts</h2>
+    {% for post in posts|reverse %}
+
+      <div class="content_box">
+        <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
+        <!-- TODO(cmei4444) - link to event info -->
+        <p>Posted in <a href="/v1/query_event?event_id={{ post.event_id }}">event with ID {{ post.event_id }}</a></p>
+
+        {% if post.text %}
+        <p>{{post.text}}</p>
+        {% endif %}
+        {% if post.files %}
+          {% for file in post.files %}
+          <img src="{{ file }}">
+          {% endfor %}
+        {% endif %}
+
+        {% if post.author_id == session["user_id"] %}
+            <a href onClick="deletePost('{{ post._id['$oid'] }}');" class="delete_button">Delete Post</a>
+        {% endif %}
+      </div>
+    {% endfor %}
 
 {% endblock content%}

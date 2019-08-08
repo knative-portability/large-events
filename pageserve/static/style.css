@@ -1,11 +1,14 @@
 /* Add a black background color to the top navigation */
 .topnav {
+  width: 100%;
   background-color: #333;
   overflow: hidden;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  position: fixed;
+  top: 0;
 }
 
 /* Style the links inside the navigation bar */
@@ -156,7 +159,13 @@ textarea {
 }
 
 .page_content {
-  margin: 0 15%;
+  margin: 75px 15% 30px;
+}
+
+@media screen and (max-width: 540px) {
+  .page_content {
+    margin-top: 110px;
+  }
 }
 
 body {
