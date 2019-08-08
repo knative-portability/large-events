@@ -185,6 +185,8 @@ class TestSearchEventsRoute(unittest.TestCase):
         response = self.client.get(
             '/v1/search?name=' + VALID_EVENT_NAME.upper())
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(VALID_EVENT_NAME.upper(),
+                         app.text_search_event_name.call_args[0][1])
         data = json_util.loads(response.data)
 
         self.assertEqual(data['events'][0]['name'], VALID_EVENT_NAME)
