@@ -386,6 +386,7 @@ class TestQueryEventsByIDRoute(TestCase):
 
 @patch('app.is_organizer', MagicMock(return_value=True))
 @patch('app.get_events', MagicMock(return_value=EXAMPLE_EVENTS))
+@requests_mock.Mocker()
 class TestGetPostsForEventRoute(TestCase):
     """Tests retrieving posts for an event at GET /v1/get_posts/<event_id>."""
 
@@ -402,7 +403,6 @@ class TestGetPostsForEventRoute(TestCase):
         self.client = app.app.test_client()
         self.expected_url = app.app.config['POSTS_ENDPOINT'] + 'by_event/'
 
-    @requests_mock.Mocker()
     def test_get_existing_posts(self, mock_requests):
         """Checks existing posts are returned correctly."""
         mock_requests.get(self.expected_url + EXAMPLE_EVENT_ID,
@@ -417,7 +417,6 @@ class TestGetPostsForEventRoute(TestCase):
         self.assertContext('posts', EXAMPLE_POSTS)
         self.assertContext('app_config', app.app.config)
 
-    @requests_mock.Mocker()
     def test_get_nonexistent_posts(self, mock_requests):
         """Checks the case when no posts are found."""
         mock_requests.get(self.expected_url + DIFFERENT_EVENT_ID,
@@ -431,7 +430,6 @@ class TestGetPostsForEventRoute(TestCase):
         self.assertContext('posts', [])
         self.assertContext('app_config', app.app.config)
 
-    @requests_mock.Mocker()
     def test_posts_service_error(self, mock_requests):
         """Checks the case when posts service throws an error."""
         mock_requests.get(self.expected_url + EXAMPLE_EVENT_ID,
