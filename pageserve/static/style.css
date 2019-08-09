@@ -85,9 +85,9 @@
 }
 
 .filter_dropdown {
-  /* display: flex;
+  display: flex;
   flex-direction: column;
-  align-items: flex-end; */
+  align-items: flex-end;
 }
 
 .filter_bar {
@@ -111,8 +111,16 @@
   max-height: 15%;
   overflow-y: scroll;
   background-color: #ffffff;
-  box-shadow: 0px 0px 16px #c4c4c4;
+  box-shadow: 0px 5px 16px #c4c4c4;
   z-index: 1;
+  margin-top: 42px;
+}
+
+/* dropdown margin increases if screen is narrow and button becomes taller */
+@media screen and (max-width: 425px) {
+  .dropdown-content {
+      margin-top: 60px;
+  }
 }
 
 .dropdown-content a {
@@ -186,7 +194,9 @@ textarea {
   box-sizing: border-box;
 }
 
-.form textarea {
+.form textarea {  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   resize: none;
 }
 
