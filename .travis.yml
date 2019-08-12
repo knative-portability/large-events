@@ -25,7 +25,6 @@ env:
     POSTS_ENDPOINT=https://posts-l3zyoxchqa-uc.a.run.app/v1/
   - TEST_DIR=users
   - TEST_DIR=events
-    USERS_ENDPOINT=https://users-l3zyoxchqa-uc.a.run.app/v1/
   - TEST_DIR=posts
 before_script:
   - cd $TEST_DIR
