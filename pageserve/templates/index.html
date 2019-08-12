@@ -75,12 +75,17 @@ limitations under the License.
     <hr class="form_divider">
 
     {% if sub_event %}
-    <h2>Past Posts for Event {{ sub_event }}</h2>
+    <div class="filter_bar">
+        <h2>Past Posts for Event {{ sub_event }}</h2>
+        <div class="filter_dropdown">
+            <a href=".." class="btn_filter">Clear Filter</a>
+        </div>
+    </div>
     {% else %}
     <div class="filter_bar">
         <h2>All Past Posts</h2>
         <div class="filter_dropdown">
-            <button class="dropbtn">Filter by Event</button>
+            <button class="btn_filter">Filter by Event</button>
             <div class="dropdown-content">
               {% for event in events %}
                   <a href="/v1/get_posts/{{ event._id['$oid'] }}">{{ event._id['$oid'] }}</a>
