@@ -3,6 +3,7 @@
 Add, edit, and fetch events list.
 """
 
+# Authors: cmei4444
 # Copyright 2019 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,11 +86,6 @@ def add_event():
         return 'Events database was undefined.', 500
 
 
-@app.route('/v1/edit/<event_id>', methods=['PUT'])
-def edit_event(event_id):
-    """Edit the event with the given id."""
-
-
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
     """Retrieve one event by event_id."""
@@ -127,7 +123,6 @@ class DBNotConnectedError(ConnectionError):
 
 
 def connect_to_mongodb():   # pragma: no cover
-    # TODO(cmei4444): restructure to be consistent with other services
     """Connects to MongoDB Atlas database.
 
     Returns events collection if connection is successful, and None otherwise.

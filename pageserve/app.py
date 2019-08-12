@@ -3,6 +3,7 @@
 Serve web UI and act as an API gateway to other services.
 """
 
+# Authors: cmei4444, mukobi
 # Copyright 2019 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -274,8 +275,6 @@ def parse_posts(posts_dict):
     Returns:
         list: parsed list of posts.
     """
-    # TODO(cmei4444): implement parsing on posts - timestamps are formatted
-    # unreadably currently
     return posts_dict['posts']
 
 
@@ -299,8 +298,6 @@ def parse_events(events_dict):
     Returns:
         list: parsed list of events.
     """
-    # TODO(cmei4444): implement parsing on events - timestamps are formatted
-    # unreadably currently
     return events_dict['events']
 
 

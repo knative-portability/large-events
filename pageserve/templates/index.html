@@ -98,7 +98,6 @@ limitations under the License.
 
       <div class="content_box">
         <p>Posted by {{post.author_id}} at {{post.created_at}}</p>
-        <!-- TODO(cmei4444) - link to event info -->
         <p>Posted in <a href="/v1/query_event?event_id={{ post.event_id }}">event with ID {{ post.event_id }}</a></p>
 
         {% if post.text %}
