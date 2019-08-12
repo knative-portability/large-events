@@ -96,13 +96,14 @@
   align-items: center;
 }
 
-.dropbtn {
+.btn_filter {
   background-color: #4CAF50;
   color: white;
   padding: 12px;
   font-size: 16px;
   border: none;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .dropdown-content {
@@ -119,7 +120,7 @@
 /* dropdown margin increases if screen is narrow and button becomes taller */
 @media screen and (max-width: 425px) {
   .dropdown-content {
-      margin-top: 60px;
+    margin-top: 60px;
   }
 }
 
@@ -138,7 +139,7 @@
   display: block;
 }
 
-.filter_dropdown:hover .dropbtn {
+.filter_dropdown:hover .btn_filter {
   background-color: #3e8e41;
 }
 
@@ -194,7 +195,8 @@ textarea {
   box-sizing: border-box;
 }
 
-.form textarea {  display: flex;
+.form textarea {
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   resize: none;
