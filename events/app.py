@@ -86,11 +86,6 @@ def add_event():
         return 'Events database was undefined.', 500
 
 
-@app.route('/v1/edit/<event_id>', methods=['PUT'])
-def edit_event(event_id):
-    """Edit the event with the given id."""
-
-
 @app.route('/v1/<event_id>', methods=['PUT'])
 def get_one_event(event_id):
     """Retrieve one event by event_id."""
