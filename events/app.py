@@ -128,7 +128,6 @@ class DBNotConnectedError(ConnectionError):
 
 
 def connect_to_mongodb():   # pragma: no cover
-    # TODO(cmei4444): restructure to be consistent with other services
     """Connects to MongoDB Atlas database.
 
     Returns events collection if connection is successful, and None otherwise.
